@@ -1,0 +1,51 @@
+﻿@model MVCProject.ViewModels.RegisterViewModel
+
+<div class="row justify-content-center">
+	<div class="col-12 col-md-8 col-lg-6">
+		<h2 class="mb-4 text-center">Create an account</h2>
+
+		<form asp-action="Register" method="post" novalidate>
+			<div asp-validation-summary="ModelOnly" class="alert alert-danger d-none" role="alert"></div>
+
+			<div class="mb-3">
+				<label asp-for="FullName" class="form-label"></label>
+				<input asp-for="FullName" class="form-control" placeholder="Your full name" />
+				<span asp-validation-for="FullName" class="text-danger"></span>
+			</div>
+
+			<div class="mb-3">
+				<label asp-for="Email" class="form-label"></label>
+				<input asp-for="Email" class="form-control" placeholder="name@example.com" />
+				<span asp-validation-for="Email" class="text-danger"></span>
+			</div>
+
+			<div class="mb-3">
+				<label asp-for="UserName" class="form-label"></label>
+				<input asp-for="UserName" class="form-control" placeholder="Choose a username" />
+				<span asp-validation-for="UserName" class="text-danger"></span>
+			</div>
+
+			<div class="mb-4">
+				<label asp-for="Password" class="form-label"></label>
+				<input asp-for="Password" type="password" class="form-control" placeholder="Create a strong password" />
+				<span asp-validation-for="Password" class="text-danger"></span>
+			</div>
+
+			<button type="submit" class="btn btn-success w-100">Register</button>
+		</form>
+
+		@if (ViewData.ModelState.Values.SelectMany(v => v.Errors).Any())
+		{
+			<div class="alert alert-danger mt-3" role="alert">
+				@foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+				{
+					<div>@error.ErrorMessage</div>
+				}
+			</div>
+		}
+	</div>
+</div>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+}

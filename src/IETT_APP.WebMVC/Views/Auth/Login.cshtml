@@ -1,0 +1,45 @@
+﻿@model MVCProject.ViewModels.LoginViewModel
+
+<div class="row justify-content-center">
+	<div class="col-12 col-md-8 col-lg-6">
+		<h2 class="mb-4 text-center">Login</h2>
+
+		<form asp-action="Login" method="post" novalidate>
+			<div asp-validation-summary="ModelOnly" class="alert alert-danger d-none" role="alert"></div>
+
+			<div class="mb-3">
+				<label asp-for="UserName" class="form-label"></label>
+				<input asp-for="UserName" class="form-control" placeholder="Your username" />
+				<span asp-validation-for="UserName" class="text-danger"></span>
+			</div>
+
+			<div class="mb-3">
+				<label asp-for="Email" class="form-label"></label>
+				<input asp-for="Email" class="form-control" placeholder="name@example.com" />
+				<span asp-validation-for="Email" class="text-danger"></span>
+			</div>
+
+			<div class="mb-4">
+				<label asp-for="Password" class="form-label"></label>
+				<input asp-for="Password" type="password" class="form-control" placeholder="Your password" />
+				<span asp-validation-for="Password" class="text-danger"></span>
+			</div>
+
+			<button type="submit" class="btn btn-primary w-100">Login</button>
+		</form>
+
+		@if (ViewData.ModelState.Values.SelectMany(v => v.Errors).Any())
+		{
+			<div class="alert alert-danger mt-3" role="alert">
+				@foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+				{
+					<div>@error.ErrorMessage</div>
+				}
+			</div>
+		}
+	</div>
+</div>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,52 @@
+﻿using IETT_APP.Applicaton.Dtos;
+using IETT_APP.Applicaton.Interfaces;
+using IETT_APP.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
+
+namespace IETT_APP.Infrastructure.Services
+{
+    public class ProfileService : IProfileService
+    {
+        private readonly UserManager<User> _userManager;
+
+        public ProfileService(UserManager<User> userManager)
+        {
+            _userManager = userManager;
+        }
+
+        public async Task<ProfileDto> GetProfileAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) throw new Exception("Kullanıcı bulunamadı.");
+
+            return new ProfileDto
+            {
+                UserName = user.UserName ?? "",
+                Email = user.Email ?? "",
+                FullName = user.FullName ?? ""
+            };
+        }
+
+        public async Task<bool> UpdateProfileAsync(string userId, UpdateProfileDto dto)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return false;
+
+            user.Email = dto.Email;
+            if (!string.IsNullOrWhiteSpace(dto.FullName))
+                user.FullName = dto.FullName;
+
+            var result = await _userManager.UpdateAsync(user);
+            return result.Succeeded;
+        }
+
+        public async Task<bool> ChangePasswordAsync(string userId, ChangePasswordDto dto)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return false;
+
+            var result = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
+            return result.Succeeded;
+        }
+    }
+}
