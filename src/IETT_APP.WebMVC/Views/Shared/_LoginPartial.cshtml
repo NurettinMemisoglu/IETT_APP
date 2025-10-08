@@ -10,15 +10,13 @@
                         <a class="nav-link" asp-controller="Profile" asp-action="Index">Profile</a>
                     </li>
                     <li class="nav-item">
-                        <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-link nav-link">Logout</button>
-                        </form>
+                        <a class="nav-link" asp-action="Logout" asp-area="Identity" asp-controller="Account">Logout</a>
                     </li>
                 }
                 else
                 {
                     <li class="nav-item">
-                        <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Sign In</a>
+                        <a class="nav-link" asp-action="Login" asp-area="Identity" asp-controller="Account">Sign In</a>
                     </li>
                 }
             </ul>

@@ -1,4 +1,8 @@
-﻿namespace IETT_APP.WebAPI.Controllers
+﻿using Microsoft.AspNetCore.Mvc;
+
+[Route("api/[controller]")]
+[ApiController]
+public class RolesController : ControllerBase
 {
 
 }

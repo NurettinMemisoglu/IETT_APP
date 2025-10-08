@@ -1,0 +1,117 @@
+﻿@using IETT_APP.Domain.Entities
+@using IETT_APP.WebMVC.Areas.Admin.Models
+@model UserViewModel
+@{
+	ViewData["Title"] = "User Management";
+}
+
+<h4 class="mb-2">Manage Users</h4>
+@if (TempData["SuccessMessage"] != null)
+{
+	<div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+	<div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<h5 class="mt-2">
+	<a asp-action="Register" asp-area="Identity" asp-controller="Account" asp-route-fromAdmin="true">
+		Add a User
+	</a>
+</h5>
+
+<table class="table table-bordered table-striped">
+	<thead>
+		<tr>
+			<th>Full Name</th>
+			<th>Username</th>
+			<th>Roles</th>
+			<th>Actions</th>
+			<th>Role Placement</th>
+		</tr>
+	</thead>
+	<tbody>
+		@if (Model.Users.Count() == 0)
+		{
+			<tr>
+				<td colspan="4" class="text-center">No users found.</td>
+			</tr>
+		}else
+		{
+			@foreach (var user in Model.Users)
+			{
+				<tr>
+					<td>@user.FullName</td>
+					<td>@user.Email</td>
+					<td>
+						@foreach (var roleName in user.RoleNames)
+						{
+							<div>@roleName</div>
+						}
+					</td>
+					<td>
+						<form method="post" asp-action="Delete" asp-route-id="@user.Id">
+							<button type="submit" class="btn btn-danger btn-sm">
+								Delete User
+							</button>
+						</form>
+					</td>
+					<td>
+						@foreach (var role in Model.Roles)
+						{
+							if (user.RoleNames.Contains(role.Name))
+							{
+								<form method="post" asp-action="RemoveRole" asp-route-userId="@user.Id" asp-route-roleName="@role.Name" class="d-inline">
+									<button type="submit" class="btn btn-warning btn-sm">
+										Remove @role.Name
+									</button>
+								</form>
+							}
+							else
+							{
+								<form method="post" asp-action="AddRole" asp-route-userId="@user.Id" asp-route-roleName="@role.Name" class="d-inline">
+									<button type="submit" class="btn btn-success btn-sm">
+										Add @role.Name
+									</button>
+								</form>
+							}
+						}
+					</td>
+				</tr>
+			}
+
+		}
+		</tbody>
+</table>
+
+<h4>Manage Roles</h4>
+
+<form method="post" asp-action="CreateRole" class="mb-3">
+	<div class="input-group">
+		<input type="text" id="roleName" name="roleName" class="form-control" placeholder="New Role Name" required />
+		<button type="submit" class="btn btn-primary">Create Role</button>
+	</div>
+</form>
+
+<table class="table table-bordered table-striped table-sm">
+	<thead>
+		<tr>
+			<th>Role Name</th>
+			<th>Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var role in Model.Roles)
+		{
+			<tr>
+				<td>@role.Name</td>
+				<td>
+					<form method="post" asp-action="DeleteRole" asp-route-roleId="@role.Id" class="d-inline">
+						<button type="submit" class="btn btn-danger btn-sm">Delete Role</button>
+					</form>
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>

@@ -39,7 +39,6 @@ builder.Services.AddAntiforgery(options =>
 });
 
 
-builder.Services.AddRazorPages();
 builder.Services.AddHttpContextAccessor();
 
 // API servisi
@@ -56,7 +55,16 @@ builder.Services.AddHttpClient<IProfileService, ProfileService>(client =>
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
+builder.Services.AddHttpClient<IApiUserService, ApiUserService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
 
+
+
+// The project previously registered a custom cookie auth scheme named "MyCookieAuth" which can conflict with Identity's scheme.
+// Disable the custom cookie registration but keep it in source so nothing is deleted.
+/*
 builder.Services.AddAuthentication("MyCookieAuth")
     .AddCookie("MyCookieAuth", options =>
     {
@@ -65,6 +73,19 @@ builder.Services.AddAuthentication("MyCookieAuth")
         options.AccessDeniedPath = "/Home/Index";
         options.ExpireTimeSpan = TimeSpan.FromHours(1);
     });
+*/
+
+// Configure Identity's application cookie so Identity UI and authorization flows use the expected paths and cookie options.
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    // Use Identity default pages under /Identity/Account/*
+    options.LoginPath = "/Identity/Account/Login";
+    options.LogoutPath = "/Identity/Account/Logout";
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromHours(1);
+    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
 
 builder.Services.AddDistributedMemoryCache();
 
@@ -76,9 +97,14 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
+// Enable session middleware (Session was registered earlier). Keep it enabled.
+app.UseSession();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Original route mappings are kept but disabled (commented) so nothing is removed.
+/*
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
@@ -86,6 +112,16 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+*/
+
+// Map area routes first so area controllers are resolved before default controllers
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages(); // Enable Identity UI pages
 

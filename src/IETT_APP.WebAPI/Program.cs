@@ -1,6 +1,7 @@
 ﻿using IETT_APP.Applicaton.Interfaces;
 using IETT_APP.Domain.Entities;
 using IETT_APP.Infrastructure.Persistence;
+using IETT_APP.Infrastructure.Persistence.Seed;
 using IETT_APP.Infrastructure.Services;
 using IETT_APP.WebAPI.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,13 +14,15 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // DbContext
+builder.Services.AddIdentity<User, IdentityRole>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = false;
+})
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
-
-// Identity
-builder.Services.AddIdentity<User, Role>()
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
 
 // JWT
 var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
@@ -48,24 +51,24 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IAdminUserService, AdminUserService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
+// CORS - set real MVC origin in configuration; fallback to localhost:5001 for dev
+var mvcOrigin = builder.Configuration["MvcClient:Url"] ?? "https://localhost:5001";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MvcClient", p =>
-        p.WithOrigins("https://localhost:xxxx") // MVC origin
+        p.WithOrigins(mvcOrigin)
          .AllowAnyHeader()
          .AllowAnyMethod());
 });
-
-
 
 builder.Services.AddControllers();
 // OpenAPI
 builder.Services.AddOpenApi();
 
-
 var app = builder.Build();
-
 
 // Pipeline
 if (app.Environment.IsDevelopment())
@@ -75,7 +78,26 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCustomMiddleware();
+
+// Use CORS before mapping controllers
 app.UseCors("MvcClient");
+
+// Custom middleware (must call next inside)
+app.UseCustomMiddleware();
+
+// Authentication/Authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Uygulama başlatıldığında admin oluştur (seeding)
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await IdentitySeed.SeedAdminAsync(services);
+}
+
+// Map controllers (register endpoints)
 app.MapControllers();
+
+// Start the app
 app.Run();

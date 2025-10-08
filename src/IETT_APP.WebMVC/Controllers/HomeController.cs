@@ -5,7 +5,8 @@ using System.Diagnostics;
 
 namespace IETT_APP.WebMVC.Controllers
 {
-    [Authorize(AuthenticationSchemes = "MyCookieAuth")]
+    //[Authorize(AuthenticationSchemes = "MyCookieAuth")]
+    [Authorize] // Use default Identity scheme
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -17,7 +18,8 @@ namespace IETT_APP.WebMVC.Controllers
         [AllowAnonymous]
         public IActionResult Index() => View();
 
-        [Authorize(AuthenticationSchemes = "MyCookieAuth")]
+        //[Authorize(AuthenticationSchemes = "MyCookieAuth")]
+        [Authorize] // Use default Identity scheme
         public IActionResult Privacy() => View();
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

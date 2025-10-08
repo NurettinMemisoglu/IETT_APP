@@ -1,9 +1,11 @@
-﻿namespace IETT_APP.Applicaton.Dtos
+﻿namespace IETT_APP.Application.Dtos
 {
     public class UserDto
     {
-        public string UserName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
+        public string Id { get; set; } = null!;
+        public string? FullName { get; set; }
+        public string Email { get; set; } = null!;
+        public List<string> RoleNames { get; set; } = new();
+        public string? UserName { get; set; }
     }
 }

@@ -22,14 +22,10 @@ namespace IETT_APP.WebAPI.Controllers
         public async Task<IActionResult> Register(RegisterUserDto dto)
         {
             var authResult = await _authService.RegisterAsync(dto);
-
             if (authResult == null)
-            {
                 return BadRequest(new { message = "Kayıt sırasında hata oluştu." });
-            }
 
-            // Başarılıysa token ile dön
-            return Ok(authResult); // AuthResponseDto: AccessToken + RefreshToken
+            return Ok(authResult);
         }
 
         [HttpPost("login")]
@@ -37,21 +33,23 @@ namespace IETT_APP.WebAPI.Controllers
         public async Task<IActionResult> Login(LoginUserDto dto)
         {
             var authResult = await _authService.LoginAsync(dto);
-
             if (authResult == null)
-            {
                 return Unauthorized(new { message = "Email veya şifre hatalı." });
-            }
 
-            return Ok(authResult); // AuthResponseDto: AccessToken + RefreshToken
+            return Ok(authResult);
         }
 
         [HttpPost("refresh")]
         [AllowAnonymous]
         public async Task<IActionResult> Refresh([FromBody] string refreshToken)
         {
+            if (string.IsNullOrEmpty(refreshToken))
+                return BadRequest(new { message = "Refresh token boş olamaz." });
+
             var result = await _authService.RefreshTokenAsync(refreshToken);
-            if (result == null) return Unauthorized(new { message = "Invalid refresh token" });
+            if (result == null)
+                return Unauthorized(new { message = "Refresh token geçersiz veya süresi dolmuş." });
+
             return Ok(result);
         }
 
@@ -59,9 +57,12 @@ namespace IETT_APP.WebAPI.Controllers
         [Authorize]
         public async Task<IActionResult> Logout()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized(new { message = "Kullanıcı bulunamadı." });
+
             await _authService.LogoutAsync(userId);
-            return Ok(new { message = "Logged out" });
+            return Ok(new { message = "Çıkış yapıldı." });
         }
     }
 }

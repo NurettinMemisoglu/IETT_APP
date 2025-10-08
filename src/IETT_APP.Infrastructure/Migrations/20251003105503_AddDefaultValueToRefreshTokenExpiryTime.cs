@@ -6,35 +6,32 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace IETT_APP.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddRefreshTokenToUser : Migration
+    public partial class AddDefaultValueToRefreshTokenExpiryTime : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "RefreshToken",
-                table: "AspNetUsers",
-                type: "nvarchar(max)",
-                nullable: true);
-
-            migrationBuilder.AddColumn<DateTime>(
+            migrationBuilder.AlterColumn<DateTime>(
                 name: "RefreshTokenExpiryTime",
                 table: "AspNetUsers",
                 type: "datetime2",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValueSql: "GETUTCDATE()",
+                oldClrType: typeof(DateTime),
+                oldType: "datetime2");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "RefreshToken",
-                table: "AspNetUsers");
-
-            migrationBuilder.DropColumn(
+            migrationBuilder.AlterColumn<DateTime>(
                 name: "RefreshTokenExpiryTime",
-                table: "AspNetUsers");
+                table: "AspNetUsers",
+                type: "datetime2",
+                nullable: false,
+                oldClrType: typeof(DateTime),
+                oldType: "datetime2",
+                oldDefaultValueSql: "GETUTCDATE()");
         }
     }
 }

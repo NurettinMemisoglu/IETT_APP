@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IETT_APP.Applicaton\IETT_APP.Applicaton.csproj" />
+    <ProjectReference Include="..\IETT_APP.Domain\IETT_APP.Domain.csproj" />
     <ProjectReference Include="..\IETT_APP.Infrastructure\IETT_APP.Infrastructure.csproj" />
   </ItemGroup>
 

@@ -21,7 +21,6 @@ namespace IETT_APP.Infrastructure.Services
 
             return new ProfileDto
             {
-                UserName = user.UserName ?? "",
                 Email = user.Email ?? "",
                 FullName = user.FullName ?? ""
             };
