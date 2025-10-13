@@ -4,6 +4,7 @@ using IETT_APP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IETT_APP.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251008125825_AddStopsTable")]
+    partial class AddStopsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,19 +32,17 @@ namespace IETT_APP.Infrastructure.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
 
                     b.ToTable("Stops");
                 });
@@ -283,13 +284,11 @@ namespace IETT_APP.Infrastructure.Migrations
                             b1.Property<string>("StopId")
                                 .HasColumnType("nvarchar(450)");
 
-                            b1.Property<decimal>("Latitude")
-                                .HasPrecision(18, 16)
-                                .HasColumnType("decimal(18,16)");
+                            b1.Property<double>("Latitude")
+                                .HasColumnType("float");
 
-                            b1.Property<decimal>("Longitude")
-                                .HasPrecision(18, 16)
-                                .HasColumnType("decimal(18,16)");
+                            b1.Property<double>("Longitude")
+                                .HasColumnType("float");
 
                             b1.HasKey("StopId");
 

@@ -1,0 +1,32 @@
+﻿@model IETT_APP.WebMVC.Areas.Planner.Models.StopViewModel
+@{
+    ViewData["Title"] = "Durak Detayları";
+}
+
+<h2>Durak Detayları</h2>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Kod</th>
+        <td>@Model.Code</td>
+    </tr>
+    <tr>
+        <th>Adı</th>
+        <td>@Model.Name</td>
+    </tr>
+    <tr>
+        <th>Tipi</th>
+        <td>@Model.Type</td>
+    </tr>
+    <tr>
+        <th>Enlem</th>
+        <td>@Model.Location.Latitude</td>
+    </tr>
+    <tr>
+        <th>Boylam</th>
+        <td>@Model.Location.Longitude</td>
+    </tr>
+</table>
+
+<a asp-action="Index" class="btn btn-secondary">Geri</a>
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Düzenle</a>

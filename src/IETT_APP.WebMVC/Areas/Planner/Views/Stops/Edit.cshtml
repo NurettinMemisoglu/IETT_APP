@@ -1,0 +1,36 @@
+﻿@model IETT_APP.WebMVC.Areas.Planner.Models.StopViewModel
+@{
+    ViewData["Title"] = "Durak Düzenle";
+}
+
+<h2>Durak Düzenle</h2>
+
+<form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+    @await Html.PartialAsync("_StopFormPartial", Model)
+    <button type="submit" class="btn btn-primary">Güncelle</button>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">İptal</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const latitudeInput = document.querySelector('input[name="Location.Latitude"]');
+            const longitudeInput = document.querySelector('input[name="Location.Longitude"]');
+
+            [latitudeInput, longitudeInput].forEach(input => {
+                input.addEventListener("input", function() {
+                    // Sadece rakam, - ve , karakterlerine izin ver
+                    this.value = this.value.replace(/[^\d,-]/g, "");
+                    // Max 6 ondalık basamak
+                    const parts = this.value.split(",");
+                    if(parts[1] && parts[1].length > 6) {
+                        parts[1] = parts[1].substring(0,6);
+                        this.value = parts.join(",");
+                    }
+                });
+            });
+        });
+    </script>
+}

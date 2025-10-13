@@ -40,7 +40,6 @@
     <Folder Include="Areas\Driver\Data\" />
     <Folder Include="Areas\Driver\Models\" />
     <Folder Include="Areas\Planner\Data\" />
-    <Folder Include="Areas\Planner\Models\" />
   </ItemGroup>
 
 </Project>

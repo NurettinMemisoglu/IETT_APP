@@ -1,0 +1,76 @@
+﻿@model IETT_APP.WebMVC.Areas.Planner.Models.StopViewModel
+
+<div class="form-floating mb-3">
+    <input asp-for="Code" class="form-control" placeholder="Kod" />
+    <label asp-for="Code">Kod</label>
+    <span asp-validation-for="Code" class="text-danger"></span>
+</div>
+
+<div class="form-floating mb-3">
+    <input asp-for="Name" class="form-control" placeholder="Adı" />
+    <label asp-for="Name">Adı</label>
+    <span asp-validation-for="Name" class="text-danger"></span>
+</div>
+
+<div class="form-floating mb-3">
+    <input asp-for="Type" class="form-control" placeholder="Tip" />
+    <label asp-for="Type">Tip</label>
+    <span asp-validation-for="Type" class="text-danger"></span>
+</div>
+
+<h5 class="mt-3">Konum</h5>
+<div class="row">
+    <div class="col-md-6 form-floating mb-3">
+        <input asp-for="Location.Latitude" 
+               type="text" 
+               class="form-control" 
+               placeholder="Enlem (ör: 41.087074062863685)" 
+               inputmode="decimal"
+               pattern="[0-9\.,\-]+" />
+        <label asp-for="Location.Latitude">Enlem</label>
+        <span asp-validation-for="Location.Latitude" class="text-danger"></span>
+    </div>
+    <div class="col-md-6 form-floating mb-3">
+        <input asp-for="Location.Longitude" 
+               type="text" 
+               class="form-control" 
+               placeholder="Boylam (ör: 29.00708652941795)" 
+               inputmode="decimal"
+               pattern="[0-9\.,\-]+" />
+        <label asp-for="Location.Longitude">Boylam</label>
+        <span asp-validation-for="Location.Longitude" class="text-danger"></span>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Virgülü noktaya çevir, fazla boşlukları temizle
+               (function () {
+            function normalizeDecimalString(s) {
+                return s ? s.replace(',', '.').trim() : s;
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                const latSelector = 'input[name="Location.Latitude"], input[name$=".Location.Latitude"]';
+                const lonSelector = 'input[name="Location.Longitude"], input[name$=".Location.Longitude"]';
+                const forms = document.querySelectorAll('form');
+
+                forms.forEach(form => {
+                    const lat = form.querySelector(latSelector);
+                    const lon = form.querySelector(lonSelector);
+
+                    if (lat) lat.addEventListener('blur', () => lat.value = normalizeDecimalString(lat.value));
+                    if (lon) lon.addEventListener('blur', () => lon.value = normalizeDecimalString(lon.value));
+
+                    form.addEventListener('submit', () => {
+                        if (lat) lat.value = normalizeDecimalString(lat.value);
+                        if (lon) lon.value = normalizeDecimalString(lon.value);
+                    });
+                });
+            });
+        })();
+
+    </script>
+}

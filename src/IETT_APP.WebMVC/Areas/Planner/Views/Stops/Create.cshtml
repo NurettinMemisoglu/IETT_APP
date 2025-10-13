@@ -1,0 +1,26 @@
+﻿@model IETT_APP.WebMVC.Areas.Planner.Models.StopViewModel
+@{
+    ViewData["Title"] = "Yeni Durak Ekle";
+}
+
+<h2>Yeni Durak Ekle</h2>
+
+<form asp-action="Create" method="post">
+    @await Html.PartialAsync("_StopFormPartial", Model)
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-success">
+            Kaydet
+        </button>
+        <button type="submit"
+                formaction="@Url.Action("Index", "Home", new { area = "Planner" })"
+                formmethod="get"
+                class="btn btn-secondary">
+            İptal
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

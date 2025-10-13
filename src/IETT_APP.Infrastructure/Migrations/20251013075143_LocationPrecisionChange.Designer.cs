@@ -4,6 +4,7 @@ using IETT_APP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IETT_APP.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251013075143_LocationPrecisionChange")]
+    partial class LocationPrecisionChange
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -284,12 +287,12 @@ namespace IETT_APP.Infrastructure.Migrations
                                 .HasColumnType("nvarchar(450)");
 
                             b1.Property<decimal>("Latitude")
-                                .HasPrecision(18, 16)
-                                .HasColumnType("decimal(18,16)");
+                                .HasPrecision(22, 18)
+                                .HasColumnType("decimal(22,18)");
 
                             b1.Property<decimal>("Longitude")
-                                .HasPrecision(18, 16)
-                                .HasColumnType("decimal(18,16)");
+                                .HasPrecision(22, 18)
+                                .HasColumnType("decimal(22,18)");
 
                             b1.HasKey("StopId");
 

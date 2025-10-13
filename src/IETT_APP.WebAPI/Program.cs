@@ -1,4 +1,5 @@
-﻿using IETT_APP.Applicaton.Interfaces;
+﻿using IETT_APP.Application.Interfaces;
+using IETT_APP.Applicaton.Interfaces;
 using IETT_APP.Domain.Entities;
 using IETT_APP.Infrastructure.Persistence;
 using IETT_APP.Infrastructure.Persistence.Seed;
@@ -6,14 +7,33 @@ using IETT_APP.Infrastructure.Services;
 using IETT_APP.WebAPI.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using System.Globalization;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// DbContext
+// ----------------------
+// Localization (EN culture)
+// ----------------------
+var defaultCulture = new CultureInfo("en-US");
+var localizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture(defaultCulture),
+    SupportedCultures = new List<CultureInfo> { defaultCulture },
+    SupportedUICultures = new List<CultureInfo> { defaultCulture }
+};
+
+// ✅ Global Culture Fix – her zaman nokta (.) kullan
+CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
+CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
+
+// ----------------------
+// Database & Identity
+// ----------------------
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
@@ -24,7 +44,9 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
-// JWT
+// ----------------------
+// JWT Authentication
+// ----------------------
 var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
 
 builder.Services.AddAuthentication(options =>
@@ -47,14 +69,19 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// DI
+// ----------------------
+// Dependency Injection
+// ----------------------
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IStopService, StopService>();
 
-// CORS - set real MVC origin in configuration; fallback to localhost:5001 for dev
+// ----------------------
+// CORS
+// ----------------------
 var mvcOrigin = builder.Configuration["MvcClient:Url"] ?? "https://localhost:5001";
 builder.Services.AddCors(options =>
 {
@@ -64,13 +91,17 @@ builder.Services.AddCors(options =>
          .AllowAnyMethod());
 });
 
+// ----------------------
+// Controllers & OpenAPI
+// ----------------------
 builder.Services.AddControllers();
-// OpenAPI
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// Pipeline
+// ----------------------
+// Middleware Pipeline
+// ----------------------
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -79,25 +110,34 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Use CORS before mapping controllers
+// CORS – controllerlardan önce olmalı
 app.UseCors("MvcClient");
 
-// Custom middleware (must call next inside)
+// Custom middleware
 app.UseCustomMiddleware();
 
-// Authentication/Authorization middleware
+// Auth
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Uygulama başlatıldığında admin oluştur (seeding)
+// Localization (virgül-nokta davranışı için)
+app.UseRequestLocalization(localizationOptions);
+
+// ----------------------
+// Database Seed (Admin oluşturma)
+// ----------------------
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     await IdentitySeed.SeedAdminAsync(services);
 }
 
-// Map controllers (register endpoints)
+// ----------------------
+// Controllers
+// ----------------------
 app.MapControllers();
 
-// Start the app
+// ----------------------
+// Run
+// ----------------------
 app.Run();
