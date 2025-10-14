@@ -34,7 +34,7 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
                 Location = new LocationViewModel
                 {
                     Latitude = dto.Location?.Latitude ?? 0,
-                    Longitude = dto.Location?.Latitude ?? 0
+                    Longitude = dto.Location?.Longitude ?? 0
                 }
             }).ToList();
 
