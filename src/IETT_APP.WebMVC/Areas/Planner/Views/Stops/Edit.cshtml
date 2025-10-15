@@ -3,13 +3,25 @@
     ViewData["Title"] = "Durak Düzenle";
 }
 
-<h2>Durak Düzenle</h2>
+<div class="container mt-4">
+    <h2 class="mb-3">Durak Düzenle</h2>
 
-<form asp-action="Edit" asp-route-id="@Model.Id" method="post">
-    @await Html.PartialAsync("_StopFormPartial", Model)
-    <button type="submit" class="btn btn-primary">Güncelle</button>
-    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">İptal</a>
-</form>
+    <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+        @await Html.PartialAsync("_StopFormPartial", Model)
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+                Güncelle
+            </button>
+            <button type="submit"
+                    formaction="@Url.Action("Index", "Home", new { area = "Planner" })"
+                    formmethod="get"
+                    class="btn btn-secondary">
+                İptal
+            </button>
+        </div>
+    </form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
@@ -22,7 +34,7 @@
             [latitudeInput, longitudeInput].forEach(input => {
                 input.addEventListener("input", function() {
                     // Sadece rakam, - ve , karakterlerine izin ver
-                    this.value = this.value.replace(/[^\d,-]/g, "");
+                    this.value = this.value.replace(/[^\d.-]/g, "");
                     // Max 6 ondalık basamak
                     const parts = this.value.split(",");
                     if(parts[1] && parts[1].length > 6) {

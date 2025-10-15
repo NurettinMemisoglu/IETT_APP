@@ -13,7 +13,8 @@ namespace IETT_APP.WebMVC.Areas.Planner.Extensions
             {
                 Code = vm.Code,
                 Name = vm.Name,
-                Type = vm.Type,
+                StopType = vm.StopType,
+                SmartStop = vm.SmartStop,
                 Location = new LocationDto
                 {
                     Latitude = vm.Location.Latitude,
@@ -28,7 +29,8 @@ namespace IETT_APP.WebMVC.Areas.Planner.Extensions
             return new UpdateStopDto
             {
                 Name = vm.Name,
-                Type = vm.Type,
+                StopType = vm.StopType,
+                SmartStop = vm.SmartStop,
                 Location = new LocationDto
                 {
                     Latitude = vm.Location.Latitude,
@@ -45,7 +47,8 @@ namespace IETT_APP.WebMVC.Areas.Planner.Extensions
                 Id = dto.Id,
                 Code = dto.Code,
                 Name = dto.Name,
-                Type = dto.Type,
+                StopType = dto.StopType,
+                SmartStop = dto.SmartStop,
                 Location = new LocationViewModel
                 {
                     Latitude = dto.Location.Latitude,

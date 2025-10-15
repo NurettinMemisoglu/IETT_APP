@@ -1,0 +1,27 @@
+﻿<ul class="nav flex-column" style="position: absolute; bottom: 10px; left: 0; width: 100%;">
+    @if (!User.Identity.IsAuthenticated)
+    {
+        <li class="nav-item">
+            <a asp-area="Identity" asp-controller="Account" asp-action="Register" class="nav-link">
+                <i class="nav-icon bi bi-person-plus"></i>
+                <p>Register</p>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a asp-area="Identity" asp-controller="Account" asp-action="Login" class="nav-link">
+                <i class="nav-icon bi bi-box-arrow-in-right"></i>
+                <p>Login</p>
+            </a>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a asp-area="Identity" asp-controller="Account" asp-action="Logout" class="nav-link">
+                <i class="nav-icon bi bi-box-arrow-right"></i>
+                <p>Logout</p>
+            </a>
+        </li>
+    }
+</ul>

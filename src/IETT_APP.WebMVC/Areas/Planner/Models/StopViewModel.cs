@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using IETT_APP.Domain.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace IETT_APP.WebMVC.Areas.Planner.Models
 {
@@ -15,8 +16,12 @@ namespace IETT_APP.WebMVC.Areas.Planner.Models
         public string Name { get; set; } = string.Empty;
 
         // Keep as string since your DTOs/controllers expect Type as string (enum name)
+
         [Required]
-        public string Type { get; set; } = string.Empty;
+        public StopType StopType { get; set; }
+
+        [Required]
+        public SmartStop SmartStop { get; set; }
 
         [Required]
         public LocationViewModel Location { get; set; } = new LocationViewModel();

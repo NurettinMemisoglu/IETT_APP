@@ -8,7 +8,8 @@ namespace IETT_APP.Domain.Entities
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public string Code { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
-        public StopType Type { get; set; }
+        public StopType StopType { get; set; }
+        public SmartStop SmartStop { get; set; }
         public Location Location { get; set; } = null!;
     }
 

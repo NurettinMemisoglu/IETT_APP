@@ -3,30 +3,38 @@
     ViewData["Title"] = "Durak Detayları";
 }
 
-<h2>Durak Detayları</h2>
 
-<table class="table table-bordered">
-    <tr>
-        <th>Kod</th>
-        <td>@Model.Code</td>
-    </tr>
-    <tr>
-        <th>Adı</th>
-        <td>@Model.Name</td>
-    </tr>
-    <tr>
-        <th>Tipi</th>
-        <td>@Model.Type</td>
-    </tr>
-    <tr>
-        <th>Enlem</th>
-        <td>@Model.Location.Latitude</td>
-    </tr>
-    <tr>
-        <th>Boylam</th>
-        <td>@Model.Location.Longitude</td>
-    </tr>
-</table>
+<div class="container mt-4">
+    <h2 class="mb-3">Durak Detayları</h2>
+    <table class="table table-bordered">
+        <tr>
+            <th>Kod</th>
+            <td>@Model.Code</td>
+        </tr>
+        <tr>
+            <th>Adı</th>
+            <td>@Model.Name</td>
+        </tr>
+        <tr>
+            <th>Tipi</th>
+            <td>@Model.StopType</td>
+        </tr>
+        <tr>
+            <th>Akıllı Durak</th>
+            <td>@Model.SmartStop</td>
+        </tr>
+        <tr>
+            <th>Enlem</th>
+            <td>@Model.Location.Latitude</td>
+        </tr>
+        <tr>
+            <th>Boylam</th>
+            <td>@Model.Location.Longitude</td>
+        </tr>
+    </table>
 
-<a asp-action="Index" class="btn btn-secondary">Geri</a>
-<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Düzenle</a>
+    <div>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary"> Geri</a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Düzenle</a>
+    </div>
+</div>

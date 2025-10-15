@@ -2,7 +2,6 @@
 using IETT_APP.Application.Interfaces;
 using IETT_APP.Applicaton.Dtos.Stop;
 using IETT_APP.Domain.Entities;
-using IETT_APP.Domain.Enums;
 using IETT_APP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -42,7 +41,8 @@ namespace IETT_APP.Infrastructure.Services
                 Id = Guid.NewGuid().ToString(),
                 Code = dto.Code,
                 Name = dto.Name,
-                Type = Enum.Parse<StopType>(dto.Type, true),
+                StopType = dto.StopType,
+                SmartStop = dto.SmartStop,
                 Location = new Location
                 {
                     Latitude = Convert.ToDecimal(dto.Location.Latitude),
@@ -76,35 +76,34 @@ namespace IETT_APP.Infrastructure.Services
             if (!string.IsNullOrWhiteSpace(dto.Name))
                 stop.Name = dto.Name;
 
-            // Type güncelle
-            if (!string.IsNullOrWhiteSpace(dto.Type))
-            {
-                if (Enum.TryParse<StopType>(dto.Type, true, out var parsedType))
-                {
-                    stop.Type = parsedType;
-                }
-                else
-                {
-                    throw new ArgumentException($"Geçersiz durak tipi: {dto.Type}");
-                }
-            }
+            // StopType ve SmartStop güncelle
+            // Eğer DTO enum tipinde ise direkt ata
+            stop.StopType = dto.StopType;
+            stop.SmartStop = dto.SmartStop;
 
             // Location güncelle
             if (dto.Location != null)
             {
-                stop.Location.Latitude = dto.Location.Latitude != 0
-                    ? dto.Location.Latitude
-                    : stop.Location.Latitude;
+                // Latitude ve Longitude opsiyonel güncelleme
+                if (dto.Location.Latitude != 0)
+                    stop.Location.Latitude = dto.Location.Latitude;
 
-                stop.Location.Longitude = dto.Location.Longitude != 0
-                    ? dto.Location.Longitude
-                    : stop.Location.Longitude;
+                if (dto.Location.Longitude != 0)
+                    stop.Location.Longitude = dto.Location.Longitude;
             }
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine(ex.InnerException?.Message);
+                throw;
+            }
+
             return true;
         }
-
 
         public async Task<bool> DeleteAsync(string id)
         {
@@ -132,7 +131,8 @@ namespace IETT_APP.Infrastructure.Services
                 Id = stop.Id,
                 Code = stop.Code,
                 Name = stop.Name,
-                Type = stop.Type.ToString(),
+                StopType = stop.StopType,
+                SmartStop = stop.SmartStop,
                 Location = new LocationDto
                 {
                     Latitude = stop.Location.Latitude,
@@ -140,5 +140,6 @@ namespace IETT_APP.Infrastructure.Services
                 }
             };
         }
+
     }
 }

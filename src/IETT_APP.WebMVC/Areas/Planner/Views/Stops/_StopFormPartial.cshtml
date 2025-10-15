@@ -12,44 +12,71 @@
     <span asp-validation-for="Name" class="text-danger"></span>
 </div>
 
+<!-- StopType Dropdown -->
 <div class="form-floating mb-3">
-    <input asp-for="Type" class="form-control" placeholder="Tip" />
-    <label asp-for="Type">Tip</label>
-    <span asp-validation-for="Type" class="text-danger"></span>
+    <select asp-for="StopType" class="form-select" asp-items="ViewBag.StopTypeList">
+        <option value="">-- Durak Tipi Seçin --</option>
+    </select>
+    <label asp-for="StopType">Durak Tipi</label>
+    <span asp-validation-for="StopType" class="text-danger"></span>
+</div>
+
+<!-- SmartStop Dropdown -->
+<div class="form-floating mb-3">
+    <select asp-for="SmartStop" class="form-select" asp-items="ViewBag.SmartStopList">
+        <option value="">-- Seçiniz --</option>
+    </select>
+    <label asp-for="SmartStop">Akıllı Durak</label>
+    <span asp-validation-for="SmartStop" class="text-danger"></span>
 </div>
 
 <h5 class="mt-3">Konum</h5>
 <div class="row">
     <div class="col-md-6 form-floating mb-3">
-        <input asp-for="Location.Latitude" 
-               type="text" 
-               class="form-control" 
-               placeholder="Enlem (ör: 41.087074062863685)" 
+        <input asp-for="Location.Latitude"
+               type="text"
+               class="form-control"
+               placeholder="Enlem (ör: 41,087074062863685)"
                inputmode="decimal"
                pattern="[0-9\.,\-]+" />
         <label asp-for="Location.Latitude">Enlem</label>
         <span asp-validation-for="Location.Latitude" class="text-danger"></span>
     </div>
     <div class="col-md-6 form-floating mb-3">
-        <input asp-for="Location.Longitude" 
-               type="text" 
-               class="form-control" 
-               placeholder="Boylam (ör: 29.00708652941795)" 
+        <input asp-for="Location.Longitude"
+               type="text"
+               class="form-control"
+               placeholder="Boylam (ör: 29,00708652941795)"
                inputmode="decimal"
                pattern="[0-9\.,\-]+" />
         <label asp-for="Location.Longitude">Boylam</label>
         <span asp-validation-for="Location.Longitude" class="text-danger"></span>
     </div>
 </div>
-
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        // Virgülü noktaya çevir, fazla boşlukları temizle
-               (function () {
+        (function () {
             function normalizeDecimalString(s) {
-                return s ? s.replace(',', '.').trim() : s;
+                if (!s) return "";
+                s = s.replace(',', '.').trim();
+
+                // Sadece sayı, nokta ve eksi izinli
+                s = s.replace(/[^0-9.\-]/g, "");
+
+                // Birden fazla nokta varsa yalnızca ilkini koru
+                const firstDot = s.indexOf(".");
+                if (firstDot !== -1) {
+                    s = s.substring(0, firstDot + 1) + s.substring(firstDot + 1).replace(/\./g, "");
+                }
+
+                // 20,18 sınırı uygula (max 2 tam, 18 ondalık basamak)
+                const parts = s.split(".");
+                if (parts[0].length > 2) parts[0] = parts[0].substring(0, 2);
+                if (parts[1] && parts[1].length > 18) parts[1] = parts[1].substring(0, 18);
+
+                return parts.join(".");
             }
 
             document.addEventListener('DOMContentLoaded', function () {
@@ -61,9 +88,16 @@
                     const lat = form.querySelector(latSelector);
                     const lon = form.querySelector(lonSelector);
 
-                    if (lat) lat.addEventListener('blur', () => lat.value = normalizeDecimalString(lat.value));
-                    if (lon) lon.addEventListener('blur', () => lon.value = normalizeDecimalString(lon.value));
+                    if (lat) {
+                        lat.addEventListener('input', () => lat.value = normalizeDecimalString(lat.value));
+                        lat.addEventListener('blur', () => lat.value = normalizeDecimalString(lat.value));
+                    }
+                    if (lon) {
+                        lon.addEventListener('input', () => lon.value = normalizeDecimalString(lon.value));
+                        lon.addEventListener('blur', () => lon.value = normalizeDecimalString(lon.value));
+                    }
 
+                    // Form gönderilmeden önce değerleri normalize et
                     form.addEventListener('submit', () => {
                         if (lat) lat.value = normalizeDecimalString(lat.value);
                         if (lon) lon.value = normalizeDecimalString(lon.value);
@@ -71,6 +105,5 @@
                 });
             });
         })();
-
     </script>
 }

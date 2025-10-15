@@ -1,7 +1,9 @@
-﻿using IETT_APP.WebMVC.Areas.Planner.Extensions;
+﻿using IETT_APP.Domain.Enums;
+using IETT_APP.WebMVC.Areas.Planner.Extensions;
 using IETT_APP.WebMVC.Areas.Planner.Models;
 using IETT_APP.WebMVC.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 [Area("Planner")]
 public class StopsController : Controller
@@ -29,6 +31,7 @@ public class StopsController : Controller
     // GET: Planner/Stops/Create
     public IActionResult Create()
     {
+        PopulateDropdowns();
         return View();
     }
 
@@ -36,13 +39,16 @@ public class StopsController : Controller
     [HttpPost]
     public async Task<IActionResult> Create(StopViewModel model)
     {
-
-
-        if (!ModelState.IsValid) return View(model);
+        if (!ModelState.IsValid)
+        {
+            PopulateDropdowns();
+            return View(model);
+        }
 
         await _stopService.CreateAsync(model.ToCreateDto());
         return RedirectToAction("Index", "Home");
     }
+
 
     // GET: Planner/Stops/Edit/{id}
     public async Task<IActionResult> Edit(string id)
@@ -50,7 +56,12 @@ public class StopsController : Controller
         var stop = await _stopService.GetByIdAsync(id);
         if (stop == null) return NotFound();
 
-        return View(stop.ToViewModel());
+        var model = stop.ToViewModel();
+
+        // Dropdown’ları doldur
+        PopulateDropdowns();
+
+        return View(model);
     }
 
     // POST: Planner/Stops/Edit/{id}
@@ -60,7 +71,7 @@ public class StopsController : Controller
         if (!ModelState.IsValid) return View(model);
 
         await _stopService.UpdateAsync(id, model.ToUpdateDto());
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction("Index", "Home");
     }
 
     // GET: Planner/Stops/Details/{id}
@@ -68,7 +79,12 @@ public class StopsController : Controller
     {
         var stop = await _stopService.GetByIdAsync(id);
         if (stop == null) return NotFound();
-        return View(stop.ToViewModel());
+
+        var model = stop.ToViewModel();
+
+        PopulateDropdowns(); // Eğer dropdown kullanılacaksa
+
+        return View(model); ;
     }
 
     // POST: Planner/Stops/Delete/{id}
@@ -76,6 +92,40 @@ public class StopsController : Controller
     public async Task<IActionResult> Delete(string id)
     {
         await _stopService.DeleteAsync(id);
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction("Index", "Home");
     }
+
+    private void PopulateDropdowns()
+    {
+        // StopType dropdown
+        ViewBag.StopTypeList = Enum.GetValues(typeof(StopType))
+            .Cast<StopType>()
+            .Select(e => new SelectListItem
+            {
+                Value = e.ToString(), // <-- enum adı string olarak
+                Text = e switch
+                {
+                    StopType.AcikDurak => "Açık Durak",
+                    StopType.KapaliDurak => "Kapalı Durak",
+                    StopType.FullKapaliDurak => "Full Kapalı Durak",
+                    _ => e.ToString()
+                }
+            }).ToList();
+
+        // SmartStop dropdown
+        ViewBag.SmartStopList = Enum.GetValues(typeof(SmartStop))
+            .Cast<SmartStop>()
+            .Select(e => new SelectListItem
+            {
+                Value = e.ToString(), // <-- enum adı string olarak
+                Text = e switch
+                {
+                    SmartStop.Yes => "Evet",
+                    SmartStop.No => "Hayır",
+                    _ => e.ToString()
+                }
+            }).ToList();
+    }
+
 }
+

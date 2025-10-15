@@ -6,7 +6,7 @@
 
 }
 
-<div class="container mt-4">
+<div class="container mt-4" id="addUserSection">
 	<h2 class="mb-3">Create New User</h2>
 	@if (TempData["SuccessMessage"] != null)
 	{
@@ -23,7 +23,7 @@
 		</a>
 </h5>
 </div>
-<div class="container mt-4">
+<div class="container mt-4" id="manageUsersSection">
 	<h2 class="mb-3">Manage Users</h2>
 	<table class="table table-bordered table-striped align-middle">
 		<thead>
@@ -89,7 +89,7 @@
 			</tbody>
 	</table>
 </div>
-<div class="container mt-4">
+<div class="container mt-4" id="manageRolesSection">
 	<h2 class="mb-3">Manage Roles</h2>
 
 <form method="post" asp-action="CreateRole" class="mb-3">
