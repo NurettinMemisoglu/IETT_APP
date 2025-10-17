@@ -41,6 +41,7 @@ namespace IETT_APP.Infrastructure.Services
                 Id = Guid.NewGuid().ToString(),
                 Code = dto.Code,
                 Name = dto.Name,
+                District = dto.District,
                 StopType = dto.StopType,
                 SmartStop = dto.SmartStop,
                 Location = new Location
@@ -75,9 +76,7 @@ namespace IETT_APP.Infrastructure.Services
             // Name güncelle
             if (!string.IsNullOrWhiteSpace(dto.Name))
                 stop.Name = dto.Name;
-
-            // StopType ve SmartStop güncelle
-            // Eğer DTO enum tipinde ise direkt ata
+            stop.District = dto.District;
             stop.StopType = dto.StopType;
             stop.SmartStop = dto.SmartStop;
 
@@ -131,6 +130,7 @@ namespace IETT_APP.Infrastructure.Services
                 Id = stop.Id,
                 Code = stop.Code,
                 Name = stop.Name,
+                District = stop.District,
                 StopType = stop.StopType,
                 SmartStop = stop.SmartStop,
                 Location = new LocationDto

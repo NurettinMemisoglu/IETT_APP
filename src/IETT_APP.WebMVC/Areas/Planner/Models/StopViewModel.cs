@@ -15,6 +15,10 @@ namespace IETT_APP.WebMVC.Areas.Planner.Models
         [StringLength(200)]
         public string Name { get; set; } = string.Empty;
 
+        [Required]
+        [StringLength(200)]
+        public string District { get; set; } = string.Empty;
+
         // Keep as string since your DTOs/controllers expect Type as string (enum name)
 
         [Required]

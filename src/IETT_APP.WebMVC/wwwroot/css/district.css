@@ -1,0 +1,9 @@
+﻿#districtDropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: block;
+    max-height: 200px;
+    overflow-y: auto;
+}

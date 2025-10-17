@@ -8,6 +8,7 @@ namespace IETT_APP.Domain.Entities
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public string Code { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
+        public string District { get; set; } = string.Empty;
         public StopType StopType { get; set; }
         public SmartStop SmartStop { get; set; }
         public Location Location { get; set; } = null!;
@@ -16,9 +17,10 @@ namespace IETT_APP.Domain.Entities
 
     public class Location
     {
-        [Precision(18, 16)]
+        [Precision(8, 6)]
         public decimal Latitude { get; set; }
-        [Precision(18, 16)]
+        [Precision(8, 6)]
         public decimal Longitude { get; set; }
     }
 }
+//id,createddate=now,createdrole=role,isdeleted,isactive

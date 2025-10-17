@@ -1,4 +1,5 @@
-﻿@model IETT_APP.WebMVC.Areas.Planner.Models.StopViewModel
+﻿@using System.Text.Json
+@model IETT_APP.WebMVC.Areas.Planner.Models.StopViewModel
 
 <div class="form-floating mb-3">
     <input asp-for="Code" class="form-control" placeholder="Kod" />
@@ -11,6 +12,18 @@
     <label asp-for="Name">Adı</label>
     <span asp-validation-for="Name" class="text-danger"></span>
 </div>
+
+<div class="form-floating mb-3 position-relative">
+    <input asp-for="District" id="DistrictInput"
+           class="form-control" placeholder="İlçe seçin veya yazın" autocomplete="off" />
+    <label for="DistrictInput">İlçe</label>
+    <span asp-validation-for="District" class="text-danger"></span>
+
+    <script type="application/json" id="districtData">
+        @Html.Raw(JsonSerializer.Serialize(((List<SelectListItem>)ViewBag.DistrictList).Select(d => d.Value)))
+    </script>
+</div>
+
 
 <!-- StopType Dropdown -->
 <div class="form-floating mb-3">
@@ -36,7 +49,7 @@
         <input asp-for="Location.Latitude"
                type="text"
                class="form-control"
-               placeholder="Enlem (ör: 41,087074062863685)"
+               placeholder="Enlem (ör: 41,087074)"
                inputmode="decimal"
                pattern="[0-9\.,\-]+" />
         <label asp-for="Location.Latitude">Enlem</label>
@@ -46,15 +59,36 @@
         <input asp-for="Location.Longitude"
                type="text"
                class="form-control"
-               placeholder="Boylam (ör: 29,00708652941795)"
+               placeholder="Boylam (ör: 29,007086)"
                inputmode="decimal"
                pattern="[0-9\.,\-]+" />
         <label asp-for="Location.Longitude">Boylam</label>
         <span asp-validation-for="Location.Longitude" class="text-danger"></span>
     </div>
 </div>
+
+
+<!-- 🌍 Harita Bölümü -->
+<h5 class="mt-4">Harita Üzerinden Konum Seçimi</h5>
+<div class="map-container mb-4">
+    <div id="map"></div>
+</div>
+
+
+
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/maps.css" />
+    <link rel="stylesheet" href="~/css/district.css" />
+}
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script async
+            src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initMap">
+    </script>
+    <script src="~/js/stops.js"></script>
 
     <script>
         (function () {
@@ -74,7 +108,7 @@
                 // 20,18 sınırı uygula (max 2 tam, 18 ondalık basamak)
                 const parts = s.split(".");
                 if (parts[0].length > 2) parts[0] = parts[0].substring(0, 2);
-                if (parts[1] && parts[1].length > 18) parts[1] = parts[1].substring(0, 18);
+                if (parts[1] && parts[1].length > 6) parts[1] = parts[1].substring(0,6);
 
                 return parts.join(".");
             }

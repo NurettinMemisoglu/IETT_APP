@@ -32,8 +32,8 @@ namespace IETT_APP.Infrastructure.Persistence
             builder.Entity<Stop>()
                 .OwnsOne(s => s.Location, loc =>
                 {
-                    loc.Property(p => p.Latitude).HasPrecision(18, 16);
-                    loc.Property(p => p.Longitude).HasPrecision(18, 16);
+                    loc.Property(p => p.Latitude).HasPrecision(8, 6);
+                    loc.Property(p => p.Longitude).HasPrecision(8, 6);
                 });
 
         }

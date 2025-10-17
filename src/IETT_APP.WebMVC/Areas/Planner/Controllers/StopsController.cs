@@ -2,9 +2,11 @@
 using IETT_APP.WebMVC.Areas.Planner.Extensions;
 using IETT_APP.WebMVC.Areas.Planner.Models;
 using IETT_APP.WebMVC.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
+[Authorize(Roles = "Planner")]
 [Area("Planner")]
 public class StopsController : Controller
 {
@@ -31,6 +33,12 @@ public class StopsController : Controller
     // GET: Planner/Stops/Create
     public IActionResult Create()
     {
+
+        var model = new StopViewModel
+        {
+            Location = new LocationViewModel() // boş ama null değil
+        };
+
         PopulateDropdowns();
         return View();
     }
@@ -39,6 +47,21 @@ public class StopsController : Controller
     [HttpPost]
     public async Task<IActionResult> Create(StopViewModel model)
     {
+        model.Location ??= new LocationViewModel();
+
+        // Name alanını title case yap
+        if (!string.IsNullOrWhiteSpace(model.Name))
+        {
+            model.Name = string.Join(" ", model.Name
+                .Split(" ", StringSplitOptions.RemoveEmptyEntries)
+                .Select(w => char.ToUpper(w[0]) + w.Substring(1).ToLower()));
+        }
+
+        // Kod alanını sadece sayı olarak temizle
+        if (!string.IsNullOrWhiteSpace(model.Code))
+        {
+            model.Code = new string(model.Code.Where(char.IsDigit).ToArray());
+        }
         if (!ModelState.IsValid)
         {
             PopulateDropdowns();
@@ -57,6 +80,8 @@ public class StopsController : Controller
         if (stop == null) return NotFound();
 
         var model = stop.ToViewModel();
+        model.Location ??= new LocationViewModel(); // null güvenliği
+
 
         // Dropdown’ları doldur
         PopulateDropdowns();
@@ -68,11 +93,37 @@ public class StopsController : Controller
     [HttpPost]
     public async Task<IActionResult> Edit(string id, StopViewModel model)
     {
-        if (!ModelState.IsValid) return View(model);
+
+        model.Location ??= new LocationViewModel();
+
+        // Name alanını title case yap
+        if (!string.IsNullOrWhiteSpace(model.Name))
+        {
+            model.Name = string.Join(" ", model.Name
+                .Split(" ", StringSplitOptions.RemoveEmptyEntries)
+                .Select(w => char.ToUpper(w[0]) + w.Substring(1).ToLower()));
+        }
+
+        // Kod alanını sadece sayı olarak temizle
+        if (!string.IsNullOrWhiteSpace(model.Code))
+        {
+            model.Code = new string(model.Code.Where(char.IsDigit).ToArray());
+        }
+
+        if (!ModelState.IsValid)
+        {
+            // Dropdown’ları tekrar doldurmazsan select boxlar boş kalır
+            PopulateDropdowns();
+
+            // Hata varsa formu view’e geri gönder
+            return View(model);
+        }
 
         await _stopService.UpdateAsync(id, model.ToUpdateDto());
+        TempData["SuccessMessage"] = "Durak başarıyla güncellendi!";
         return RedirectToAction("Index", "Home");
     }
+
 
     // GET: Planner/Stops/Details/{id}
     public async Task<IActionResult> Details(string id)
@@ -102,7 +153,7 @@ public class StopsController : Controller
             .Cast<StopType>()
             .Select(e => new SelectListItem
             {
-                Value = e.ToString(), // <-- enum adı string olarak
+                Value = e.ToString(),
                 Text = e switch
                 {
                     StopType.AcikDurak => "Açık Durak",
@@ -117,7 +168,7 @@ public class StopsController : Controller
             .Cast<SmartStop>()
             .Select(e => new SelectListItem
             {
-                Value = e.ToString(), // <-- enum adı string olarak
+                Value = e.ToString(),
                 Text = e switch
                 {
                     SmartStop.Yes => "Evet",
@@ -125,7 +176,24 @@ public class StopsController : Controller
                     _ => e.ToString()
                 }
             }).ToList();
+
+        // District dropdown (İstanbul ilçeleri)
+        var districts = new List<string> {
+            "Adalar","Arnavutköy","Ataşehir","Avcılar","Bağcılar",
+            "Bahçelievler","Bakırköy","Başakşehir","Bayrampaşa","Beşiktaş",
+            "Beykoz","Beylikdüzü","Beyoğlu","Büyükçekmece","Çekmeköy",
+            "Esenler","Esenyurt","Eyüpsultan","Fatih","Gaziosmanpaşa",
+            "Güngören","Kadıköy","Kağıthane","Kartal","Küçükçekmece",
+            "Maltepe","Pendik","Sancaktepe","Sarıyer","Silivri",
+            "Sultanbeyli","Sultangazi","Şile","Şişli","Tuzla",
+            "Ümraniye","Üsküdar","Zeytinburnu"
+        };
+
+        ViewBag.DistrictList = districts
+            .Select(d => new SelectListItem { Value = d, Text = d })
+            .ToList();
     }
+
 
 }
 

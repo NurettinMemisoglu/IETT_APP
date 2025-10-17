@@ -30,6 +30,7 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
                 Id = dto.Id,
                 Code = dto.Code,
                 Name = dto.Name,
+                District = dto.District,
                 StopType = dto.StopType,
                 SmartStop = dto.SmartStop,
                 Location = new LocationViewModel
