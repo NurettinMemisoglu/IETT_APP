@@ -1,5 +1,5 @@
-﻿using IETT_APP.Applicaton.Dtos;
-using IETT_APP.Applicaton.Interfaces;
+﻿using IETT_APP.Application.Dtos;
+using IETT_APP.Application.Interfaces;
 using IETT_APP.Domain.Entities;
 using IETT_APP.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;

@@ -1,6 +1,5 @@
-﻿using IETT_APP.Application.Dtos;
+﻿using IETT_APP.Application.Dtos.Stop;
 using IETT_APP.Application.Interfaces;
-using IETT_APP.Applicaton.Dtos.Stop;
 using IETT_APP.Domain.Entities;
 using IETT_APP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +21,7 @@ namespace IETT_APP.Infrastructure.Services
             return stops.Select(MapToDto).ToList();
         }
 
-        public async Task<StopDto?> GetByIdAsync(string id)
+        public async Task<StopDto?> GetByIdAsync(Guid id)
         {
             var stop = await _context.Stops.FindAsync(id);
             return stop == null ? null : MapToDto(stop);
@@ -36,9 +35,9 @@ namespace IETT_APP.Infrastructure.Services
                 throw new ArgumentException($"'{dto.Code}' kodu ile başka bir durak zaten mevcut.");
             }
 
-            var stop = new Stop
+            var stop = new Stop<Guid>
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid(),
                 Code = dto.Code,
                 Name = dto.Name,
                 District = dto.District,
@@ -57,8 +56,7 @@ namespace IETT_APP.Infrastructure.Services
             return MapToDto(stop);
         }
 
-
-        public async Task<bool> UpdateAsync(string id, UpdateStopDto dto)
+        public async Task<bool> UpdateAsync(Guid id, UpdateStopDto dto)
         {
             var stop = await _context.Stops.FindAsync(id);
             if (stop == null) return false;
@@ -66,7 +64,6 @@ namespace IETT_APP.Infrastructure.Services
             // Code güncelle
             if (!string.IsNullOrWhiteSpace(dto.Code))
             {
-                // Unique kod kontrolü
                 if (await _context.Stops.AnyAsync(s => s.Code == dto.Code && s.Id != id))
                     throw new ArgumentException($"'{dto.Code}' kodu başka bir durak tarafından kullanılıyor.");
 
@@ -76,6 +73,8 @@ namespace IETT_APP.Infrastructure.Services
             // Name güncelle
             if (!string.IsNullOrWhiteSpace(dto.Name))
                 stop.Name = dto.Name;
+
+            // Diğer alanlar
             stop.District = dto.District;
             stop.StopType = dto.StopType;
             stop.SmartStop = dto.SmartStop;
@@ -83,7 +82,6 @@ namespace IETT_APP.Infrastructure.Services
             // Location güncelle
             if (dto.Location != null)
             {
-                // Latitude ve Longitude opsiyonel güncelleme
                 if (dto.Location.Latitude != 0)
                     stop.Location.Latitude = dto.Location.Latitude;
 
@@ -91,20 +89,11 @@ namespace IETT_APP.Infrastructure.Services
                     stop.Location.Longitude = dto.Location.Longitude;
             }
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException ex)
-            {
-                Console.WriteLine(ex.InnerException?.Message);
-                throw;
-            }
-
+            await _context.SaveChangesAsync();
             return true;
         }
 
-        public async Task<bool> DeleteAsync(string id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var stop = await _context.Stops.FindAsync(id);
             if (stop == null) return false;
@@ -123,7 +112,7 @@ namespace IETT_APP.Infrastructure.Services
             return stops.Select(MapToDto).ToList();
         }
 
-        private StopDto MapToDto(Stop stop)
+        private StopDto MapToDto(Stop<Guid> stop)
         {
             return new StopDto
             {
@@ -140,6 +129,6 @@ namespace IETT_APP.Infrastructure.Services
                 }
             };
         }
-
     }
+
 }

@@ -1,6 +1,6 @@
 ﻿// IETT_APP.Infrastructure/Services/UserService.cs
 using IETT_APP.Application.Dtos;
-using IETT_APP.Applicaton.Interfaces;
+using IETT_APP.Application.Interfaces;
 using IETT_APP.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

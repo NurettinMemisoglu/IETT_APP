@@ -1,5 +1,5 @@
 ﻿using IETT_APP.Application.Dtos;
-using IETT_APP.Applicaton.Interfaces;
+using IETT_APP.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

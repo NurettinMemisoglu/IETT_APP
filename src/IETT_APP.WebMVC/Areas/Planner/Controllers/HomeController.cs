@@ -27,7 +27,7 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
             // DTO → ViewModel dönüşümü
             var stops = stopDtos.Select(dto => new StopViewModel
             {
-                Id = dto.Id,
+                Id = dto.Id,                  // Guid uyumlu
                 Code = dto.Code,
                 Name = dto.Name,
                 District = dto.District,
@@ -44,4 +44,6 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
             return View(stops);
         }
     }
+
+
 }

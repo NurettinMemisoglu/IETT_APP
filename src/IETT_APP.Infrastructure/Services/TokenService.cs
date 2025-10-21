@@ -1,4 +1,4 @@
-﻿using IETT_APP.Applicaton.Interfaces;
+﻿using IETT_APP.Application.Interfaces;
 using IETT_APP.Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;

@@ -1,6 +1,5 @@
-﻿using IETT_APP.Application.Dtos;
+﻿using IETT_APP.Application.Dtos.Stop;
 using IETT_APP.Application.Interfaces;
-using IETT_APP.Applicaton.Dtos.Stop;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IETT_APP.WebAPI.Controllers
@@ -23,7 +22,7 @@ namespace IETT_APP.WebAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<StopDto>> GetById(string id)
+        public async Task<ActionResult<StopDto>> GetById(Guid id)
         {
             var stop = await _stopService.GetByIdAsync(id);
             if (stop == null) return NotFound();
@@ -33,7 +32,6 @@ namespace IETT_APP.WebAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<StopDto>> Create([FromBody] CreateStopDto dto)
         {
-
             if (!ModelState.IsValid)
             {
                 var errors = string.Join(" | ", ModelState.Values
@@ -53,9 +51,8 @@ namespace IETT_APP.WebAPI.Controllers
             }
         }
 
-
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] UpdateStopDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateStopDto dto)
         {
             try
             {
@@ -70,7 +67,7 @@ namespace IETT_APP.WebAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             var deleted = await _stopService.DeleteAsync(id);
             if (!deleted) return NotFound();
@@ -84,4 +81,5 @@ namespace IETT_APP.WebAPI.Controllers
             return Ok(stops);
         }
     }
+
 }

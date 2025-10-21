@@ -3,15 +3,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IETT_APP.Domain.Entities
 {
-    public class Stop
+    public class Stop<T>
     {
-        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public T Id { get; set; }
         public string Code { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string District { get; set; } = string.Empty;
         public StopType StopType { get; set; }
         public SmartStop SmartStop { get; set; }
         public Location Location { get; set; } = null!;
+
+        public ICollection<RouteStop<Guid>> RouteStops { get; set; } = new List<RouteStop<Guid>>();
+
     }
 
 

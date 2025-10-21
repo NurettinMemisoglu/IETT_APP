@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\IETT_APP.Applicaton\IETT_APP.Applicaton.csproj" />
+    <ProjectReference Include="..\IETT_APP.Application\IETT_APP.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

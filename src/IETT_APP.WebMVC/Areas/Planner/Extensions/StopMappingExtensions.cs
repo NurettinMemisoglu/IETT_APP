@@ -1,5 +1,4 @@
-﻿using IETT_APP.Application.Dtos;
-using IETT_APP.Applicaton.Dtos.Stop;
+﻿using IETT_APP.Application.Dtos.Stop;
 using IETT_APP.WebMVC.Areas.Planner.Models;
 
 namespace IETT_APP.WebMVC.Areas.Planner.Extensions

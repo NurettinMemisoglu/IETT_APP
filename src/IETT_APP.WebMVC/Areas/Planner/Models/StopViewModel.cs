@@ -5,7 +5,7 @@ namespace IETT_APP.WebMVC.Areas.Planner.Models
 {
     public class StopViewModel
     {
-        public string Id { get; set; } = string.Empty;
+        public Guid Id { get; set; }
 
         [Required]
         [StringLength(50)]

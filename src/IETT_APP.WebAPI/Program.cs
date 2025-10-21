@@ -1,7 +1,8 @@
 ﻿using IETT_APP.Application.Interfaces;
-using IETT_APP.Applicaton.Interfaces;
+using IETT_APP.Application.Mapping;
 using IETT_APP.Domain.Entities;
 using IETT_APP.Infrastructure.Persistence;
+using IETT_APP.Infrastructure.Persistence.Repositories;
 using IETT_APP.Infrastructure.Persistence.Seed;
 using IETT_APP.Infrastructure.Services;
 using IETT_APP.WebAPI.Middlewares;
@@ -72,12 +73,24 @@ builder.Services.AddAuthentication(options =>
 // ----------------------
 // Dependency Injection
 // ----------------------
+// Service Line
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IStopService, StopService>();
+builder.Services.AddScoped<IRouteService<Guid>, RouteService<Guid>>();
+builder.Services.AddScoped<ILineService<Guid>, LineService<Guid>>();
+// Repository Line
+builder.Services.AddScoped<IRouteRepository<Guid>, RouteRepository<Guid>>();
+builder.Services.AddScoped<ILineRepository<Guid>, LineRepository<Guid>>();
+//AutoMapper Line
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<LineProfile>();
+    cfg.AddProfile<RouteProfile>();
+});
 
 // ----------------------
 // CORS

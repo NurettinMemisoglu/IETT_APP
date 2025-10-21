@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\IETT_APP.Applicaton\IETT_APP.Applicaton.csproj" />
+    <ProjectReference Include="..\IETT_APP.Application\IETT_APP.Application.csproj" />
     <ProjectReference Include="..\IETT_APP.Domain\IETT_APP.Domain.csproj" />
     <ProjectReference Include="..\IETT_APP.Infrastructure\IETT_APP.Infrastructure.csproj" />
   </ItemGroup>
@@ -40,6 +40,7 @@
     <Folder Include="Areas\Driver\Data\" />
     <Folder Include="Areas\Driver\Models\" />
     <Folder Include="Areas\Planner\Data\" />
+    <Folder Include="Areas\Planner\Views\Lines\" />
     <Folder Include="wwwroot\assets\css\alt\" />
     <Folder Include="wwwroot\assets\js\adminlte_3.2.0\pages\" />
     <Folder Include="wwwroot\assets\lib\bootstrap\dist\css\" />
