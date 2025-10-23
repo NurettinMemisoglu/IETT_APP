@@ -1,0 +1,33 @@
+﻿@model IEnumerable<IETT_APP.WebMVC.Areas.Planner.Models.LineViewModel>
+
+@{
+    ViewData["Title"] = "Hatlar";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between mb-3">
+        <input type="text" id="searchInput" class="form-control w-50" placeholder="Hat ara..." />
+        <button id="addLineBtn" class="btn btn-success">Yeni Hat Ekle</button>
+    </div>
+
+    <div id="linesTableContainer">
+        <partial name="_LinesTablePartial" model="Model" />
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="lineModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="modalTitle" class="modal-title"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalBody"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/lines.js"></script>
+}

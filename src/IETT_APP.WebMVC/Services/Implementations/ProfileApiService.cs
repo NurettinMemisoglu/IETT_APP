@@ -6,14 +6,14 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
-namespace MVCProject.Services
+namespace IETT_APP.WebMVC.Services.Implementations
 {
-    public class ProfileService : IProfileService
+    public class ProfileApiService : IProfileApiService
     {
         private readonly HttpClient _httpClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ProfileService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        public ProfileApiService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
         {
             _httpClient = httpClient;
             _httpContextAccessor = httpContextAccessor;

@@ -1,12 +1,12 @@
-﻿using IETT_APP.Domain.Entities;
+﻿
+
+using IETT_APP.Domain.Entities;
 using IETT_APP.Infrastructure.Persistence;
 using IETT_APP.WebMVC.Services.Implementations;
 using IETT_APP.WebMVC.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
-using MVCProject.Services;
-using MVCProject.Services.Interfaces;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -65,22 +65,17 @@ builder.Services.AddHttpContextAccessor();
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"]
                  ?? throw new InvalidOperationException("ApiSettings:BaseUrl is missing.");
 
-builder.Services.AddHttpClient<IApiService, ApiService>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
-
-builder.Services.AddHttpClient<IProfileService, ProfileService>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
 
 builder.Services.AddHttpClient<IApiUserService, ApiUserService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
-builder.Services.AddHttpClient<IStopService, StopService>(client =>
+builder.Services.AddHttpClient<IStopApiService, StopApiService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
+builder.Services.AddHttpClient<ILineApiService, LineApiService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });

@@ -1,0 +1,42 @@
+﻿@model IETT_APP.WebMVC.Areas.Planner.Models.LineViewModel
+
+<form id="lineForm">
+    <input type="hidden" id="Id" name="Id" value="@Model.Id" />
+
+    <div class="form-floating mb-3">
+        <input asp-for="Code" id="Code" class="form-control" placeholder="Kod" />
+        <label asp-for="Code"></label>
+    </div>
+
+    <div class="form-floating mb-3">
+        <input asp-for="Name" id="Name" class="form-control" placeholder="Ad" />
+        <label asp-for="Name"></label>
+    </div>
+
+    <div class="form-floating mb-3">
+        <select asp-for="LineType" class="form-select" asp-items="ViewBag.LineTypeList">
+            <option value="">-- Hat Tipi Seçin --</option>
+        </select>
+        <label asp-for="LineType"></label>
+    </div>
+
+    <div class="form-floating mb-3">
+        <input asp-for="VehicleCount" id="VehicleCount" class="form-control" type="number" />
+        <label asp-for="VehicleCount"></label>
+    </div>
+
+    <div class="form-check form-switch mb-3">
+        <input asp-for="IsActive" id="IsActive" class="form-check-input" type="checkbox" />
+        <label asp-for="IsActive" class="form-check-label"></label>
+    </div>
+
+    <div id="loadingSpinner" class="d-none text-center mt-3">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Yükleniyor...</span>
+        </div>
+    </div>
+
+    <div class="text-end">
+        <button type="submit" class="btn btn-primary">Kaydet</button>
+    </div>
+</form>

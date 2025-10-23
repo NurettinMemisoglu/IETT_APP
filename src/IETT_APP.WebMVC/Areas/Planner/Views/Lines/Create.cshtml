@@ -1,20 +1,20 @@
-﻿@model IETT_APP.WebMVC.Areas.Planner.Models.StopViewModel
+﻿@model IETT_APP.WebMVC.Areas.Planner.Models.LineViewModel
 @{
     ViewData["Title"] = "Yeni Durak Ekle";
 }
 
 <div class="container mt-4">
-    <h2 class="mb-3">Yeni Durak Ekle</h2>
+    <h2 class="mb-3">Yeni Durak Ekle</h2>   
 
     <form asp-action="Create" method="post">
-        @await Html.PartialAsync("_StopFormPartial", Model)
+        @await Html.PartialAsync("_LineFormPartial", Model)
 
         <div class="d-flex gap-2">
             <button type="submit" class="btn btn-success">
                 Kaydet
             </button>
             <button type="button"
-                    onclick="window.location='@Url.Action("Index", "Stops", new { area = "Planner" })';"
+                    onclick="window.location='@Url.Action("Index", "Lines", new { area = "Planner" })';"
                     class="btn btn-secondary">
                 İptal
             </button>
@@ -23,4 +23,5 @@
 </div>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/lines.js"></script>
 }

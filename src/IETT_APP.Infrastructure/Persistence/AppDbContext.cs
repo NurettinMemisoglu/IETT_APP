@@ -8,6 +8,8 @@ namespace IETT_APP.Infrastructure.Persistence
     public class AppDbContext : IdentityDbContext<User, IdentityRole, string>
     {
 
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options) { }
 
         public DbSet<UserRefreshToken> UserRefreshTokens { get; set; }  // ← Burayı ekle
 
@@ -15,10 +17,6 @@ namespace IETT_APP.Infrastructure.Persistence
         public DbSet<Stop<Guid>> Stops { get; set; }
         public DbSet<Route<Guid>> Routes { get; set; }
         public DbSet<RouteStop<Guid>> RouteStops { get; set; }
-
-        public AppDbContext(DbContextOptions<AppDbContext> options)
-            : base(options) { }
-
 
 
         protected override void OnModelCreating(ModelBuilder builder)

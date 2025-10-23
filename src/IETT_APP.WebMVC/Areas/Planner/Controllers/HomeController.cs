@@ -9,9 +9,9 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
     [Area("Planner")]
     public class HomeController : Controller
     {
-        private readonly IStopService _stopService;
+        private readonly IStopApiService _stopService;
 
-        public HomeController(IStopService stopService)
+        public HomeController(IStopApiService stopService)
         {
             _stopService = stopService;
         }

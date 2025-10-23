@@ -11,5 +11,9 @@ namespace IETT_APP.Application.Interfaces
         Task<bool> DeleteAsync(T id);
         Task<List<LineDto<T>>> SearchAsync(string query);
         Task<bool> SetActiveAsync(T id, bool isActive);
+
+        // ✅ Yeni metodlar
+        Task<LineDto<T>> CreateOrUpdateAsync(LineCreateUpdateDto<T> dto);
+        Task<bool> SoftDeleteAsync(T id);
     }
 }

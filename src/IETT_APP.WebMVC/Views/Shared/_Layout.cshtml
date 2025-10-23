@@ -71,47 +71,6 @@
                         </a>
                     </li>
                     <li class="nav-item d-none d-md-block"><a asp-area="Views" asp-controller="Home" asp-action="Index" class="nav-link">Home</a></li>
-                   
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <li class="nav-item">
-                            <a asp-area="Admin" asp-controller="User" asp-action="Index" class="nav-link">
-                                <i class="nav-icon fas fa-users"></i>
-                                <p>Users</p>
-                            </a>
-                        </li>
-                    }
-
-                    @if (User.IsInRole("Planner"))
-                    {
-                        <li class="nav-item">
-                            <a asp-area="Planner" asp-controller="Home" asp-action="Index" class="nav-link">
-                                <i class="nav-icon fas fa-route"></i>
-                                <p>Planner</p>
-                            </a>
-                        </li>
-                    }
-
-                    @if (User.IsInRole("Driver"))
-                    {
-                        <li class="nav-item">
-                            <a asp-area="Driver" asp-controller="Home" asp-action="Index" class="nav-link">
-                                <i class="nav-icon fas fa-bus"></i>
-                                <p>Driver</p>
-                            </a>
-                        </li>
-                    }
-
-                    @if (User.IsInRole("Chief"))
-                    {
-                        <li class="nav-item">
-                            <a asp-area="Chief" asp-controller="Home" asp-action="Index" class="nav-link">
-                                <i class="nav-icon fas fa-user-tie"></i>
-                                <p>Chief</p>
-                            </a>
-                        </li>
-                    }
-
                 </ul>
                 <!--end::Start Navbar Links-->
                 <!--begin::End Navbar Links-->
@@ -389,6 +348,7 @@
     <!--end::App Wrapper-->
     <!--begin::Script-->
     <!--begin::Third Party Plugin(OverlayScrollbars)-->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"
             crossorigin="anonymous"></script>
     <!--end::Third Party Plugin(OverlayScrollbars)--><!--begin::Required Plugin(popperjs for Bootstrap 5)-->
@@ -401,7 +361,7 @@
     <script async
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBrsuVWjUgd1nNrH-4lU4lblxegEEkrQGw&libraries=places&callback=initMap">
     </script>
-    <script src='~/js/stops.js'></script>
+    <script async src="~/js/maps.js"></script>
     <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->  
     <script>
         const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';

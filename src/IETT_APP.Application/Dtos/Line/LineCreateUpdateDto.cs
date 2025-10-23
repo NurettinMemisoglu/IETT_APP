@@ -22,5 +22,6 @@ namespace IETT_APP.Application.Dtos.Line
         // Validate that provided numeric value is one of the defined enum members
         [ValidEnumValue(typeof(LineType), ErrorMessage = "LineType değeri geçersiz. Geçerli değerler: 1 (IETT), 2 (OHO), 3 (METROBUS).")]
         public LineType LineType { get; set; }
+        public bool IsActive { get; set; }
     }
 }

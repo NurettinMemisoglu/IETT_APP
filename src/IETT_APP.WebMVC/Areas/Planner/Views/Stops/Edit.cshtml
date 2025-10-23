@@ -13,9 +13,8 @@
             <button type="submit" class="btn btn-primary">
                 Güncelle
             </button>
-            <button type="submit"
-                    formaction="@Url.Action("Index", "Home", new { area = "Planner" })"
-                    formmethod="get"
+            <button type="button"
+                    onclick="window.location='@Url.Action("Index", "Stops", new { area = "Planner" })';"
                     class="btn btn-secondary">
                 İptal
             </button>

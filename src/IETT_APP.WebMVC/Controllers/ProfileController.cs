@@ -8,9 +8,9 @@ namespace IETT_APP.WebMVC.Controllers
     [Authorize]
     public class ProfileController : Controller
     {
-        private readonly IProfileService _profileService;
+        private readonly IProfileApiService _profileService;
 
-        public ProfileController(IProfileService profileService)
+        public ProfileController(IProfileApiService profileService)
         {
             _profileService = profileService;
         }

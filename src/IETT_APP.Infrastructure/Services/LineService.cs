@@ -19,22 +19,23 @@ namespace IETT_APP.Infrastructure.Services
         public async Task<List<LineDto<T>>> GetAllAsync()
         {
             var entities = await _repo.GetAllAsync();
-            return _mapper.Map<List<LineDto<T>>>(entities);
+            // Soft delete filtre
+            var activeEntities = entities.Where(x => !x.IsDeleted).ToList();
+            return _mapper.Map<List<LineDto<T>>>(activeEntities);
         }
 
         public async Task<LineDto<T>?> GetByIdAsync(T id)
         {
             var entity = await _repo.GetByIdAsync(id);
-            return entity == null ? null : _mapper.Map<LineDto<T>>(entity);
+            if (entity == null || entity.IsDeleted) return null;
+            return _mapper.Map<LineDto<T>>(entity);
         }
 
         public async Task<LineDto<T>> CreateAsync(LineCreateUpdateDto<T> dto)
         {
             var entity = _mapper.Map<Line<T>>(dto);
-
-            // created flags handled by repository
+            entity.IsDeleted = false;
             await _repo.AddAsync(entity);
-
             return _mapper.Map<LineDto<T>>(entity);
         }
 
@@ -43,38 +44,57 @@ namespace IETT_APP.Infrastructure.Services
             if (dto.Id == null) return false;
 
             var entity = await _repo.GetByIdAsync(dto.Id);
-            if (entity == null) return false;
+            if (entity == null || entity.IsDeleted) return false;
 
             _mapper.Map(dto, entity);
             await _repo.UpdateAsync(entity);
             return true;
         }
 
-        public async Task<bool> DeleteAsync(T id)
+        public async Task<LineDto<T>> CreateOrUpdateAsync(LineCreateUpdateDto<T> dto)
+        {
+            if (dto.Id == null || dto.Id.Equals(default(T)) || dto.Id.Equals(Guid.Empty))
+                return await CreateAsync(dto);
+
+            var updated = await UpdateAsync(dto);
+            if (!updated) throw new ArgumentException("Güncellenecek hat bulunamadı.");
+
+            var entity = await GetByIdAsync(dto.Id);
+            return entity!;
+        }
+
+        public async Task<bool> SoftDeleteAsync(T id)
         {
             var entity = await _repo.GetByIdAsync(id);
-            if (entity == null) return false;
+            if (entity == null || entity.IsDeleted) return false;
 
-            await _repo.DeleteAsync(id);
+            entity.IsDeleted = true;
+            await _repo.UpdateAsync(entity);
             return true;
+        }
+
+        public async Task<bool> DeleteAsync(T id)
+        {
+            // Direkt delete isteğe bağlı, soft delete yerine SoftDeleteAsync kullan
+            return await SoftDeleteAsync(id);
         }
 
         public async Task<List<LineDto<T>>> SearchAsync(string query)
         {
             var all = await _repo.GetAllAsync();
-            var filtered = all.Where(l =>
-                    (!string.IsNullOrEmpty(l.Name) && l.Name.Contains(query, StringComparison.OrdinalIgnoreCase)) ||
-                    (!string.IsNullOrEmpty(l.Code) && l.Code.Contains(query, StringComparison.OrdinalIgnoreCase)))
+            var filtered = all
+                .Where(l => !l.IsDeleted &&
+                       (!string.IsNullOrEmpty(l.Name) && l.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                        !string.IsNullOrEmpty(l.Code) && l.Code.Contains(query, StringComparison.OrdinalIgnoreCase)))
                 .ToList();
 
             return _mapper.Map<List<LineDto<T>>>(filtered);
         }
 
-        // NEW: toggle active flag on a Line entity
         public async Task<bool> SetActiveAsync(T id, bool isActive)
         {
             var entity = await _repo.GetByIdAsync(id);
-            if (entity == null) return false;
+            if (entity == null || entity.IsDeleted) return false;
 
             entity.IsActive = isActive;
             await _repo.UpdateAsync(entity);

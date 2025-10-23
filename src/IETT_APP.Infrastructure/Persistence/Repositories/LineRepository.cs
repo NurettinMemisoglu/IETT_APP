@@ -27,31 +27,28 @@ namespace IETT_APP.Infrastructure.Persistence.Repositories
 
         public async Task AddAsync(Line<T> entity)
         {
-            entity.CreatedAt = DateTime.UtcNow;
-            entity.CreatedBy = "System";
             await _context.Set<Line<T>>().AddAsync(entity);
             await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Line<T> entity)
         {
-            entity.UpdatedAt = DateTime.UtcNow;
-            entity.UpdatedBy = "System";
             _context.Set<Line<T>>().Update(entity);
             await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(T id)
         {
-            var entity = await _context.Set<Line<T>>().FirstOrDefaultAsync(x => x.Id!.Equals(id));
-            if (entity == null) return;
+            var entity = await _context.Set<Line<T>>()
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id!.Equals(id));
 
-            entity.IsDeleted = true;
-            entity.DeletedAt = DateTime.UtcNow;
-            entity.DeletedBy = "System";
+            if (entity == null)
+                return;
 
-            _context.Set<Line<T>>().Update(entity);
+            _context.Set<Line<T>>().Remove(entity); // soft delete'e dönüşür
             await _context.SaveChangesAsync();
         }
+
     }
 }

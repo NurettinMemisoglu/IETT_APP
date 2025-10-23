@@ -40,7 +40,7 @@
     <Folder Include="Areas\Driver\Data\" />
     <Folder Include="Areas\Driver\Models\" />
     <Folder Include="Areas\Planner\Data\" />
-    <Folder Include="Areas\Planner\Views\Lines\" />
+    <Folder Include="Areas\Planner\Views\Home\" />
     <Folder Include="wwwroot\assets\css\alt\" />
     <Folder Include="wwwroot\assets\js\adminlte_3.2.0\pages\" />
     <Folder Include="wwwroot\assets\lib\bootstrap\dist\css\" />

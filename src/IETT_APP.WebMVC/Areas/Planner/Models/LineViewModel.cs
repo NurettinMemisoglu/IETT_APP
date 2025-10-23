@@ -1,4 +1,5 @@
 ﻿using IETT_APP.Domain.Enums;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace IETT_APP.WebMVC.Areas.Planner.Models
@@ -17,11 +18,8 @@ namespace IETT_APP.WebMVC.Areas.Planner.Models
         [StringLength(200)]
         public string Name { get; set; } = string.Empty;
 
-        [Display(Name = "Açıklama")]
-        [StringLength(500)]
-        public string? Description { get; set; }
-
         [Display(Name = "Hat Tipi")]
+        [Required(ErrorMessage = "Hat tipi zorunludur.")]
         public LineType LineType { get; set; }
 
         [Display(Name = "Araç Sayısı")]
@@ -35,5 +33,9 @@ namespace IETT_APP.WebMVC.Areas.Planner.Models
 
         [Display(Name = "Son Düzenleme Tarihi")]
         public DateTime? UpdatedAt { get; set; }
+
+
+        public SelectList? LineTypeList { get; set; }
     }
 }
+

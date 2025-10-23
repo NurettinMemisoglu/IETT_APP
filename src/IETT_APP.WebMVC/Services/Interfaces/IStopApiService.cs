@@ -2,7 +2,7 @@
 
 namespace IETT_APP.WebMVC.Services.Interfaces
 {
-    public interface IStopService
+    public interface IStopApiService
     {
         Task<IEnumerable<StopDto>> GetAllAsync();
         Task<StopDto?> GetByIdAsync(string id);

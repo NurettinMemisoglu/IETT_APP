@@ -2,7 +2,7 @@
 
 namespace IETT_APP.WebMVC.Services.Interfaces
 {
-    public interface IProfileService
+    public interface IProfileApiService
 
     {
         Task<(bool IsSuccess, string Message, ProfileViewModel? Data)> GetProfileAsync();

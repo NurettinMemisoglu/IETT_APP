@@ -4,11 +4,11 @@ using System.Text.Json;
 
 namespace IETT_APP.WebMVC.Services.Implementations
 {
-    public class StopService : IStopService
+    public class StopApiService : IStopApiService
     {
         private readonly HttpClient _http;
 
-        public StopService(HttpClient http)
+        public StopApiService(HttpClient http)
         {
             _http = http;
         }

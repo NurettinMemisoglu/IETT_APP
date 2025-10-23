@@ -9,7 +9,13 @@ namespace IETT_APP.Application.Dtos.Line
         public string Name { get; set; } = string.Empty;
         public LineType LineType { get; set; }
         public int VehicleCount { get; set; }
-        public bool IsDeleted { get; set; } = false;
         public bool IsActive { get; set; } = true;
+
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+        public DateTime? DeletedAt { get; set; }  // nullable olmalı
+        public bool IsDeleted { get; set; } = false;
+
+
     }
 }
