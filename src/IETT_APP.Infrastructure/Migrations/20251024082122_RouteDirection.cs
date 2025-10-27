@@ -5,19 +5,19 @@
 namespace IETT_APP.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class StopTypeRedesign : Migration
+    public partial class RouteDirection : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "Type",
-                table: "Stops",
-                newName: "StopType");
+                name: "LengthInKm",
+                table: "Routes",
+                newName: "RouteDirection");
 
             migrationBuilder.AddColumn<int>(
-                name: "SmartStop",
-                table: "Stops",
+                name: "LengthInM",
+                table: "Routes",
                 type: "int",
                 nullable: false,
                 defaultValue: 0);
@@ -27,13 +27,13 @@ namespace IETT_APP.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "SmartStop",
-                table: "Stops");
+                name: "LengthInM",
+                table: "Routes");
 
             migrationBuilder.RenameColumn(
-                name: "StopType",
-                table: "Stops",
-                newName: "Type");
+                name: "RouteDirection",
+                table: "Routes",
+                newName: "LengthInKm");
         }
     }
 }

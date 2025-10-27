@@ -12,25 +12,157 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IETT_APP.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251009072143_UpdateLocationToDecimal")]
-    partial class UpdateLocationToDecimal
+    [Migration("20251024071105_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("IETT_APP.Domain.Entities.Stop", b =>
+            modelBuilder.Entity("IETT_APP.Domain.Entities.Line<System.Guid>", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("LineType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("VehicleCount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Lines");
+                });
+
+            modelBuilder.Entity("IETT_APP.Domain.Entities.Route<System.Guid>", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("LengthInKm")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("LineId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("timeInMinutes")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("LineId");
+
+                    b.ToTable("Routes");
+                });
+
+            modelBuilder.Entity("IETT_APP.Domain.Entities.RouteStop<System.Guid>", b =>
+                {
+                    b.Property<Guid>("RouteId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("StopId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.HasKey("RouteId", "StopId");
+
+                    b.HasIndex("StopId");
+
+                    b.ToTable("RouteStops");
+                });
+
+            modelBuilder.Entity("IETT_APP.Domain.Entities.Stop<System.Guid>", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("District")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -38,10 +170,16 @@ namespace IETT_APP.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Type")
+                    b.Property<int>("SmartStop")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StopType")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
 
                     b.ToTable("Stops");
                 });
@@ -276,20 +414,50 @@ namespace IETT_APP.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("IETT_APP.Domain.Entities.Stop", b =>
+            modelBuilder.Entity("IETT_APP.Domain.Entities.Route<System.Guid>", b =>
+                {
+                    b.HasOne("IETT_APP.Domain.Entities.Line<System.Guid>", "Line")
+                        .WithMany("Routes")
+                        .HasForeignKey("LineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Line");
+                });
+
+            modelBuilder.Entity("IETT_APP.Domain.Entities.RouteStop<System.Guid>", b =>
+                {
+                    b.HasOne("IETT_APP.Domain.Entities.Route<System.Guid>", "Route")
+                        .WithMany("RouteStops")
+                        .HasForeignKey("RouteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("IETT_APP.Domain.Entities.Stop<System.Guid>", "Stop")
+                        .WithMany("RouteStops")
+                        .HasForeignKey("StopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Route");
+
+                    b.Navigation("Stop");
+                });
+
+            modelBuilder.Entity("IETT_APP.Domain.Entities.Stop<System.Guid>", b =>
                 {
                     b.OwnsOne("IETT_APP.Domain.Entities.Location", "Location", b1 =>
                         {
-                            b1.Property<string>("StopId")
-                                .HasColumnType("nvarchar(450)");
+                            b1.Property<Guid>("StopId")
+                                .HasColumnType("uniqueidentifier");
 
                             b1.Property<decimal>("Latitude")
-                                .HasPrecision(9, 7)
-                                .HasColumnType("decimal(9,7)");
+                                .HasPrecision(8, 6)
+                                .HasColumnType("decimal(8,6)");
 
                             b1.Property<decimal>("Longitude")
-                                .HasPrecision(9, 7)
-                                .HasColumnType("decimal(9,7)");
+                                .HasPrecision(8, 6)
+                                .HasColumnType("decimal(8,6)");
 
                             b1.HasKey("StopId");
 
@@ -363,6 +531,21 @@ namespace IETT_APP.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("IETT_APP.Domain.Entities.Line<System.Guid>", b =>
+                {
+                    b.Navigation("Routes");
+                });
+
+            modelBuilder.Entity("IETT_APP.Domain.Entities.Route<System.Guid>", b =>
+                {
+                    b.Navigation("RouteStops");
+                });
+
+            modelBuilder.Entity("IETT_APP.Domain.Entities.Stop<System.Guid>", b =>
+                {
+                    b.Navigation("RouteStops");
                 });
 #pragma warning restore 612, 618
         }

@@ -16,7 +16,6 @@ namespace IETT_APP.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -32,8 +31,6 @@ namespace IETT_APP.Infrastructure.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FullName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    RefreshTokenExpiryTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -52,6 +49,47 @@ namespace IETT_APP.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Lines",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    LineType = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VehicleCount = table.Column<int>(type: "int", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Lines", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Stops",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StopType = table.Column<int>(type: "int", nullable: false),
+                    SmartStop = table.Column<int>(type: "int", nullable: false),
+                    District = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Location_Latitude = table.Column<decimal>(type: "decimal(8,6)", precision: 8, scale: 6, nullable: false),
+                    Location_Longitude = table.Column<decimal>(type: "decimal(8,6)", precision: 8, scale: 6, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Stops", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -160,6 +198,83 @@ namespace IETT_APP.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "UserRefreshTokens",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Token = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ExpiryTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserRefreshTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserRefreshTokens_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Routes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LengthInKm = table.Column<int>(type: "int", nullable: false),
+                    timeInMinutes = table.Column<int>(type: "int", nullable: false),
+                    LineId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeletedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Routes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Routes_Lines_LineId",
+                        column: x => x.LineId,
+                        principalTable: "Lines",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RouteStops",
+                columns: table => new
+                {
+                    RouteId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StopId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Order = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RouteStops", x => new { x.RouteId, x.StopId });
+                    table.ForeignKey(
+                        name: "FK_RouteStops_Routes_RouteId",
+                        column: x => x.RouteId,
+                        principalTable: "Routes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RouteStops_Stops_StopId",
+                        column: x => x.StopId,
+                        principalTable: "Stops",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -198,6 +313,39 @@ namespace IETT_APP.Infrastructure.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Lines_Code",
+                table: "Lines",
+                column: "Code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Routes_Code",
+                table: "Routes",
+                column: "Code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Routes_LineId",
+                table: "Routes",
+                column: "LineId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RouteStops_StopId",
+                table: "RouteStops",
+                column: "StopId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Stops_Code",
+                table: "Stops",
+                column: "Code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserRefreshTokens_UserId",
+                table: "UserRefreshTokens",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -219,10 +367,25 @@ namespace IETT_APP.Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "RouteStops");
+
+            migrationBuilder.DropTable(
+                name: "UserRefreshTokens");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "Routes");
+
+            migrationBuilder.DropTable(
+                name: "Stops");
+
+            migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Lines");
         }
     }
 }

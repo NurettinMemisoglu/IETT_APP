@@ -10,6 +10,7 @@ namespace IETT_APP.Application.Interfaces
         Task<bool> UpdateAsync(RouteCreateUpdateDto<T> dto);
         Task<bool> DeleteAsync(T id);
         Task<List<RouteDto<T>>> SearchAsync(string query);
+        Task<bool> SetActiveAsync(T id, bool isActive);
     }
 }
 

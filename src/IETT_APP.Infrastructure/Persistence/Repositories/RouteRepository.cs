@@ -29,6 +29,12 @@ namespace IETT_APP.Infrastructure.Persistence.Repositories
 
         public async Task AddAsync(Route<T> entity)
         {
+            var exists = await _context.Set<Route<T>>()
+                           .AnyAsync(x => x.Code == entity.Code && !x.IsDeleted);
+
+            if (exists)
+                throw new ArgumentException($"Aynı güzergah kodu ile aktif bir hat mevcut: {entity.Code}");
+
             entity.CreatedAt = DateTime.UtcNow;
             entity.CreatedBy = "System";
             await _context.Set<Route<T>>().AddAsync(entity);

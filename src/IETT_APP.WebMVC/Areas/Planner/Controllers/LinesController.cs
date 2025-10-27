@@ -33,9 +33,13 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
                 ? await _lineApiService.GetAllAsync()
                 : await _lineApiService.SearchAsync(term);
 
+            // 🔹 Silinmiş hatları filtrele
+            result = result.Where(x => !x.IsDeleted).ToList();
+
             var viewModels = result.Select(x => x.ToViewModel()).ToList();
             return PartialView("_LinesTablePartial", viewModels);
         }
+
 
         [HttpGet]
         public IActionResult Create()

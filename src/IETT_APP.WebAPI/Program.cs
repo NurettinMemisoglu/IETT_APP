@@ -143,6 +143,10 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     await IdentitySeed.SeedAdminAsync(services);
+    await IdentitySeed.SeedPlannerAsync(services);
+    await IdentitySeed.SeedChiefAsync(services);
+    await IdentitySeed.SeedDriverAsync(services);
+    await IdentitySeed.SeedUserAsync(services);
 }
 
 // ----------------------

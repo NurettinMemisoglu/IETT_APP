@@ -2,70 +2,97 @@
 using IETT_APP.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-[Route("api/[controller]")]
-[ApiController]
-public class LinesController : ControllerBase
+namespace IETT_APP.WebAPI.Controllers
 {
-    private readonly ILineService<Guid> _lineService;
-
-    public LinesController(ILineService<Guid> lineService)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class LinesController : ControllerBase
     {
-        _lineService = lineService;
-    }
+        private readonly ILineService<Guid> _lineService;
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] bool? active)
-    {
-        var lines = await _lineService.GetAllAsync();
-        lines = lines.Where(l => !l.IsDeleted).ToList();
-
-        if (active.HasValue)
-            lines = lines.Where(l => l.IsActive == active.Value).ToList();
-
-        return Ok(lines);
-    }
-
-    [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetById(Guid id)
-    {
-        var line = await _lineService.GetByIdAsync(id);
-        if (line == null || line.IsDeleted) return NotFound();
-        return Ok(line);
-    }
-
-    [HttpPost("execute")]
-    public async Task<IActionResult> Execute([FromBody] LineCreateUpdateDto<Guid> dto)
-    {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-
-        try
+        public LinesController(ILineService<Guid> lineService)
         {
-            var result = await _lineService.CreateOrUpdateAsync(dto);
+            _lineService = lineService;
+        }
+
+        // support filtering: /api/line?active=true
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] bool? active)
+        {
+            var lines = await _lineService.GetAllAsync();
+            if (active.HasValue)
+            {
+                lines = lines.Where(l => l.IsActive == active.Value).ToList();
+            }
+            return Ok(lines);
+        }
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var line = await _lineService.GetByIdAsync(id);
+            if (line == null) return NotFound();
+            return Ok(line);
+        }
+
+        [HttpPost("execute")]
+        public async Task<IActionResult> Execute([FromBody] LineCreateUpdateDto<Guid> dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                if (dto.Id == null || dto.Id == Guid.Empty)
+                {
+                    var created = await _lineService.CreateAsync(dto);
+                    return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+                }
+
+                var updated = await _lineService.UpdateAsync(dto);
+                if (!updated) return NotFound();
+                // Güncellenen satırı dön
+                var updatedDto = await _lineService.GetByIdAsync(dto.Id);
+                return Ok(updatedDto);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // Activate a line
+        [HttpPatch("{id:guid}/activate")]
+        public async Task<IActionResult> Activate(Guid id)
+        {
+            var ok = await _lineService.SetActiveAsync(id, true);
+            if (!ok) return NotFound();
+            return NoContent();
+        }
+
+        // Deactivate a line
+        [HttpPatch("{id:guid}/deactivate")]
+        public async Task<IActionResult> Deactivate(Guid id)
+        {
+            var ok = await _lineService.SetActiveAsync(id, false);
+            if (!ok) return NotFound();
+            return NoContent();
+        }
+
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+
+            var deleted = await _lineService.DeleteAsync(id);
+
+            if (!deleted) return NotFound();
+            return NoContent();
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string query)
+        {
+            var result = await _lineService.SearchAsync(query);
             return Ok(result);
         }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-    }
-
-    [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> Delete(Guid id)
-    {
-        var deleted = await _lineService.SoftDeleteAsync(id);
-        if (!deleted) return NotFound();
-        return NoContent();
-    }
-
-    [HttpGet("search")]
-    public async Task<IActionResult> Search([FromQuery] string? query)
-    {
-        var lines = string.IsNullOrWhiteSpace(query)
-            ? await _lineService.GetAllAsync()
-            : await _lineService.SearchAsync(query);
-
-        lines = lines.Where(l => !l.IsDeleted).ToList();
-        return Ok(lines);
     }
 }
-

@@ -142,5 +142,15 @@ namespace IETT_APP.Infrastructure.Services
 
             return dtos;
         }
+
+        public async Task<bool> SetActiveAsync(T id, bool isActive)
+        {
+            var entity = await _repo.GetByIdAsync(id);
+            if (entity == null) return false;
+
+            entity.IsActive = isActive;
+            await _repo.UpdateAsync(entity);
+            return true;
+        }
     }
 }

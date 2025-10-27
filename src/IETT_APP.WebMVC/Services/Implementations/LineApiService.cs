@@ -21,6 +21,8 @@ namespace IETT_APP.WebMVC.Services.Implementations
 
         public async Task<LineDto<Guid>> CreateOrUpdateAsync(LineCreateUpdateDto<Guid> dto)
         {
+            var json = JsonSerializer.Serialize(dto);
+            Console.WriteLine("GÖNDERİLEN JSON: " + json);
             var response = await _httpClient.PostAsJsonAsync("api/lines/execute", dto);
             var content = await response.Content.ReadAsStringAsync();
 
@@ -36,6 +38,7 @@ namespace IETT_APP.WebMVC.Services.Implementations
         public async Task<bool> DeleteAsync(Guid id)
         {
             var response = await _httpClient.DeleteAsync($"api/lines/{id}");
+            Console.WriteLine($"Silme isteği: api/lines/{id}");
             return response.IsSuccessStatusCode;
         }
 

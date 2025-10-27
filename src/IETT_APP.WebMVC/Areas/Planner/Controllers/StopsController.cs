@@ -72,7 +72,7 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
             }
 
             await _stopApiService.CreateAsync(model.ToCreateDto());
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Stops");
         }
 
 
@@ -124,7 +124,7 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
 
             await _stopApiService.UpdateAsync(id, model.ToUpdateDto());
             TempData["SuccessMessage"] = "Durak başarıyla güncellendi!";
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Stops");
         }
 
 
@@ -146,7 +146,7 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
         public async Task<IActionResult> Delete(string id)
         {
             await _stopApiService.DeleteAsync(id);
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Stops");
         }
 
         private void PopulateDropdowns()

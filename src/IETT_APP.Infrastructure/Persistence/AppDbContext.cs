@@ -55,6 +55,14 @@ namespace IETT_APP.Infrastructure.Persistence
                 .WithMany(l => l.Routes)
                 .HasForeignKey(r => r.LineId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Route<Guid>>()
+               .HasIndex(s => s.Code)
+               .IsUnique();
+
+            builder.Entity<Line<Guid>>()
+               .HasIndex(s => s.Code)
+               .IsUnique();
         }
     }
 }

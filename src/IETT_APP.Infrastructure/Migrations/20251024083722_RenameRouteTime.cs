@@ -5,25 +5,24 @@
 namespace IETT_APP.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddDistrict : Migration
+    public partial class RenameRouteTime : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "District",
-                table: "Stops",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "");
+            migrationBuilder.RenameColumn(
+                name: "timeInMinutes",
+                table: "Routes",
+                newName: "TimeInMinutes");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "District",
-                table: "Stops");
+            migrationBuilder.RenameColumn(
+                name: "TimeInMinutes",
+                table: "Routes",
+                newName: "timeInMinutes");
         }
     }
 }
