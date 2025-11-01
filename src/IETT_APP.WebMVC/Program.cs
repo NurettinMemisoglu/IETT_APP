@@ -79,6 +79,10 @@ builder.Services.AddHttpClient<ILineApiService, LineApiService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });
+builder.Services.AddHttpClient<IRouteApiService, RouteApiService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
 
 // ----------------------
 // Cookie & Authentication

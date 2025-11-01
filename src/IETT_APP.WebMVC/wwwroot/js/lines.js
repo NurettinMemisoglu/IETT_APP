@@ -27,11 +27,11 @@
             Id: $(this).find('[name="Id"]').val(),
             Code: $(this).find('[name="Code"]').val(),
             Name: $(this).find('[name="Name"]').val(),
-            LineType: $(this).find('[name="LineType"]').val(),
+            LineType: parseInt($(this).find('[name="LineType"]').val()), 
             VehicleCount: $(this).find('[name="VehicleCount"]').val(),
             IsActive: $(this).find('[name="IsActive"]').is(':checked')
         };
-
+        console.log(payload);
         $.ajax({
             url: '/Planner/Lines/Execute',
             type: 'POST',
@@ -84,7 +84,9 @@
     }
 
     // === AKTİF / PASİF TOGGLE ===
-    $(document).on('click', '.toggle-line-active', function () {
+    $(document).on('click', '.toggle-line-active', function (e) {
+        e.preventDefault();  // form submit'ini engelle
+        e.stopPropagation(); // başka event zincirlerini kes
         var $btn = $(this);
         var $row = $btn.closest('tr');
         if ($row.data('isDeleted') === true) return;
@@ -113,7 +115,8 @@
             VehicleCount: parseInt($row.find('.line-vehicleCount').text()),
             IsActive: newActive
         };
-
+        console.log(payload);
+        console.log("Satır:", $row[0]);
         $.ajax({
             url: '/Planner/Lines/Execute',
             type: 'POST',

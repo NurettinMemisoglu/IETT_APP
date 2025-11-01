@@ -2,7 +2,7 @@
 
 namespace IETT_APP.Domain.Enums
 {
-    public enum RouteDirection
+    public enum RoutesDirection
     {
         [Display(Name = "Gidiş")]
         Outbound = 1,

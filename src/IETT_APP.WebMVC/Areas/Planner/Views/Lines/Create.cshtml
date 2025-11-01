@@ -1,27 +1,26 @@
-﻿@model IETT_APP.WebMVC.Areas.Planner.Models.LineViewModel
+﻿@model IETT_APP.WebMVC.Areas.Planner.Models.RouteViewModel
 @{
-    ViewData["Title"] = "Yeni Durak Ekle";
+    ViewData["Title"] = "Yeni Güzergah Ekle";
 }
 
 <div class="container mt-4">
-    <h2 class="mb-3">Yeni Durak Ekle</h2>   
+    <h2 class="mb-3">Yeni Güzergah Ekle</h2>
 
-    <form asp-action="Create" method="post">
-        @await Html.PartialAsync("_LineFormPartial", Model)
+    <form asp-action="Execute" method="post" id="routeForm">
+        @await Html.PartialAsync("_RouteFormPartial", Model)
 
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-success">
-                Kaydet
-            </button>
+        <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn btn-success">Kaydet</button>
             <button type="button"
-                    onclick="window.location='@Url.Action("Index", "Lines", new { area = "Planner" })';"
+                    onclick="window.location='@Url.Action("Index", "Routes", new { area = "Planner" })';"
                     class="btn btn-secondary">
                 İptal
             </button>
         </div>
     </form>
 </div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script src="~/js/lines.js"></script>
+    <script src="~/js/route-form.js"></script>
 }

@@ -49,7 +49,8 @@ namespace IETT_APP.WebAPI.Controllers
                 }
                 var updated = await _routeService.UpdateAsync(dto);
                 if (!updated) return NotFound();
-                return NoContent();
+                var updatedDto = await _routeService.GetByIdAsync(dto.Id);
+                return Ok(updatedDto);
             }
             catch (ArgumentException ex)
             {

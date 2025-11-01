@@ -1,9 +1,6 @@
 ﻿@using IETT_APP.WebMVC.Extensions
 @model IEnumerable<IETT_APP.WebMVC.Areas.Planner.Models.LineViewModel>
 
-
-
-
 <div class="card">
     <div class="card-body table-responsive p-0">
         <table class="table table-hover table-striped text-nowrap">
@@ -27,7 +24,9 @@
                         <tr data-id="@item.Id">
                             <td class="line-code">@item.Code</td>
                             <td class="line-name">@item.Name</td>
-                            <td class="line-type" data-value="@item.LineType">@item.LineType.ToDisplayName()</td>
+                            <td class="line-type" data-value="@((int)item.LineType)">
+                                @item.LineType.ToDisplayName()
+                            </td>
                             <td class="line-vehicleCount">@item.VehicleCount</td>
                             <td>
                                 <button class="toggle-line-active"

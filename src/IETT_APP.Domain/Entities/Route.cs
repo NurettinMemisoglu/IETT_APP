@@ -7,7 +7,7 @@ namespace IETT_APP.Domain.Entities
     {
         public string Code { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
-        public RouteDirection RouteDirection { get; set; }
+        public RoutesDirection RoutesDirection { get; set; }
         public int LengthInM { get; set; }
         public int TimeInMinutes { get; set; }
         public T LineId { get; set; }

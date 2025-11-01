@@ -1,0 +1,15 @@
+﻿@model IETT_APP.WebMVC.Areas.Planner.Models.RouteViewModel
+@{
+    ViewData["Title"] = "Yeni Güzergâh Ekle";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3">Yeni Güzergâh Ekle</h2>
+
+    <form id="routeForm" asp-action="Execute" method="post">
+        @await Html.PartialAsync("_RouteFormPartial", Model)
+    </form>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

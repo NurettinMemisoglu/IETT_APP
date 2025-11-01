@@ -5,6 +5,7 @@ using IETT_APP.WebMVC.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Text.Json;
 
 namespace IETT_APP.WebMVC.Areas.Planner.Controllers
 {
@@ -58,23 +59,26 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Execute(LineViewModel vm)
+        public async Task<IActionResult> Execute([FromBody] LineViewModel vm)
         {
-            if (!ModelState.IsValid)
-            {
-                var errors = ModelState
-                    .Where(kvp => kvp.Value.Errors.Any())
-                    .Select(kvp => new { Key = kvp.Key, Errors = kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray() })
-                    .ToList();
-
-                return BadRequest(new { message = "Model doğrulama hatası", details = errors });
-            }
+            Console.WriteLine(await new StreamReader(Request.Body).ReadToEndAsync());
+            var errors = ModelState
+        .Where(kvp => kvp.Value.Errors.Any())   // Sadece hatası olan alanlar
+        .Select(kvp => new
+        {
+            Key = kvp.Key,                     // Hata olan alanın adı (örn. "Code")
+            Errors = kvp.Value.Errors
+                         .Select(e => e.ErrorMessage)
+                         .ToArray()            // Bu alandaki tüm hata mesajları
+        })
+        .ToList();
 
             var dto = vm.ToDto();
 
             try
             {
                 var result = await _lineApiService.CreateOrUpdateAsync(dto);
+                Console.WriteLine("GÖNDERİLEN JSON: " + JsonSerializer.Serialize(dto));
                 return Ok(result); // Güncellenmiş DTO dönülüyor
             }
             catch (Exception ex)
@@ -91,6 +95,13 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
             var result = await _lineApiService.DeleteAsync(id);
             if (!result) return BadRequest("Silme işlemi başarısız.");
             return Ok(new { message = "Hat başarıyla silindi." });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var lines = await _lineApiService.GetAllAsync();
+            return Json(lines);
         }
 
         private SelectList GetLineTypeSelectList() => new SelectList(

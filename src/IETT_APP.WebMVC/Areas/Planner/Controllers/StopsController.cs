@@ -149,6 +149,14 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
             return RedirectToAction("Index", "Stops");
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var stops = await _stopApiService.GetAllAsync();
+            return Json(stops);
+        }
+
+
         private void PopulateDropdowns()
         {
             // StopType dropdown

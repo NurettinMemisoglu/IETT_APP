@@ -1,0 +1,23 @@
+﻿@model IEnumerable<IETT_APP.WebMVC.Areas.Planner.Models.RouteViewModel>
+
+@{
+    ViewData["Title"] = "Rota Yönetimi";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3">Rota Listesi</h2>
+
+    <div class="d-flex justify-content-between mb-3">
+        <input type="text" id="searchInput" class="form-control w-50" placeholder="Rota ara..." />
+        <a asp-area="Planner" asp-controller="Routes" asp-action="Create" class="btn btn-success">Yeni Rota Ekle</a>
+    </div>
+
+    <div id="routesTableContainer">
+        @await Html.PartialAsync("_RoutesTablePartial", Model)
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    @await Html.PartialAsync("_StopsModalPartial")
+}

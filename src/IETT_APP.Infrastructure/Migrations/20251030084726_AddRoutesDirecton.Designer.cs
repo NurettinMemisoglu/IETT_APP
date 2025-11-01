@@ -4,6 +4,7 @@ using IETT_APP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IETT_APP.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251030084726_AddRoutesDirecton")]
+    partial class AddRoutesDirecton
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -71,7 +74,7 @@ namespace IETT_APP.Infrastructure.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("Lines", (string)null);
+                    b.ToTable("Lines");
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.Route<System.Guid>", b =>
@@ -131,7 +134,7 @@ namespace IETT_APP.Infrastructure.Migrations
 
                     b.HasIndex("LineId");
 
-                    b.ToTable("Routes", (string)null);
+                    b.ToTable("Routes");
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.RouteStop<System.Guid>", b =>
@@ -149,7 +152,7 @@ namespace IETT_APP.Infrastructure.Migrations
 
                     b.HasIndex("StopId");
 
-                    b.ToTable("RouteStops", (string)null);
+                    b.ToTable("RouteStops");
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.Stop<System.Guid>", b =>
@@ -181,7 +184,7 @@ namespace IETT_APP.Infrastructure.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("Stops", (string)null);
+                    b.ToTable("Stops");
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.User", b =>
@@ -278,7 +281,7 @@ namespace IETT_APP.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserRefreshTokens", (string)null);
+                    b.ToTable("UserRefreshTokens");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -461,7 +464,7 @@ namespace IETT_APP.Infrastructure.Migrations
 
                             b1.HasKey("StopId");
 
-                            b1.ToTable("Stops", (string)null);
+                            b1.ToTable("Stops");
 
                             b1.WithOwner()
                                 .HasForeignKey("StopId");

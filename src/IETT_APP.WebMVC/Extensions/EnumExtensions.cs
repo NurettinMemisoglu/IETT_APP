@@ -28,6 +28,13 @@ namespace IETT_APP.WebMVC.Extensions
             _ => type.ToString()
         };
 
+        public static string ToDisplayName(this RoutesDirection type) => type switch
+        {
+            RoutesDirection.Outbound => "Gidiş",
+            RoutesDirection.Inbound => "Dönüş",
+            _ => type.ToString()
+        };
+
 
         public static string ToDisplayName<TEnum>(this TEnum value) where TEnum : Enum
         {

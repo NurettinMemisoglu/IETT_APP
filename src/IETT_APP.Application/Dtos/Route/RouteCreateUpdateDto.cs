@@ -9,9 +9,10 @@ namespace IETT_APP.Application.Dtos.Route
         public string Name { get; set; } = string.Empty;
         public int LengthInM { get; set; }
         public int TimeInMinutes { get; set; }
-        public RouteDirection RouteDirection { get; set; }
+        public RoutesDirection RoutesDirection { get; set; }
         public T LineId { get; set; }
         public List<Guid> StopIds { get; set; } = new();
+        public List<string> StopNames { get; set; } = new();
         public bool IsActive { get; set; }
 
     }

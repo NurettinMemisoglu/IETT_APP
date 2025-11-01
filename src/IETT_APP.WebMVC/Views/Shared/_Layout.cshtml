@@ -358,9 +358,25 @@
             crossorigin="anonymous"></script>
     <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
     <script src="~/js/adminlte.js"></script>
-        <script src="~/js/lines.js"></script>
+    @if (ViewContext.RouteData.Values["controller"].ToString() == "Stops")
+    {
+        <script src="~/js/stops-map.js?v=@DateTime.Now.Ticks"></script>
+        <script async src="~/js/stops.js?v=@DateTime.Now.Ticks"></script>
+    }
+    @if (ViewContext.RouteData.Values["controller"].ToString() == "Routes")
+    {
+        <script src="~/js/routes.js?v=@DateTime.Now.Ticks"></script>
+        <script src="~/js/routes-map.js?v=@DateTime.Now.Ticks"></script>
+    }
+    @if (ViewContext.RouteData.Values["controller"].ToString() == "Lines")
+    {
+        <script src="~/js/lines.js?v=@DateTime.Now.Ticks"></script>
+    }
+    
+
+
     <!-- Stops & District -->
-    <script async src="~/js/stops.js"></script>
+  
     <!-- Google Maps -->
     <script async defer
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBrsuVWjUgd1nNrH-4lU4lblxegEEkrQGw&libraries=places&callback=initMap">

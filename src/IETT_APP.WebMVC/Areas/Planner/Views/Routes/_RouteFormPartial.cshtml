@@ -1,0 +1,60 @@
+﻿@model IETT_APP.WebMVC.Areas.Planner.Models.RouteViewModel
+
+
+<form id="routeForm" method="post">
+    <input type="hidden" id="Id" name="Id" value="@Model.Id" />
+
+    <div class="form-floating mb-3">
+        <input asp-for="Code" class="form-control" placeholder="Kod" />
+        <label asp-for="Code"></label>
+    </div>
+
+    <div class="form-floating mb-3">
+        <input asp-for="Name" class="form-control" placeholder="Ad" />
+        <label asp-for="Name"></label>
+    </div>
+
+    <div class="form-floating mb-3">
+        <select asp-for="RoutesDirection" class="form-select" asp-items="ViewBag.RoutesTypeList">
+            <option value="">-- Yön Seçin --</option>
+        </select>
+        <label asp-for="RoutesDirection"></label>
+    </div>
+
+    <div class="form-floating mb-3">
+        <input asp-for="LengthInM" id="LengthInM" class="form-control" type="number" />
+        <label asp-for="LengthInM"></label>
+    </div>
+
+    <div class="form-floating mb-3">
+        <select asp-for="LineId" id="LineId" class="form-select" data-selected="@Model.LineId">
+            <option value="">-- Hat Seçin --</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label>Duraklar</label><br>
+        <button type="button" class="btn btn-outline-primary btn-sm" id="selectStopsBtn">Durak Seç</button>
+        <div id="selectedStopsList" class="mt-2" data-selected='@Json.Serialize(Model.StopIds)'></div>
+    </div>
+
+    <div class="form-check form-switch mb-3">
+        <input asp-for="IsActive" class="form-check-input" />
+        <label asp-for="IsActive" class="form-check-label"></label>
+    </div>
+
+    <div class="text-end">
+        <button type="submit" class="btn btn-primary">Kaydet</button>
+        <button type="button" class="btn btn-secondary" id="cancelRouteBtn">İptal</button>
+    </div>
+</form>
+
+<!-- 🌍 Harita Bölümü (sadece durak markerları) -->
+<h5 class="mt-4">Seçilen Durakların Haritadaki Konumu</h5>
+<div class="map-container mb-4" style="height:400px;">
+    <div id="map"></div>
+</div>
+
+<!-- Stop modal -->
+@await Html.PartialAsync("_StopsModalPartial")
+

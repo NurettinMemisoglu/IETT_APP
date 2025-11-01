@@ -20,39 +20,30 @@ namespace IETT_APP.Infrastructure.Services
             _db = db;
         }
 
+        // GET ALL
         public async Task<List<RouteDto<T>>> GetAllAsync()
         {
             var entities = await _repo.GetAllAsync();
-            var dtos = entities.Select(e =>
-            {
-                var dto = _mapper.Map<RouteDto<T>>(e);
-                dto.StopIds = e.RouteStops?.Select(ls => ls.StopId).ToList() ?? new List<Guid>();
-                return dto;
-            }).ToList();
-
-            return dtos;
+            return entities.Select(MapToDto).ToList();
         }
 
+        // GET BY ID
         public async Task<RouteDto<T>?> GetByIdAsync(T id)
         {
             var entity = await _repo.GetByIdAsync(id);
-            if (entity == null) return null;
-
-            var dto = _mapper.Map<RouteDto<T>>(entity);
-            dto.StopIds = entity.RouteStops?.Select(ls => ls.StopId).ToList() ?? new List<Guid>();
-            return dto;
+            return entity == null ? null : MapToDto(entity);
         }
 
+        // CREATE
         public async Task<RouteDto<T>> CreateAsync(RouteCreateUpdateDto<T> dto)
         {
-            // validate stop ids exist
-            if (dto.StopIds != null && dto.StopIds.Any())
+            if (dto.StopIds?.Any() == true)
             {
-                var requested = dto.StopIds.Select(s => (Guid)(object)s!).ToList();
+                var requested = dto.StopIds.Cast<Guid>().ToList();
                 var existing = await _db.Stops
-                                        .Where(s => requested.Contains(s.Id))
-                                        .Select(s => s.Id)
-                                        .ToListAsync();
+                    .Where(s => requested.Contains(s.Id))
+                    .Select(s => s.Id)
+                    .ToListAsync();
 
                 var missing = requested.Except(existing).ToList();
                 if (missing.Any())
@@ -61,62 +52,50 @@ namespace IETT_APP.Infrastructure.Services
 
             var entity = _mapper.Map<Route<T>>(dto);
 
-            if (dto.StopIds != null && dto.StopIds.Any())
+            if (dto.StopIds?.Any() == true)
             {
-                entity.RouteStops = dto.StopIds
-                    .Select((stopId, idx) => new RouteStop<T>
-                    {
-                        StopId = (Guid)(object)stopId!,
-                        Order = idx,
-                        Route = entity
-                    })
-                    .ToList();
+                entity.RouteStops = dto.StopIds.Select((stopId, idx) => new RouteStop<T>
+                {
+                    StopId = (Guid)(object)stopId!,
+                    Order = idx,
+                    Route = entity
+                }).ToList();
             }
 
             await _repo.AddAsync(entity);
 
-            var created = _mapper.Map<RouteDto<T>>(entity);
-            created.StopIds = entity.RouteStops?.Select(ls => ls.StopId).ToList() ?? new List<Guid>();
-            return created;
+            // _db'den değil _repo'dan al
+            var createdEntity = await _repo.GetByIdAsync(entity.Id!);
+
+            return MapToDto(createdEntity);
         }
 
+        // UPDATE
         public async Task<bool> UpdateAsync(RouteCreateUpdateDto<T> dto)
         {
             if (dto.Id == null) return false;
-
-            // validate stop ids exist
-            if (dto.StopIds != null && dto.StopIds.Any())
-            {
-                var requested = dto.StopIds.Select(s => (Guid)(object)s!).ToList();
-                var existing = await _db.Stops
-                                        .Where(s => requested.Contains(s.Id))
-                                        .Select(s => s.Id)
-                                        .ToListAsync();
-
-                var missing = requested.Except(existing).ToList();
-                if (missing.Any())
-                    throw new ArgumentException($"Some stops do not exist: {string.Join(", ", missing)}");
-            }
 
             var entity = await _repo.GetByIdAsync(dto.Id);
             if (entity == null) return false;
 
             _mapper.Map(dto, entity);
 
-            entity.RouteStops = dto.StopIds?
-                .Select((stopId, idx) => new RouteStop<T>
+            if (dto.StopIds?.Any() == true)
+            {
+                entity.RouteStops = dto.StopIds.Select((stopId, idx) => new RouteStop<T>
                 {
                     StopId = (Guid)(object)stopId!,
                     Order = idx,
                     RouteId = entity.Id,
                     Route = entity
-                })
-                .ToList() ?? new List<RouteStop<T>>();
+                }).ToList();
+            }
 
             await _repo.UpdateAsync(entity);
             return true;
         }
 
+        // DELETE
         public async Task<bool> DeleteAsync(T id)
         {
             var entity = await _repo.GetByIdAsync(id);
@@ -126,23 +105,24 @@ namespace IETT_APP.Infrastructure.Services
             return true;
         }
 
+        // SEARCH
         public async Task<List<RouteDto<T>>> SearchAsync(string query)
         {
+            if (string.IsNullOrWhiteSpace(query)) return new List<RouteDto<T>>();
+
+            var term = query.Trim().ToLowerInvariant();
             var all = await _repo.GetAllAsync();
-            var filtered = all.Where(l => l.Name.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                                          l.Code.Contains(query, StringComparison.OrdinalIgnoreCase))
-                              .ToList();
 
-            var dtos = filtered.Select(e =>
-            {
-                var dto = _mapper.Map<RouteDto<T>>(e);
-                dto.StopIds = e.RouteStops?.Select(ls => ls.StopId).ToList() ?? new List<Guid>();
-                return dto;
-            }).ToList();
+            var filtered = all
+                .Where(l => !l.IsDeleted &&
+                           ((l.Name?.ToLowerInvariant().Contains(term) ?? false) ||
+                            (l.Code?.ToLowerInvariant().Contains(term) ?? false)))
+                .ToList();
 
-            return dtos;
+            return filtered.Select(MapToDto).ToList();
         }
 
+        // SET ACTIVE
         public async Task<bool> SetActiveAsync(T id, bool isActive)
         {
             var entity = await _repo.GetByIdAsync(id);
@@ -151,6 +131,23 @@ namespace IETT_APP.Infrastructure.Services
             entity.IsActive = isActive;
             await _repo.UpdateAsync(entity);
             return true;
+        }
+
+        // 🔹 Private helper to map entity -> DTO with StopInfo
+        private RouteDto<T> MapToDto(Route<T> entity)
+        {
+            var dto = _mapper.Map<RouteDto<T>>(entity);
+            dto.StopIds = entity.RouteStops?.Select(rs => rs.StopId).ToList() ?? new List<Guid>();
+            dto.StopNames = entity.RouteStops?.Select(rs => rs.Stop?.Name ?? string.Empty).ToList() ?? new List<string>();
+            dto.Stops = entity.RouteStops?.Select(rs => new StopInfoDto
+            {
+                Id = rs.StopId,
+                Name = rs.Stop?.Name ?? "",
+                Latitude = rs.Stop?.Location?.Latitude ?? 0,
+                Longitude = rs.Stop?.Location?.Longitude ?? 0
+            }).ToList() ?? new List<StopInfoDto>();
+
+            return dto;
         }
     }
 }
