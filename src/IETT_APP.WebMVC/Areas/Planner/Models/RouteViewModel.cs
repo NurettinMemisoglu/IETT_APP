@@ -60,5 +60,7 @@ namespace IETT_APP.WebMVC.Areas.Planner.Models
         public SelectList? RoutesDirectionList { get; set; }
         public SelectList? LineList { get; set; }
         public SelectList? StopList { get; set; }
+
+
     }
 }

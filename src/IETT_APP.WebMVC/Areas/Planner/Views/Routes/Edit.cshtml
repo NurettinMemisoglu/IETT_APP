@@ -12,4 +12,9 @@
 </div>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        window.initialStops = @Html.Raw(Json.Serialize(Model.StopIds));
+        window.initialStopsDetailed = @Html.Raw(Json.Serialize(Model.StopNames));
+    </script>
 }

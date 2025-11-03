@@ -2,6 +2,7 @@
 @model IEnumerable<IETT_APP.WebMVC.Areas.Planner.Models.RouteViewModel>
 @inject IETT_APP.WebMVC.Services.Interfaces.ILineApiService LineService
 @inject IETT_APP.WebMVC.Services.Interfaces.IStopApiService StopService
+@await Html.PartialAsync("_StopsModalPartial")
 
 <div class="card">
     <div class="card-body table-responsive p-0">

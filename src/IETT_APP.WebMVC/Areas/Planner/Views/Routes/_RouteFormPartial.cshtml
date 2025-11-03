@@ -27,15 +27,20 @@
     </div>
 
     <div class="form-floating mb-3">
+        <input asp-for="TimeInMinutes" id="TimeInMinutes" class="form-control" type="number" />
+        <label asp-for="TimeInMinutes"></label>
+    </div>
+
+    <div class="form-floating mb-3">
         <select asp-for="LineId" id="LineId" class="form-select" data-selected="@Model.LineId">
             <option value="">-- Hat Seçin --</option>
         </select>
     </div>
 
     <div class="mb-3">
-        <label>Duraklar</label><br>
-        <button type="button" class="btn btn-outline-primary btn-sm" id="selectStopsBtn">Durak Seç</button>
-        <div id="selectedStopsList" class="mt-2" data-selected='@Json.Serialize(Model.StopIds)'></div>
+        <label>Duraklar</label><br> 
+        <button id="selectStopsBtn" type="button" class="btn btn-outline-primary">Durak Seç</button>
+        @await Html.PartialAsync("_FormModalPartial")
     </div>
 
     <div class="form-check form-switch mb-3">
@@ -49,12 +54,19 @@
     </div>
 </form>
 
-<!-- 🌍 Harita Bölümü (sadece durak markerları) -->
+<!-- 🌍 Harita Bölümü -->
 <h5 class="mt-4">Seçilen Durakların Haritadaki Konumu</h5>
 <div class="map-container mb-4" style="height:400px;">
     <div id="map"></div>
 </div>
 
-<!-- Stop modal -->
-@await Html.PartialAsync("_StopsModalPartial")
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        window.initialStops = @Html.Raw(Json.Serialize(Model.StopIds));
+        window.initialStopsDetailed = @Html.Raw(Json.Serialize(Model.StopNames));
+    </script>
+}
 
