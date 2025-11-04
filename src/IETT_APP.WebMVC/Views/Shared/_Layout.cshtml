@@ -24,7 +24,12 @@
     <meta name="supported-color-schemes" content="light dark" />
     <link rel="stylesheet" href="~/css/adminlte.css" />
     <link rel="stylesheet" href="~/css/maps.css" />
+    @if (ViewContext.RouteData.Values["controller"].ToString().Equals("Routes", StringComparison.OrdinalIgnoreCase))
+    {
+        <link rel="stylesheet" href="~/css/routes.css" />
+    }
     <link rel="stylesheet" href="~/css/district.css" />
+
     <!--end::Accessibility Features-->
     <!--begin::Fonts-->
 
@@ -372,6 +377,7 @@
     @if (ViewContext.RouteData.Values["controller"].ToString() == "Lines")
     {
         <script src="~/js/lines.js?v=@DateTime.Now.Ticks"></script>
+
     }
     
 

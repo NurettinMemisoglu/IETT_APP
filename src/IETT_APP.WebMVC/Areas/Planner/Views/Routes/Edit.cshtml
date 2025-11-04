@@ -16,5 +16,6 @@
     <script>
         window.initialStops = @Html.Raw(Json.Serialize(Model.StopIds));
         window.initialStopsDetailed = @Html.Raw(Json.Serialize(Model.StopNames));
+        window.initialStopsDetailed = @Html.Raw(ViewBag.InitialStops ?? "[]");
     </script>
 }

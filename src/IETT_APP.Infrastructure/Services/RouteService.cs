@@ -137,17 +137,33 @@ namespace IETT_APP.Infrastructure.Services
         private RouteDto<T> MapToDto(Route<T> entity)
         {
             var dto = _mapper.Map<RouteDto<T>>(entity);
-            dto.StopIds = entity.RouteStops?.Select(rs => rs.StopId).ToList() ?? new List<Guid>();
-            dto.StopNames = entity.RouteStops?.Select(rs => rs.Stop?.Name ?? string.Empty).ToList() ?? new List<string>();
-            dto.Stops = entity.RouteStops?.Select(rs => new StopInfoDto
+
+            // RouteStops null değilse sıraya göre diz
+            var orderedStops = entity.RouteStops?
+                .OrderBy(rs => rs.Order)
+                .ToList() ?? new List<RouteStop<T>>();
+
+            // 🧠 DEBUG: Konsolda sıralamayı görmek için
+            Console.WriteLine($"=== Route: {entity.Name} ===");
+            foreach (var rs in orderedStops)
+            {
+                Console.WriteLine($"Stop: {rs.Stop?.Name} | Order: {rs.Order}");
+            }
+            Console.WriteLine("==========================");
+
+            dto.StopIds = orderedStops.Select(rs => rs.StopId).ToList();
+            dto.StopNames = orderedStops.Select(rs => rs.Stop?.Name ?? string.Empty).ToList();
+            dto.Stops = orderedStops.Select(rs => new StopInfoDto
             {
                 Id = rs.StopId,
                 Name = rs.Stop?.Name ?? "",
                 Latitude = rs.Stop?.Location?.Latitude ?? 0,
-                Longitude = rs.Stop?.Location?.Longitude ?? 0
-            }).ToList() ?? new List<StopInfoDto>();
+                Longitude = rs.Stop?.Location?.Longitude ?? 0,
+                Order = rs.Order // 🧩 sıralama bilgisi burada
+            }).ToList();
 
             return dto;
         }
+
     }
 }

@@ -32,13 +32,15 @@
     </div>
 
     <div class="form-floating mb-3">
-        <select asp-for="LineId" id="LineId" class="form-select" data-selected="@Model.LineId">
-            <option value="">-- Hat Seçin --</option>
+        <select asp-for="LineId" id="LineId" class="form-select"
+                data-selected="@((Model.LineId == null || Model.LineId == Guid.Empty) ? string.Empty : Model.LineId.ToString())">
+            <option value="" disabled selected>-- Hat Seçin --</option>
         </select>
     </div>
 
+
     <div class="mb-3">
-        <label>Duraklar</label><br> 
+        <label>Duraklar</label><br>
         <button id="selectStopsBtn" type="button" class="btn btn-outline-primary">Durak Seç</button>
         @await Html.PartialAsync("_FormModalPartial")
     </div>
@@ -55,18 +57,20 @@
 </form>
 
 <!-- 🌍 Harita Bölümü -->
-<h5 class="mt-4">Seçilen Durakların Haritadaki Konumu</h5>
+<div class="route-header">
+    <h5 class="mt-4">Seçilen Durakların Haritadaki Konumu</h5>
+</div>
+
 <div class="map-container mb-4" style="height:400px;">
     <div id="map"></div>
 </div>
-
-
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
         window.initialStops = @Html.Raw(Json.Serialize(Model.StopIds));
         window.initialStopsDetailed = @Html.Raw(Json.Serialize(Model.StopNames));
+        window.initialStopsDetailed = @Html.Raw(ViewBag.InitialStops ?? "[]");
     </script>
 }
 

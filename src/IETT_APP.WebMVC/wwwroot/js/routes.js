@@ -3,20 +3,65 @@
     let stopsMap = {};
     let selectedStopsOrder = [];
     let tempStopsOrder = [];
+    let latestRouteSummary = { distanceM: 0, durationMin: 0 };
+
+    // Helper: keep table row's .view-stops data/attributes in sync
+    function setRowStopsData(routeId, stopIds) {
+        if (!routeId) return;
+        const $row = $(`#routesTableContainer tr[data-id="${routeId}"]`);
+        if (!$row.length) return;
+        const $btn = $row.find('.view-stops');
+        const stopNames = stopIds.map(id => stopsMap[id]?.name || '');
+
+        // Eski cache'i temizle
+        $btn.removeData('stopids').removeData('stops');
+
+        // Yeni data’yı hem cache hem DOM’a yaz
+        $btn.data('stopids', stopIds);
+        $btn.data('stops', stopNames);
+        $btn.attr('data-stopids', JSON.stringify(stopIds));
+        $btn.attr('data-stops', JSON.stringify(stopNames));
+    }
+
 
     // === LİNE VE STOPLARI YÜKLE ===
     function loadLinesAndStops(callback) {
         $.get('/Planner/Lines/GetAll', function (lines) {
             linesMap = {};
             const lineSelect = $('#LineId');
-            lineSelect.empty().append('<option value="">-- Hat Seçin --</option>');
+            const selectedId = lineSelect.data('selected');
+
+            // Sadece geçerli ID varsa seç
+            if (selectedId && selectedId !== "00000000-0000-0000-0000-000000000000") {
+                lineSelect.val(selectedId);
+            } else {
+                lineSelect.val(''); // placeholder seçili kalsın
+            }
+
+            // Önce tüm optionları temizle
+            lineSelect.empty();
+
+            // Placeholder option
+            const placeholder = $('<option>', {
+                value: '',
+                text: '-- Hat Seçin --',
+                disabled: true
+            });
+            lineSelect.append(placeholder);
+
+            // Gerçek hatları ekle
             lines.forEach(line => {
                 if (!line.isDeleted) {
                     linesMap[line.id] = line.name;
-                    lineSelect.append(new Option(`${line.code} - ${line.name}`, line.id));
+                    const option = $('<option>', {
+                        value: line.id,
+                        text: `${line.code} - ${line.name}`
+                    });
+                    lineSelect.append(option);
                 }
             });
 
+            // Durakları yükle
             $.get('/Planner/Stops/GetAll', function (stops) {
                 stopsMap = {};
                 stops.forEach(stop => {
@@ -29,10 +74,12 @@
                         };
                     }
                 });
-                if (callback) callback();
+
+                if (callback) setTimeout(callback, 200);
             });
         });
     }
+
 
     // === SAYFA YÜKLENDİKTEN SONRA ===
     loadLinesAndStops(function () {
@@ -40,6 +87,7 @@
         $('#LineId').val(selectedLineId || '');
 
         if (window.initialStops && Array.isArray(window.initialStops) && window.initialStops.length > 0) {
+            console.log("📦 Initial stops:", window.initialStopsDetailed);
             selectedStopsOrder = window.initialStops.map(id => id.toString());
 
             if (window.initialStopsDetailed && Array.isArray(window.initialStopsDetailed)) {
@@ -96,7 +144,14 @@
             selectedStopsOrder = [...tempStopsOrder];
             updateSelectedStopsList(selectedStopsOrder);
             dispatchStopsToMap();
+
+            // ✅ form input’unu da güncelle
+            $("#SelectedStopsOrder").val(JSON.stringify(selectedStopsOrder));
+
+            const currentRouteId = $('#routeForm [name="Id"]').val();
+            setRowStopsData(currentRouteId, selectedStopsOrder);
         });
+
     });
 
     $(document).on('change', '.stop-checkbox', function () {
@@ -122,13 +177,46 @@
         $('#selectedStopsOrder').html(`<strong>Sıra:</strong> ${names.join(' → ')}`);
     }
 
-    $(document).on('click', '#saveSelectedStops', function () {
-        // Modaldaki son sıra sortable ile eşleşmeli
-        selectedStopsOrder = $('#sortableStops li').map(function () { return $(this).data('id'); }).get();
-        updateSelectedStopsList(selectedStopsOrder);
-        dispatchStopsToMap();
-        bootstrap.Modal.getInstance(document.getElementById('stopsModal')).hide();
+    $("#saveSelectedStops").on('click', function () {
+        selectedStopsOrder = $("#stopsList .list-group-item").map(function () {
+            return $(this).data("stop-id");
+        }).get();
+
+        console.log("✅ Modal Kaydet sonrası sıra:", selectedStopsOrder);
+
+        // Formdaki gizli input’a kaydet
+        $("#SelectedStopsOrder").val(JSON.stringify(selectedStopsOrder));
+
+        // 👇 Seçilen durakları formun altında göster
+        const selectedNames = selectedStopsOrder.map(id => stopsMap[id]?.name || id);
+        const html = selectedNames.map(name => `<div class="badge bg-secondary me-1">${name}</div>`).join("");
+        $("#selectedStopsList").html(html);
+
+        $("#stopsModal").modal("hide");
     });
+
+
+    $('#stopsModal').on('show.bs.modal', function () {
+        const routeId = $('#routeForm [name="Id"]').val();
+        const $row = $(`#routesTableContainer tr[data-id="${routeId}"]`);
+        const $btn = $row.find('.view-stops');
+
+        let stopIds = [];
+        let stopIdsRaw = $btn.attr('data-stopids') || $btn.data('stopids');
+        if (typeof stopIdsRaw === 'string') {
+            try {
+                stopIds = JSON.parse(stopIdsRaw.replace(/&quot;/g, '"'));
+            } catch {
+                stopIds = stopIdsRaw.split(',').map(x => x.trim());
+            }
+        } else if (Array.isArray(stopIdsRaw)) stopIds = stopIdsRaw;
+
+        if (!stopIds.length) stopIds = selectedStopsOrder;
+
+        updateSelectedStopsList(stopIds);
+    });
+
+
 
     // === SEÇİLEN DURAK LİSTESİ ===
     function updateSelectedStopsList(selectedIds) {
@@ -140,67 +228,129 @@
             return;
         }
 
-        $list.append('<ul id="sortableStops" class="list-group mb-3"></ul>');
-        selectedIds.forEach(id => {
+        // Grid container (list-group yerine)
+        $list.append('<ul id="sortableStops" class="stops-grid"></ul>');
+
+        selectedIds.forEach((id, index) => {
             const stop = stopsMap[id];
             if (!stop) return;
             $('#sortableStops').append(`
-            <li class="list-group-item d-flex justify-content-between align-items-center" data-id="${id}">
-                <span>${stop.name}</span>
-                <small class="text-muted">(${stop.lat.toFixed(5)}, ${stop.lng.toFixed(5)})</small>
+            <li class="stop-card" data-id="${id}">
+                <div class="stop-content">
+                    <strong>${index + 1}.</strong> ${stop.name}
+                    <br>
+                    <small class="text-muted">(${stop.lat.toFixed(5)}, ${stop.lng.toFixed(5)})</small>
+                </div>
             </li>
         `);
         });
 
-        // Sortable
+        // === Sortable aktif et ===
         $('#sortableStops').sortable({
+            placeholder: "sortable-placeholder",
             update: function () {
-                selectedStopsOrder = $('#sortableStops li').map(function () { return $(this).data('id'); }).get();
+                selectedStopsOrder = $('#sortableStops li').map(function () {
+                    return $(this).data('id');
+                }).get();
+
+                const names = selectedStopsOrder
+                    .map(id => stopsMap[id]?.name || '')
+                    .filter(Boolean);
+
+                $('#selectedStopsOrder').html(`<strong>Sıra:</strong> ${names.join(' → ')}`);
+
                 dispatchStopsToMap();
 
-                // Tabloya güncel sırayı aktar
-                $('#routesTableContainer .view-stops').each(function () {
-                    const $btn = $(this);
-                    const rowId = $btn.closest('tr').data('id');
-                    if (rowId === $('#routeForm [name="Id"]').val()) {
-                        $btn.data('stopids', selectedStopsOrder);
-                        const stopNames = selectedStopsOrder.map(id => stopsMap[id]?.name || '').filter(Boolean);
-                        $btn.data('stops', stopNames);
-                    }
-                });
+                const currentRouteId = $('#routeForm [name="Id"]').val();
+                if (currentRouteId) {
+                    setRowStopsData(currentRouteId, selectedStopsOrder);
+                }
 
-                updateSelectedStopsList(selectedStopsOrder);
-            }
+                const $viewBody = $('#viewStopsModalBody');
+                if ($viewBody.is(':visible')) {
+                    const html = `
+                        <div class="view-stops-grid">
+                            ${selectedStopsOrder.map((id, i) => {
+                        const s = stopsMap[id];
+                        if (!s) return '';
+                        return `
+                                    <div class="view-stop-card">
+                                        <div class="fw-bold">${i + 1}. ${s.name}</div>
+                                        <small class="text-muted d-block">(${s.lat.toFixed(5)}, ${s.lng.toFixed(5)})</small>
+                                    </div>
+                                `;
+                    }).join('')}
+                        </div>
+                    `;
+                    $viewBody.html(html);
+                    }
+
+                }
         });
 
         const names = selectedStopsOrder.map(id => stopsMap[id]?.name).filter(Boolean).join(' → ');
         $('#selectedStopsOrder').html(`<strong>Sıra:</strong> ${names || '<em>Henüz durak seçilmedi</em>'}`);
     }
 
+
+
     // === MAP UPDATE ===
     function dispatchStopsToMap() {
+        if (Object.keys(stopsMap).length === 0) {
+            setTimeout(dispatchStopsToMap, 200);
+            return;
+        }
         const stopsData = selectedStopsOrder.map(id => ({
-            Id: stopsMap[id].id,
-            Name: stopsMap[id].name,
-            Lat: stopsMap[id].lat,
-            Lng: stopsMap[id].lng
-        }));
+            Id: stopsMap[id]?.id,
+            Name: stopsMap[id]?.name,
+            Lat: stopsMap[id]?.lat,
+            Lng: stopsMap[id]?.lng
+        })).filter(s => s.Id);
         document.dispatchEvent(new CustomEvent('stopsUpdated', { detail: stopsData }));
     }
+
 
     // === TABLODA DURAKLARI GÖR ===
     $(document).on('click', '.view-stops', function () {
         const stopIdsRaw = $(this).data('stopids');
         let stopIds = Array.isArray(stopIdsRaw) ? stopIdsRaw : [];
         const orderedStops = stopIds.map(id => stopsMap[id]).filter(Boolean);
-        const names = orderedStops.map(s => s.name);
 
+        // Haritayı modal için göster
+        showStopsMiniMapModal(orderedStops);
+
+        // Alt kısımda sadece isimler
+        const names = orderedStops.map(s => s.name);
         const modalBody = document.getElementById('viewStopsModalBody');
         if (!modalBody) return;
-        modalBody.innerHTML = names.length ? `<div>${names.join(' → ')}</div>` : '<em>Henüz durak seçilmedi</em>';
 
-        bootstrap.Modal.getOrCreateInstance(document.getElementById('viewStopsModal')).show();
+        if (names.length) {
+            modalBody.innerHTML = `
+                <div style="font-size: 1rem; line-height: 1.5; color: #212529;">
+                    ${names.map((name, index) => `
+                        <span>${name}</span>
+                        ${index < names.length - 1 ? '<span style="margin: 0 6px; color: #6c757d;">→</span>' : ''}
+                    `).join('')}
+                </div>
+            `;
+        } else {
+            modalBody.innerHTML = '<em>Henüz durak seçilmedi</em>';
+        }
     });
+
+
+
+
+    document.addEventListener("routeSummaryUpdated", (e) => {
+        latestRouteSummary = e.detail;
+
+        const $form = $('#routeForm');
+        $form.find('[name="LengthInM"]').val(Math.round(latestRouteSummary.distanceM));
+        $form.find('[name="TimeInMinutes"]').val(Math.round(latestRouteSummary.durationMin));
+
+        console.log("📍 Haritadan gelen rota bilgisi (metre):", latestRouteSummary);
+    });
+
 
     // === FORM SUBMIT ===
     $(document).on('submit', '#routeForm', function (e) {
@@ -222,7 +372,8 @@
             LineId: $(this).find('[name="LineId"]').val() || null,
             IsActive: $(this).find('[name="IsActive"]').is(':checked'),
             StopIds: orderedStops.map(s => s.StopId),
-            StopNames: orderedStops.map(s => s.Name)
+            StopNames: orderedStops.map(s => s.Name),
+            RouteStops: orderedStops
         };
 
         $.ajax({
@@ -243,13 +394,19 @@
     function logRoutesOrder() {
         $('#routesTableContainer').find('tr').each(function () {
             const $row = $(this);
-            const stopIdsRaw = $row.find('.view-stops').data('stopids');
+            const $btn = $row.find('.view-stops');
+
+            // Önce attr() oku, sonra data()
+            let stopIdsRaw = $btn.attr('data-stopids') || $btn.data('stopids');
             if (!stopIdsRaw) return;
 
             let stopIds = [];
             if (typeof stopIdsRaw === 'string') {
-                try { stopIds = JSON.parse(stopIdsRaw.replace(/&quot;/g, '"')); }
-                catch { stopIds = stopIdsRaw.split(',').map(s => s.trim()); }
+                try {
+                    stopIds = JSON.parse(stopIdsRaw.replace(/&quot;/g, '"'));
+                } catch {
+                    stopIds = stopIdsRaw.split(',').map(s => s.trim());
+                }
             } else if (Array.isArray(stopIdsRaw)) stopIds = stopIdsRaw;
 
             const names = stopIds.map(id => stopsMap[id]?.name || id);
@@ -257,23 +414,18 @@
         });
     }
 
+
     // === ARAMA ===
     $('#searchInput').on('input', function () {
         const term = $(this).val();
         refreshTable(term);
     });
 
-    function refreshTable(term = '') {
-        $.get('/Planner/Routes/Search', { term }, function (data) {
-            $('#routesTableContainer').html(data);
-            setTimeout(logRoutesOrder, 200);
-        });
-    }
 
     // === AKTİF / PASİF TOGGLE ===
     $(document).on('click', '.toggle-route-active', function (e) {
-        e.preventDefault();  // form submit'ini engelle
-        e.stopPropagation(); // başka event zincirlerini kes
+        e.preventDefault();
+        e.stopPropagation();
 
         var $btn = $(this);
         var $row = $btn.closest('tr');
@@ -301,7 +453,6 @@
         let stopsData = [];
         let stopIds = [];
 
-        // Eğer string ise split et
         if (typeof stopsDataRaw === "string") {
             stopsData = stopsDataRaw.split(',').map(s => s.trim());
         } else if (Array.isArray(stopsDataRaw)) {
@@ -327,24 +478,30 @@
             IsActive: newActive
         };
 
-
         $.ajax({
             url: '/Planner/Routes/Execute',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(payload),
             success: function () {
-                // Reload yerine sadece badge güncelle
-                $btn.data('active', newActive);
-                $badge.removeClass('bg-success bg-secondary')
-                    .addClass(newActive ? 'bg-success' : 'bg-secondary')
-                    .text(newActive ? 'Aktif' : 'Pasif');
+                // Table refresh ile güncel UpdatedAt gösterilecek
+                refreshTable();
             },
             error: function (xhr) {
                 alert('Durum güncellenemedi: ' + (xhr.responseText || ''));
             }
         });
     });
+
+    // === TABLOYU YENİLE ===
+    function refreshTable(term = '') {
+        $.get('/Planner/Routes/Search', { term }, function (data) {
+            $('#routesTableContainer').html(data);
+        }).fail(function () {
+            alert('Tablo yenilenemedi.');
+        });
+    }
+
 
     // === İptal butonu ===
     $(document).on('click', '#cancelRouteBtn', function () {
@@ -373,5 +530,7 @@
             error: function () { alert('Silme işlemi başarısız.'); }
         });
     });
+
+
 
 });

@@ -2,6 +2,7 @@
 using IETT_APP.Application.Mapping;
 using IETT_APP.Domain.Entities;
 using IETT_APP.Infrastructure.Persistence;
+using IETT_APP.Infrastructure.Persistence.Interceptors;
 using IETT_APP.Infrastructure.Persistence.Repositories;
 using IETT_APP.Infrastructure.Persistence.Seed;
 using IETT_APP.Infrastructure.Services;
@@ -31,6 +32,19 @@ var localizationOptions = new RequestLocalizationOptions
 // ✅ Global Culture Fix – her zaman nokta (.) kullan
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
+
+// ----------------------
+// Timezone Fix (UTC+3 Türkiye Saati)
+// ----------------------
+TimeZoneInfo turkeyZone = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
+TimeZoneInfo.ClearCachedData();
+
+// Tüm DateTime kayıtlarını Türkiye saatine göre ayarlamak için helper
+DateTime nowTurkey = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, turkeyZone);
+
+// Uygulama genelinde DateTime.Now Türkiye saatine eşit olacak şekilde
+AppContext.SetSwitch("System.Globalization.UseNls", true);
+DateTime.SpecifyKind(nowTurkey, DateTimeKind.Local);
 
 // ----------------------
 // Database & Identity
@@ -82,6 +96,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IStopService, StopService>();
 builder.Services.AddScoped<IRouteService<Guid>, RouteService<Guid>>();
 builder.Services.AddScoped<ILineService<Guid>, LineService<Guid>>();
+builder.Services.AddScoped<AuditInterceptor>();
 // Repository Line
 builder.Services.AddScoped<IRouteRepository<Guid>, RouteRepository<Guid>>();
 builder.Services.AddScoped<ILineRepository<Guid>, LineRepository<Guid>>();

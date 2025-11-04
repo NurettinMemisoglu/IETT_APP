@@ -4,20 +4,20 @@
     ViewData["Title"] = "Rota Yönetimi";
 }
 
-<div class="container mt-4">
+<div class="container-fluid mt-4 px-5">
     <h2 class="mb-3">Rota Listesi</h2>
 
-    <div class="d-flex justify-content-between mb-3">
-        <input type="text" id="searchInput" class="form-control w-50" placeholder="Rota ara..." />
+    <div class="d-flex justify-content-between mb-3 flex-wrap">
+        <input type="text" id="searchInput" class="form-control w-auto flex-grow-1 me-2" placeholder="Rota ara..." />
         <a asp-area="Planner" asp-controller="Routes" asp-action="Create" class="btn btn-success">Yeni Rota Ekle</a>
     </div>
 
-    <div id="routesTableContainer">
+    <div id="routesTableContainer" class="table-responsive rounded shadow-sm p-2 bg-white">
         @await Html.PartialAsync("_RoutesTablePartial", Model)
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-
+    <link rel="stylesheet" href="~/css/routes.css" />
 }

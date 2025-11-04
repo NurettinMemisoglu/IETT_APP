@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 public class RouteRepository<T> : IRouteRepository<T>
 {
     private readonly AppDbContext _context;
+    private static readonly TimeZoneInfo TurkeyZone =
+        TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
 
     public RouteRepository(AppDbContext context)
     {
@@ -17,7 +19,7 @@ public class RouteRepository<T> : IRouteRepository<T>
     {
         return await _context.Set<Route<T>>()
                              .Include(l => l.RouteStops)
-                                 .ThenInclude(rs => rs.Stop) // Stop bilgisi yüklendi
+                                 .ThenInclude(rs => rs.Stop)
                              .ToListAsync();
     }
 
@@ -26,7 +28,7 @@ public class RouteRepository<T> : IRouteRepository<T>
     {
         return await _context.Set<Route<T>>()
                              .Include(l => l.RouteStops)
-                                 .ThenInclude(rs => rs.Stop) // Stop bilgisi yüklendi
+                                 .ThenInclude(rs => rs.Stop)
                              .FirstOrDefaultAsync(x => x.Id!.Equals(id));
     }
 
@@ -38,16 +40,23 @@ public class RouteRepository<T> : IRouteRepository<T>
         if (exists)
             throw new ArgumentException($"Aynı güzergah kodu ile aktif bir hat mevcut: {entity.Code}");
 
-        entity.CreatedAt = DateTime.UtcNow;
+        // 🇹🇷 TR saatini kullan
+        var nowTr = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TurkeyZone);
+
+        entity.CreatedAt = nowTr;
         entity.CreatedBy = "System";
+
         await _context.Set<Route<T>>().AddAsync(entity);
         await _context.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(Route<T> entity)
     {
-        entity.UpdatedAt = DateTime.UtcNow;
+        var nowTr = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TurkeyZone);
+
+        entity.UpdatedAt = nowTr;
         entity.UpdatedBy = "System";
+
         _context.Set<Route<T>>().Update(entity);
         await _context.SaveChangesAsync();
     }
@@ -57,8 +66,10 @@ public class RouteRepository<T> : IRouteRepository<T>
         var entity = await _context.Set<Route<T>>().FirstOrDefaultAsync(x => x.Id!.Equals(id));
         if (entity == null) return;
 
+        var nowTr = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TurkeyZone);
+
         entity.IsDeleted = true;
-        entity.DeletedAt = DateTime.UtcNow;
+        entity.DeletedAt = nowTr;
         entity.DeletedBy = "System";
 
         _context.Set<Route<T>>().Update(entity);

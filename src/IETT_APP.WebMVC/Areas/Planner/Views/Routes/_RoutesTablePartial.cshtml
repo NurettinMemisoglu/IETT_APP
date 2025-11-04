@@ -46,7 +46,9 @@
                             <td class="route-direction" data-value="@((int)item.RoutesDirection)">
                                 @item.RoutesDirection.ToDisplayName()
                             </td>
-                            <td class="route-line" data-lineid="@item.LineId">@lineName</td>
+                            <td class="route-line" data-lineid="@item.LineId">
+                                @(LineService.GetByIdAsync(item.LineId).Result?.Code ?? "—")
+                            </td>
 
                             <td>
                                 @if (item.StopNames != null && item.StopNames.Any())

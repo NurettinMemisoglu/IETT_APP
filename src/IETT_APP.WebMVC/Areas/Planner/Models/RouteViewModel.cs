@@ -26,11 +26,11 @@ namespace IETT_APP.WebMVC.Areas.Planner.Models
         [Range(0, int.MaxValue, ErrorMessage = "Süre pozitif olmalıdır.")]
         public int TimeInMinutes { get; set; }
 
-        [Display(Name = "Gidiş Yönü")]
+        [Display(Name = "Güzegah Yönü")]
         [Required(ErrorMessage = "Gidiş yönü zorunludur.")]
         public RoutesDirection RoutesDirection { get; set; }
 
-        [Display(Name = "Hat Seçimi")]
+
         [Required(ErrorMessage = "Hat seçimi zorunludur.")]
         public Guid LineId { get; set; }
 

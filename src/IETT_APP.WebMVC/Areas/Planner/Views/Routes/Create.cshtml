@@ -3,13 +3,14 @@
     ViewData["Title"] = "Yeni Güzergâh Ekle";
 }
 
-<div class="container mt-4">
-    <h2 class="mb-3">Yeni Güzergâh Ekle</h2>
-
-    <form id="routeForm" asp-action="Execute" method="post">
-        @await Html.PartialAsync("_RouteFormPartial", Model)
-    </form>
+<div class="route-header mt-4 mb-3">
+    <h2>Yeni Güzergâh Ekle</h2>
 </div>
+
+<form id="routeForm" asp-action="Execute" method="post">
+    @await Html.PartialAsync("_RouteFormPartial", Model)
+</form>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
