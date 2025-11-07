@@ -5,7 +5,7 @@ namespace IETT_APP.Domain.Entities
 {
     public class Stop<T>
     {
-        public T Id { get; set; }
+        public T Id { get; set; } = default!;
         public string Code { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public StopType StopType { get; set; }
@@ -18,7 +18,7 @@ namespace IETT_APP.Domain.Entities
 
     }
 
-
+    [Owned]
     public class Location
     {
         [Precision(8, 6)]

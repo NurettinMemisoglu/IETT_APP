@@ -2,7 +2,7 @@
 {
     public class RouteStop<T>
     {
-        public T RouteId { get; set; }
+        public T RouteId { get; set; } = default!;
         public Route<T> Route { get; set; } = null!;
 
         public Guid StopId { get; set; }

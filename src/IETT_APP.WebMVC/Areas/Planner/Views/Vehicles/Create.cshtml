@@ -1,0 +1,16 @@
+﻿@model IETT_APP.WebMVC.Areas.Planner.Models.VehicleViewModel
+@{
+    ViewData["Title"] = "Yeni Araç Ekle";
+}
+
+<div class="route-header mt-4 mb-3">
+    <h2>Yeni Araç Ekle</h2>
+</div>
+
+<form id="vehicleForm" asp-action="Create" method="post">
+    @await Html.PartialAsync("_VehicleFormPartial", Model)
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

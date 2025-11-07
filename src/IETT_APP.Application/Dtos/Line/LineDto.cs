@@ -4,7 +4,7 @@ namespace IETT_APP.Application.Dtos.Line
 {
     public class LineDto<T>
     {
-        public T Id { get; set; }
+        public T Id { get; set; } = default!;
         public string Code { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public LineType LineType { get; set; }

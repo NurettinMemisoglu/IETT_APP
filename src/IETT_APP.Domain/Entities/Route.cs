@@ -10,7 +10,7 @@ namespace IETT_APP.Domain.Entities
         public RoutesDirection RoutesDirection { get; set; }
         public int LengthInM { get; set; }
         public int TimeInMinutes { get; set; }
-        public T LineId { get; set; }
+        public T LineId { get; set; } = default!;
 
         public bool IsActive { get; set; } = true;
 

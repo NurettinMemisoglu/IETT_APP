@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace IETT_APP.Application.Validation
+namespace IETT_APP.Application.Validators
 {
     /// <summary>
     /// Validates that a value is one of the defined values of the provided enum type.

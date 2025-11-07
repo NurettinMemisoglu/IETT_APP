@@ -1,0 +1,23 @@
+﻿@model IEnumerable<IETT_APP.WebMVC.Areas.Planner.Models.VehicleViewModel>
+
+@{
+    ViewData["Title"] = "Araç Yönetimi";
+}
+
+<div class="container-fluid mt-4 px-5">
+    <h2 class="mb-3">Araç Listesi</h2>
+
+    <div class="d-flex justify-content-between mb-3 flex-wrap">
+        <input type="text" id="searchInput" class="form-control w-auto flex-grow-1 me-2" placeholder="Araç ara..." />
+        <a asp-area="Planner" asp-controller="Vehicles" asp-action="Create" class="btn btn-success">Yeni Araç Ekle</a>
+    </div>
+
+    <div id="vehiclesTableContainer" class="table-responsive rounded shadow-sm p-2 bg-white">
+        @await Html.PartialAsync("_VehiclesTablePartial", Model)
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+}

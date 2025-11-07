@@ -1,0 +1,112 @@
+﻿@model IETT_APP.WebMVC.Areas.Planner.Models.VehicleViewModel
+
+<form id="vehicleForm" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-floating mb-3">
+        <input asp-for="DoorNumber" class="form-control" placeholder="Kapı Numarası" />
+        <label asp-for="DoorNumber"></label>
+        <span asp-validation-for="DoorNumber" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <input asp-for="PlateNumber" class="form-control" placeholder="Plaka Numarası" />
+        <label asp-for="PlateNumber"></label>
+        <span asp-validation-for="PlateNumber" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <input asp-for="Capacity" class="form-control" type="number" placeholder="Kapasite" />
+        <label asp-for="Capacity"></label>
+        <span asp-validation-for="Capacity" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <select asp-for="GarageId" class="form-select" asp-items="Model.GarageList">
+            <option value="">-- Garaj Seçin --</option>
+        </select>
+        <label asp-for="GarageId"></label>
+        <span asp-validation-for="GarageId" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <select asp-for="ServiceStatus" class="form-select" asp-items="Model.ServiceStatusList">
+            <option value="">-- Servis Durumu Seçin --</option>
+        </select>
+        <label asp-for="ServiceStatus"></label>
+        <span asp-validation-for="ServiceStatus" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <select asp-for="Operator" class="form-select" asp-items="Model.OperatorList">
+            <option value="">-- Operatör Seçin --</option>
+        </select>
+        <label asp-for="Operator"></label>
+        <span asp-validation-for="Operator" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <select asp-for="Model" class="form-select" asp-items="Model.ModelList">
+            <option value="">-- Model Seçin --</option>
+        </select>
+        <label asp-for="Model"></label>
+        <span asp-validation-for="Model" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <input asp-for="Year" class="form-control" type="number" placeholder="Üretim Yılı" />
+        <label asp-for="Year"></label>
+        <span asp-validation-for="Year" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <input asp-for="TotalKm" class="form-control" type="number" placeholder="Toplam Kilometre" />
+        <label asp-for="TotalKm"></label>
+        <span asp-validation-for="TotalKm" class="text-danger"></span>
+    </div>
+
+    <div class="form-check form-switch mb-2">
+        <input asp-for="HasDisabilityAccess" class="form-check-input" />
+        <label asp-for="HasDisabilityAccess" class="form-check-label"></label>
+    </div>
+
+    <div class="form-check form-switch mb-2">
+        <input asp-for="HasWiFi" class="form-check-input" />
+        <label asp-for="HasWiFi" class="form-check-label"></label>
+    </div>
+
+    <div class="form-check form-switch mb-2">
+        <input asp-for="HasBikeRack" class="form-check-input" />
+        <label asp-for="HasBikeRack" class="form-check-label"></label>
+    </div>
+
+    <div class="form-check form-switch mb-2">
+        <input asp-for="HasMobileCharging" class="form-check-input" />
+        <label asp-for="HasMobileCharging" class="form-check-label"></label>
+    </div>
+
+    <div class="form-check form-switch mb-2">
+        <input asp-for="HasPassengerInfoSystem" class="form-check-input" />
+        <label asp-for="HasPassengerInfoSystem" class="form-check-label"></label>
+    </div>
+
+    <div class="form-check form-switch mb-3">
+        <input asp-for="HasCCTV" class="form-check-input" />
+        <label asp-for="HasCCTV" class="form-check-label"></label>
+    </div>
+
+    <div class="form-check form-switch mb-3">
+        <input asp-for="IsActive" class="form-check-input" />
+        <label asp-for="IsActive" class="form-check-label"></label>
+    </div>
+
+    <div class="text-end mt-4">
+        <button type="submit" class="btn btn-primary">Kaydet</button>
+        <button type="button" class="btn btn-secondary" id="cancelVehicleBtn">İptal</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/vehicles.js"></script>
+}

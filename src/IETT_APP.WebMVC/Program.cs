@@ -83,6 +83,10 @@ builder.Services.AddHttpClient<IRouteApiService, RouteApiService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });
+builder.Services.AddHttpClient<IVehicleApiService, VehicleApiService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
 
 // ----------------------
 // Cookie & Authentication

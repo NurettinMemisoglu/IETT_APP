@@ -10,28 +10,34 @@
         <a href="#" class="nav-link active">
             <i class="nav-icon bi bi-speedometer"></i>
             <p>
-                PLANNER
+                PLANLAMA
                 <i class="nav-arrow bi bi-chevron-right"></i>
             </p>
         </a>
-        <ul class="nav nav-treeview">
+        <ul class="nav nav-treeview" role="navigation" aria-label="Navigation 4">
             <li class="nav-item">
-                <a asp-area="Planner" asp-action="Index" asp-controller="Stops" class="nav-link active">
+                <a asp-area="Planner" asp-action="Index" asp-controller="Stops" class="nav-link">
                     <i class="nav-icon bi bi-circle"></i>
                     <p>Duraklar</p>
                 </a>
             </li>
             <li class="nav-item">
-                <a asp-area="Planner" asp-action="Index" asp-controller="Routes" class="nav-link active">
+                <a asp-area="Planner" asp-action="Index" asp-controller="Routes" class="nav-link">
                     <i class="nav-icon bi bi-circle"></i>
                     <p>Güzergahlar</p>
                 </a>
             </li>
             <li class="nav-item">
-                <a asp-area="Planner" asp-action="Index" asp-controller="Lines" class="nav-link active">
+                <a asp-area="Planner" asp-action="Index" asp-controller="Lines" class="nav-link ">
                     <i class="nav-icon bi bi-circle"></i>
                     <p>Hatlar</p>
                 </a>
+            <li class="nav-item">
+                <a asp-area="Planner" asp-action="Index" asp-controller="Vehicles" class="nav-link ">
+                    <i class="nav-icon bi bi-circle"></i>
+                    <p>Araçlar</p>
+                </a>
+            </li>
             </li>
         </ul>
     </li>

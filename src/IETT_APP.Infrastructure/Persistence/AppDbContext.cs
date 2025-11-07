@@ -19,10 +19,15 @@ namespace IETT_APP.Infrastructure.Persistence
         public DbSet<Stop<Guid>> Stops { get; set; }
         public DbSet<Route<Guid>> Routes { get; set; }
         public DbSet<RouteStop<Guid>> RouteStops { get; set; }
+        public DbSet<Garage<Guid>> Garages { get; set; }
+        public DbSet<Vehicle<Guid>> Vehicles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<Vehicle<Guid>>().HasQueryFilter(v => !v.IsDeleted);
+            builder.Entity<Garage<Guid>>().HasQueryFilter(g => !g.IsDeleted);
 
             builder.Entity<Stop<Guid>>()
                 .HasIndex(s => s.Code)

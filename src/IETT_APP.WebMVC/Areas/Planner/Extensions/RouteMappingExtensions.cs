@@ -1,7 +1,7 @@
 ﻿using IETT_APP.Application.Dtos.Route;
 using IETT_APP.WebMVC.Areas.Planner.Models;
 
-namespace IETT_APP.WebMVC.Extensions
+namespace IETT_APP.WebMVC.Areas.Planner.Extensions
 {
     public static class RouteMappingExtensions
     {
