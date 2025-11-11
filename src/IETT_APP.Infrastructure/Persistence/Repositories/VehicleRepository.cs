@@ -19,8 +19,9 @@ namespace IETT_APP.Infrastructure.Persistence.Repositories
 
         public async Task<IEnumerable<Vehicle<T>>> GetAllAsync() =>
             await _dbSet
-                .Include(v => v.Garage)
-                .ToListAsync();
+            .Include(v => v.Garage)
+            .OrderBy(v => v.CreatedAt)
+            .ToListAsync();
 
         public async Task<Vehicle<T>?> GetByIdAsync(T id) =>
             await _dbSet

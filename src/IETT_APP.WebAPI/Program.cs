@@ -1,4 +1,5 @@
 ﻿using IETT_APP.Application.Interfaces;
+using IETT_APP.Application.Interfaces.Garages;
 using IETT_APP.Application.Mapping;
 using IETT_APP.Domain.Entities;
 using IETT_APP.Infrastructure.Persistence;
@@ -97,6 +98,7 @@ builder.Services.AddScoped<IStopService, StopService>();
 builder.Services.AddScoped<IRouteService<Guid>, RouteService<Guid>>();
 builder.Services.AddScoped<ILineService<Guid>, LineService<Guid>>();
 builder.Services.AddScoped<IVehicleService<Guid>, VehicleService<Guid>>();
+builder.Services.AddScoped<IGarageService, GarageService>();
 builder.Services.AddScoped<AuditInterceptor>();
 // Repository Line
 builder.Services.AddScoped<IRouteRepository<Guid>, RouteRepository<Guid>>();

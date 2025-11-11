@@ -7,8 +7,10 @@
     <h2 class="mb-3">Araç Düzenle</h2>
 
     <form id="vehicleForm" asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
         @await Html.PartialAsync("_VehicleFormPartial", Model)
     </form>
+
 </div>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

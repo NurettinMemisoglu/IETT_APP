@@ -25,6 +25,8 @@ namespace IETT_APP.Application.Dtos.Vehicle
         public bool HasPassengerInfoSystem { get; set; }
         public bool HasCCTV { get; set; }
 
+        public bool IsAssigned { get; set; }
+
         public bool IsActive { get; set; } = true;
     }
 }

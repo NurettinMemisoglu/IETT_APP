@@ -24,7 +24,7 @@ namespace IETT_APP.WebMVC.Services.Implementations
             var json = JsonSerializer.Serialize(dto);
             Console.WriteLine("GÖNDERİLEN JSON: " + json);
 
-            var response = await _httpClient.PostAsJsonAsync("api/vehicles/create", dto);
+            var response = await _httpClient.PostAsJsonAsync("api/vehicles", dto);
             var content = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -41,16 +41,22 @@ namespace IETT_APP.WebMVC.Services.Implementations
             var json = JsonSerializer.Serialize(dto);
             Console.WriteLine("GÖNDERİLEN JSON (UPDATE): " + json);
 
-            var response = await _httpClient.PutAsJsonAsync($"api/vehicles/update/{id}", dto);
+            var response = await _httpClient.PutAsJsonAsync($"api/vehicles/{id}", dto);
             var content = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
                 throw new Exception($"API hata: {response.StatusCode} - {content}");
 
-            return JsonSerializer.Deserialize<VehicleDto<Guid>>(content, new JsonSerializerOptions
+            if (!string.IsNullOrWhiteSpace(content))
             {
-                PropertyNameCaseInsensitive = true
-            }) ?? throw new Exception("Güncelleme başarısız oldu.");
+                return JsonSerializer.Deserialize<VehicleDto<Guid>>(content, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? throw new Exception("Güncelleme başarısız oldu.");
+            }
+
+            // Beklenmedik boş dönüş
+            throw new Exception("API boş bir yanıt döndürdü.");
         }
 
         public async Task<bool> DeleteAsync(Guid id)

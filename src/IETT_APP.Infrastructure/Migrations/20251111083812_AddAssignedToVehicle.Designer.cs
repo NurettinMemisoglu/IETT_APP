@@ -4,6 +4,7 @@ using IETT_APP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IETT_APP.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251111083812_AddAssignedToVehicle")]
+    partial class AddAssignedToVehicle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -384,6 +387,9 @@ namespace IETT_APP.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<Guid>("LineId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("Model")
                         .HasColumnType("int");
 
@@ -412,6 +418,8 @@ namespace IETT_APP.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("GarageId");
+
+                    b.HasIndex("LineId");
 
                     b.ToTable("Vehicles");
                 });
@@ -652,7 +660,15 @@ namespace IETT_APP.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("IETT_APP.Domain.Entities.Line<System.Guid>", "Line")
+                        .WithMany("Vehicles")
+                        .HasForeignKey("LineId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Garage");
+
+                    b.Navigation("Line");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -709,6 +725,8 @@ namespace IETT_APP.Infrastructure.Migrations
             modelBuilder.Entity("IETT_APP.Domain.Entities.Line<System.Guid>", b =>
                 {
                     b.Navigation("Routes");
+
+                    b.Navigation("Vehicles");
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.Route<System.Guid>", b =>

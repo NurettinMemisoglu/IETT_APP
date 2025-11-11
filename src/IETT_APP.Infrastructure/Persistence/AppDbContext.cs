@@ -26,13 +26,16 @@ namespace IETT_APP.Infrastructure.Persistence
         {
             base.OnModelCreating(builder);
 
+            // Query filters
             builder.Entity<Vehicle<Guid>>().HasQueryFilter(v => !v.IsDeleted);
             builder.Entity<Garage<Guid>>().HasQueryFilter(g => !g.IsDeleted);
 
+            // Stop index
             builder.Entity<Stop<Guid>>()
                 .HasIndex(s => s.Code)
                 .IsUnique();
 
+            // Stop location precision
             builder.Entity<Stop<Guid>>()
                 .OwnsOne(d => d.Location, loc =>
                 {
@@ -40,6 +43,7 @@ namespace IETT_APP.Infrastructure.Persistence
                     loc.Property(p => p.Longitude).HasPrecision(8, 6);
                 });
 
+            // RouteStop composite key
             builder.Entity<RouteStop<Guid>>()
                 .HasKey(ls => new { ls.RouteId, ls.StopId });
 
@@ -53,6 +57,7 @@ namespace IETT_APP.Infrastructure.Persistence
                 .WithMany(s => s.RouteStops)
                 .HasForeignKey(ls => ls.StopId);
 
+            // Route -> Line
             builder.Entity<Route<Guid>>()
                 .HasOne(r => r.Line)
                 .WithMany(l => l.Routes)
@@ -63,12 +68,13 @@ namespace IETT_APP.Infrastructure.Persistence
                 .HasIndex(s => s.Code)
                 .IsUnique();
 
+            // Line index
             builder.Entity<Line<Guid>>()
                 .HasIndex(s => s.Code)
                 .IsUnique();
         }
 
-        // === 🕒 SaveChanges Override: CreatedAt / UpdatedAt TR Saatiyle ===
+        // === SaveChanges Override: CreatedAt / UpdatedAt TR Saatiyle ===
         public override int SaveChanges()
         {
             ApplyAuditInformation();

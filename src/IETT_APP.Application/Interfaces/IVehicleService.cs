@@ -11,6 +11,8 @@ namespace IETT_APP.Application.Interfaces
         Task UpdateAsync(VehicleUpdateDto<T> dto);
         Task<bool> DeleteAsync(T id);
         Task<List<VehicleDto<T>>> SearchAsync(string query);
+        Task UnassignFromLineAsync(T vehicleId);
+        Task<List<VehicleDto<T>>> GetUnassignedVehiclesAsync(); // Hat atanmış olmayan araçlar
     }
 
 

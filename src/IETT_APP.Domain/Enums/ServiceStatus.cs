@@ -1,11 +1,18 @@
-﻿namespace IETT_APP.Domain.Enums
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace IETT_APP.Domain.Enums
 {
     public enum ServiceStatus
     {
-        InService = 1,          // Servise hazır
-        OutOfService = 2,       // Servis dışı
-        UnderMaintenance = 3,   // Bakımda
-        Damaged = 4,            // Hasarlı
-        OutOfDuty = 5           // Görev dışı
+        [Display(Name = "Servise Hazır")]
+        InService = 1,
+        [Display(Name = "Servis Dışı")]
+        OutOfService = 2,
+        [Display(Name = "Bakımda")]
+        UnderMaintenance = 3,
+        [Display(Name = "Hasarlı")]
+        Damaged = 4,
+        [Display(Name = "Görev dışı")]
+        OutOfDuty = 5
     }
 }

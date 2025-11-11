@@ -12,7 +12,6 @@ namespace IETT_APP.Application.Dtos.Vehicle
 
         public T GarageId { get; set; } = default!;
 
-
         public ServiceStatus ServiceStatus { get; set; }
         public VehicleOperator Operator { get; set; }
 
@@ -27,6 +26,8 @@ namespace IETT_APP.Application.Dtos.Vehicle
         public bool HasMobileCharging { get; set; }
         public bool HasPassengerInfoSystem { get; set; }
         public bool HasCCTV { get; set; }
+
+        public bool IsAssigned { get; set; }
 
         public bool IsActive { get; set; } = true;
     }

@@ -37,6 +37,10 @@
     {
         <link rel="stylesheet" href="~/css/routes.css" />
     }
+    @if (ViewContext.RouteData.Values["controller"].ToString().Equals("Vehicles", StringComparison.OrdinalIgnoreCase))
+    {
+        <link rel="stylesheet" href="~/css/vehicles.css" />
+    }
     <link rel="stylesheet" href="~/css/district.css" />
 
     <!--end::Accessibility Features-->

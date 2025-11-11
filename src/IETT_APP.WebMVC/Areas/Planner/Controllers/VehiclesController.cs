@@ -85,7 +85,6 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
 
         // POST: VehiclesController/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([FromBody] VehicleViewModel vm)
         {
             if (!ModelState.IsValid)
@@ -138,9 +137,8 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
             }
         }
 
-        // POST: VehiclesController/Edit/5
+        // POST: Vehicles/Edit
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit([FromBody] VehicleViewModel vm)
         {
             if (!ModelState.IsValid)
@@ -161,9 +159,8 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
 
             try
             {
-                // dto.Id varsa buradan alıyoruz
                 var result = await _vehicleApiService.UpdateAsync(dto.Id, dto);
-                return Ok(result); // Güncellenmiş DTO dönülüyor
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -195,7 +192,6 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
 
         // POST: VehiclesController/Delete/{id}
         [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             try

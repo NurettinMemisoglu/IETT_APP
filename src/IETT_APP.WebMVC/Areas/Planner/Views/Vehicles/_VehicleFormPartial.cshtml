@@ -1,7 +1,8 @@
 ﻿@model IETT_APP.WebMVC.Areas.Planner.Models.VehicleViewModel
 
 <form id="vehicleForm" method="post">
-    <input type="hidden" asp-for="Id" />
+    <input type="hidden" id="Id" name="Id" value="@Model.Id" />
+
 
     <div class="form-floating mb-3">
         <input asp-for="DoorNumber" class="form-control" placeholder="Kapı Numarası" />
@@ -21,33 +22,37 @@
         <span asp-validation-for="Capacity" class="text-danger"></span>
     </div>
 
+    <!-- Garage Dropdown (JS ile yükleniyor) -->
     <div class="form-floating mb-3">
-        <select asp-for="GarageId" class="form-select" asp-items="Model.GarageList">
-            <option value="">-- Garaj Seçin --</option>
+        <select asp-for="GarageId" id="GarageId" class="form-select"
+                data-selected="@((Model.GarageId == null || Model.GarageId == Guid.Empty) ? string.Empty : Model.GarageId.ToString())">
+            <option value="" disabled selected>-- Garaj Seçin --</option>
         </select>
         <label asp-for="GarageId"></label>
-        <span asp-validation-for="GarageId" class="text-danger"></span>
     </div>
 
+    <!-- Service Status Dropdown -->
     <div class="form-floating mb-3">
-        <select asp-for="ServiceStatus" class="form-select" asp-items="Model.ServiceStatusList">
-            <option value="">-- Servis Durumu Seçin --</option>
+        <select asp-for="ServiceStatus" class="form-select" asp-items="ViewBag.ServiceStatusList">
+            <option value="" selected disabled>-- Servis Durumu Seçin --</option>
         </select>
         <label asp-for="ServiceStatus"></label>
         <span asp-validation-for="ServiceStatus" class="text-danger"></span>
     </div>
 
+    <!-- Operator Dropdown -->
     <div class="form-floating mb-3">
-        <select asp-for="Operator" class="form-select" asp-items="Model.OperatorList">
-            <option value="">-- Operatör Seçin --</option>
+        <select asp-for="Operator" class="form-select" asp-items="ViewBag.VehicleOperatorList">
+            <option value="" selected disabled >-- Operatör Seçin --</option>
         </select>
         <label asp-for="Operator"></label>
         <span asp-validation-for="Operator" class="text-danger"></span>
     </div>
 
+    <!-- Model Dropdown -->
     <div class="form-floating mb-3">
-        <select asp-for="Model" class="form-select" asp-items="Model.ModelList">
-            <option value="">-- Model Seçin --</option>
+        <select asp-for="Model" class="form-select" asp-items="ViewBag.VehicleModelList">
+            <option value="" selected disabled>-- Model Seçin --</option>
         </select>
         <label asp-for="Model"></label>
         <span asp-validation-for="Model" class="text-danger"></span>
@@ -108,5 +113,4 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script src="~/js/vehicles.js"></script>
 }

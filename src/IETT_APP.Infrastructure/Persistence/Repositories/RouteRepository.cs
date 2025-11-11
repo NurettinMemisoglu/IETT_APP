@@ -20,6 +20,7 @@ public class RouteRepository<T> : IRouteRepository<T>
         return await _context.Set<Route<T>>()
                              .Include(l => l.RouteStops)
                                  .ThenInclude(rs => rs.Stop)
+                             .OrderBy(v => v.CreatedAt)
                              .ToListAsync();
     }
 

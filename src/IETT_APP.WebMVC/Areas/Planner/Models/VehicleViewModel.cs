@@ -77,6 +77,8 @@ namespace IETT_APP.WebMVC.Areas.Planner.Models
         [Display(Name = "Silindi mi?")]
         public bool IsDeleted { get; set; }
 
+        public string GarageName { get; set; } = string.Empty;
+
         // Dropdown verileri (controller’da doldurulacak)
         public SelectList? GarageList { get; set; }
         public SelectList? ServiceStatusList { get; set; }

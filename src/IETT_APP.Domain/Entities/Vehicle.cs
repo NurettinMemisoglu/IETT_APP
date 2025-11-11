@@ -8,6 +8,9 @@ namespace IETT_APP.Domain.Entities
         public string DoorNumber { get; set; } = string.Empty;
         public string PlateNumber { get; set; } = string.Empty;
         public int Capacity { get; set; }
+
+        public bool IsAssigned { get; set; } = false; // yeni
+
         public T GarageId { get; set; } = default!;
         public Garage<T> Garage { get; set; } = null!;
         public ServiceStatus ServiceStatus { get; set; } = ServiceStatus.InService;

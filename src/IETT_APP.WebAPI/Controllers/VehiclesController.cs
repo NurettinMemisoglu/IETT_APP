@@ -55,8 +55,13 @@ namespace IETT_APP.WebAPI.Controllers
             if (!id.Equals(dto.Id))
                 return BadRequest(new { Message = "ID mismatch between route and body." });
 
+            // 🔹 Güncellemeyi yap
             await _vehicleService.UpdateAsync(dto);
-            return NoContent();
+
+            // 🔹 Güncellenmiş veriyi DB'den tekrar çek
+            var updatedDto = await _vehicleService.GetByIdAsync(dto.Id);
+
+            return Ok(updatedDto);
         }
 
         // 🔹 DELETE: api/vehicle/{id}
@@ -76,6 +81,30 @@ namespace IETT_APP.WebAPI.Controllers
         {
             var result = await _vehicleService.SearchAsync(query);
             return Ok(result);
+        }
+
+        // GET: /api/vehicles/unassigned
+        [HttpGet("unassigned")]
+        public async Task<IActionResult> GetUnassigned()
+        {
+            var vehicles = await _vehicleService.GetUnassignedVehiclesAsync();
+            return Ok(vehicles);
+        }
+
+
+        // POST: /api/vehicles/unassign/{id}
+        [HttpPost("unassign/{id:guid}")]
+        public async Task<IActionResult> UnassignFromLine(Guid id)
+        {
+            try
+            {
+                await _vehicleService.UnassignFromLineAsync(id);
+                return Ok(new { Message = "Araç hattan kaldırıldı." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ex.Message });
+            }
         }
     }
 

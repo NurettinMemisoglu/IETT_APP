@@ -87,6 +87,10 @@ builder.Services.AddHttpClient<IVehicleApiService, VehicleApiService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });
+builder.Services.AddHttpClient<IGarageApiService, GarageApiService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
 
 // ----------------------
 // Cookie & Authentication

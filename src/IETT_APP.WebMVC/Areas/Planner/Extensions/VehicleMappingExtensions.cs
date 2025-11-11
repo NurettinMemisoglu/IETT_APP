@@ -15,6 +15,7 @@ namespace IETT_APP.WebMVC.Areas.Planner.Extensions
                 PlateNumber = dto.PlateNumber ?? string.Empty,
                 Capacity = dto.Capacity,
                 GarageId = dto.GarageId,
+                GarageName = string.Empty,
                 ServiceStatus = dto.ServiceStatus,
                 Operator = dto.Operator,
                 Model = dto.Model,

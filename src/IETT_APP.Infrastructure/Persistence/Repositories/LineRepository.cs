@@ -17,7 +17,9 @@ namespace IETT_APP.Infrastructure.Persistence.Repositories
 
         public async Task<List<Line<T>>> GetAllAsync()
         {
-            return await _context.Set<Line<T>>().ToListAsync();
+            return await _context.Set<Line<T>>()
+                            .OrderBy(v => v.CreatedAt)
+                            .ToListAsync();
         }
 
         public async Task<Line<T>?> GetByIdAsync(T id)

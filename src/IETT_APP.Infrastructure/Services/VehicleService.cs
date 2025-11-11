@@ -68,5 +68,22 @@ namespace IETT_APP.Infrastructure.Services
             return _mapper.Map<List<VehicleDto<T>>>(filtered);
         }
 
+        public async Task UnassignFromLineAsync(T vehicleId)
+        {
+            var vehicle = await _repository.GetByIdAsync(vehicleId);
+            if (vehicle == null) throw new Exception("Araç bulunamadı.");
+
+            vehicle.IsAssigned = false;
+
+            await _repository.UpdateAsync(vehicle);
+        }
+
+        public async Task<List<VehicleDto<T>>> GetUnassignedVehiclesAsync()
+        {
+            var allVehicles = await _repository.GetAllAsync();
+            var unassigned = allVehicles.Where(v => !v.IsAssigned && !v.IsDeleted).ToList();
+            return _mapper.Map<List<VehicleDto<T>>>(unassigned);
+        }
     }
+
 }
