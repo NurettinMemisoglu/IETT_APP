@@ -20,15 +20,14 @@ namespace IETT_APP.Application.Dtos.Vehicle
         public int Year { get; set; }
         public int TotalKm { get; set; }
 
-        public bool HasDisabilityAccess { get; set; }
-        public bool HasWiFi { get; set; }
-        public bool HasBikeRack { get; set; }
-        public bool HasMobileCharging { get; set; }
-        public bool HasPassengerInfoSystem { get; set; }
-        public bool HasCCTV { get; set; }
-
-        public bool IsAssigned { get; set; }
-
+        public bool HasDisabilityAccess { get; set; } = true;
+        public bool HasWiFi { get; set; } = true;
+        public bool HasBikeRack { get; set; } = false;
+        public bool HasMobileCharging { get; set; } = false;
+        public bool HasPassengerInfoSystem { get; set; } = false;
+        public bool HasCCTV { get; set; } = true;
         public bool IsActive { get; set; } = true;
+
+        public bool IsAssigned { get; set; } = false;
     }
 }

@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\IETT_APP.Application\IETT_APP.Application.csproj" />
+    <ProjectReference Include="..\IETT_APP.Domain\IETT_APP.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

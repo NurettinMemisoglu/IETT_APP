@@ -1,5 +1,5 @@
-﻿using IETT_APP.Application.Interfaces;
-using IETT_APP.Domain.Entities;
+﻿using IETT_APP.Domain.Entities;
+using IETT_APP.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace IETT_APP.Infrastructure.Persistence.Repositories
@@ -18,15 +18,17 @@ namespace IETT_APP.Infrastructure.Persistence.Repositories
         public async Task<List<Line<T>>> GetAllAsync()
         {
             return await _context.Set<Line<T>>()
-                            .OrderBy(v => v.CreatedAt)
-                            .ToListAsync();
+                                 .Where(l => !l.IsDeleted) // <-- sadece aktif hatlar
+                                 .OrderBy(v => v.CreatedAt)
+                                 .ToListAsync();
         }
 
         public async Task<Line<T>?> GetByIdAsync(T id)
         {
             return await _context.Set<Line<T>>()
-                                 .FirstOrDefaultAsync(x => x.Id!.Equals(id));
+                                 .FirstOrDefaultAsync(x => x.Id!.Equals(id) && !x.IsDeleted); // <-- filtre eklendi
         }
+
 
         public async Task AddAsync(Line<T> entity)
         {

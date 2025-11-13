@@ -1,6 +1,6 @@
 ﻿using IETT_APP.Domain.Entities;
 
-namespace IETT_APP.Application.Interfaces
+namespace IETT_APP.Domain.Interfaces
 {
     public interface IRouteRepository<T>
     {
@@ -11,4 +11,3 @@ namespace IETT_APP.Application.Interfaces
         Task DeleteAsync(T id); // Soft delete
     }
 }
-

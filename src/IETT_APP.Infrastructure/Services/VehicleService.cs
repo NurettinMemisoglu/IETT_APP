@@ -2,6 +2,7 @@
 using IETT_APP.Application.Dtos.Vehicle;
 using IETT_APP.Application.Interfaces;
 using IETT_APP.Domain.Entities;
+using IETT_APP.Domain.Interfaces;
 
 namespace IETT_APP.Infrastructure.Services
 {

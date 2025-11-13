@@ -1,6 +1,6 @@
 ﻿using IETT_APP.Domain.Entities;
 
-namespace IETT_APP.Application.Interfaces
+namespace IETT_APP.Domain.Interfaces
 {
     public interface IVehicleRepository<T>
     {

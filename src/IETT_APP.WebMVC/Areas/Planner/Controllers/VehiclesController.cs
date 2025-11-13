@@ -60,9 +60,6 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
                     .Select(x => x.ToViewModel())
                     .ToList();
 
-                if (!viewModels.Any())
-                    return PartialView("_NoResultsPartial");
-
                 // 🔹 View’a artık yalnızca ViewModel gönderiyoruz
                 return PartialView("_VehiclesTablePartial", viewModels);
             }

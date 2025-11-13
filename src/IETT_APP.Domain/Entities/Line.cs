@@ -13,5 +13,6 @@ namespace IETT_APP.Domain.Entities
 
         // NEW: navigation to routes
         public ICollection<Route<T>> Routes { get; set; } = new List<Route<T>>();
+        public ICollection<TripTask> TripTasks { get; set; } = new List<TripTask>();
     }
 }

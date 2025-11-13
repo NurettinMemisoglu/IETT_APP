@@ -2,6 +2,7 @@
 using IETT_APP.Application.Dtos.Route;
 using IETT_APP.Application.Interfaces;
 using IETT_APP.Domain.Entities;
+using IETT_APP.Domain.Interfaces;
 using IETT_APP.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 

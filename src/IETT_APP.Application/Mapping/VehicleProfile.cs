@@ -14,11 +14,15 @@ namespace IETT_APP.Application.Mapping
             // VehicleCreateDto -> Vehicle
             CreateMap(typeof(VehicleCreateDto<>), typeof(Vehicle<>))
                 .ForMember("Id", opt => opt.Ignore())
-                .ForMember("IsDeleted", opt => opt.Ignore());
+                .ForMember("IsDeleted", opt => opt.Ignore())
+                .ForMember("CreatedAt", opt => opt.MapFrom(src => DateTime.UtcNow)) // ✅ Oluşturma zamanı
+                .ForMember("UpdatedAt", opt => opt.MapFrom(src => DateTime.UtcNow)); // ✅ Başlangıçta aynı
 
             // VehicleUpdateDto -> Vehicle
             CreateMap(typeof(VehicleUpdateDto<>), typeof(Vehicle<>))
-                .ForMember("IsDeleted", opt => opt.Ignore());
+                .ForMember("IsDeleted", opt => opt.Ignore())
+                .ForMember("CreatedAt", opt => opt.Ignore()) // ✅ Güncellemede dokunma
+                .ForMember("UpdatedAt", opt => opt.MapFrom(src => DateTime.UtcNow)); // ✅ Güncelleme zamanı değişir
         }
     }
 }

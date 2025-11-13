@@ -95,7 +95,7 @@ form#vehicleForm {
 .popover .feature-row {
     display: flex;
     align-items: center;
-    min-width: 100px;
+    min-width: 220px;
     padding: 2px 0;
 }
 

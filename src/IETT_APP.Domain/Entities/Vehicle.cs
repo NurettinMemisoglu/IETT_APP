@@ -14,6 +14,7 @@ namespace IETT_APP.Domain.Entities
         public T GarageId { get; set; } = default!;
         public Garage<T> Garage { get; set; } = null!;
         public ServiceStatus ServiceStatus { get; set; } = ServiceStatus.InService;
+        public string? StatusReason { get; set; } = null;
         public VehicleOperator Operator { get; set; }
         public VehicleModel Model { get; set; }
         public int Year { get; set; }
@@ -25,5 +26,7 @@ namespace IETT_APP.Domain.Entities
         public bool HasPassengerInfoSystem { get; set; } = false;
         public bool HasCCTV { get; set; } = true;
         public bool IsActive { get; set; } = true;
+
+        public ICollection<TripTask> TripTasks { get; set; } = new List<TripTask>();
     }
 }

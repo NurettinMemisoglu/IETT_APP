@@ -47,25 +47,29 @@ namespace IETT_APP.WebMVC.Areas.Planner.Models
         public int TotalKm { get; set; }
 
         [Display(Name = "Engelli Erişimi Var mı?")]
-        public bool HasDisabilityAccess { get; set; }
+        public bool HasDisabilityAccess { get; set; } = true; // default true
 
         [Display(Name = "WiFi Var mı?")]
-        public bool HasWiFi { get; set; }
+        public bool HasWiFi { get; set; } = true; // default true
 
         [Display(Name = "Bisiklet Taşıma Aparatı")]
-        public bool HasBikeRack { get; set; }
+        public bool HasBikeRack { get; set; } = false; // default false
 
         [Display(Name = "Şarj Ünitesi")]
-        public bool HasMobileCharging { get; set; }
+        public bool HasMobileCharging { get; set; } = false; // default false
 
         [Display(Name = "Yolcu Bilgilendirme Sistemi")]
-        public bool HasPassengerInfoSystem { get; set; }
+        public bool HasPassengerInfoSystem { get; set; } = false; // default false
 
         [Display(Name = "Kamera (CCTV)")]
-        public bool HasCCTV { get; set; }
+        public bool HasCCTV { get; set; } = true; // default true
 
         [Display(Name = "Aktif mi?")]
-        public bool IsActive { get; set; } = true;
+        public bool IsActive { get; set; } = true; // default true
+
+        [Display(Name = "Atandı mı?")]
+        public bool IsAssigned { get; set; } = false; // default false
+
 
         // Meta Bilgiler
         [Display(Name = "Oluşturulma Tarihi")]

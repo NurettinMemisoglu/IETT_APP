@@ -2,6 +2,8 @@
 using IETT_APP.Application.Interfaces.Garages;
 using IETT_APP.Application.Mapping;
 using IETT_APP.Domain.Entities;
+using IETT_APP.Domain.Interfaces;
+using IETT_APP.Domain.Services;
 using IETT_APP.Infrastructure.Persistence;
 using IETT_APP.Infrastructure.Persistence.Interceptors;
 using IETT_APP.Infrastructure.Persistence.Repositories;
@@ -99,17 +101,22 @@ builder.Services.AddScoped<IRouteService<Guid>, RouteService<Guid>>();
 builder.Services.AddScoped<ILineService<Guid>, LineService<Guid>>();
 builder.Services.AddScoped<IVehicleService<Guid>, VehicleService<Guid>>();
 builder.Services.AddScoped<IGarageService, GarageService>();
+builder.Services.AddScoped<ITripTaskService, TripTaskService>();
+builder.Services.AddScoped<TripTaskDomainService>();
+
 builder.Services.AddScoped<AuditInterceptor>();
 // Repository Line
 builder.Services.AddScoped<IRouteRepository<Guid>, RouteRepository<Guid>>();
 builder.Services.AddScoped<ILineRepository<Guid>, LineRepository<Guid>>();
 builder.Services.AddScoped<IVehicleRepository<Guid>, VehicleRepository<Guid>>();
+builder.Services.AddScoped<ITripTaskRepository, TripTaskRepository>();
 //AutoMapper Line
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<LineProfile>();
     cfg.AddProfile<RouteProfile>();
     cfg.AddProfile<VehicleProfile>();
+    cfg.AddProfile<TripTaskProfile>();
 });
 
 // ----------------------

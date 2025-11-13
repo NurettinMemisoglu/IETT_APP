@@ -25,7 +25,7 @@
     <!-- Garage Dropdown (JS ile yükleniyor) -->
     <div class="form-floating mb-3">
         <select asp-for="GarageId" id="GarageId" class="form-select"
-                data-selected="@((Model.GarageId == null || Model.GarageId == Guid.Empty) ? string.Empty : Model.GarageId.ToString())">
+                data-selected="@((Model.GarageId == Guid.Empty) ? string.Empty : Model.GarageId.ToString())">
             <option value="" disabled selected>-- Garaj Seçin --</option>
         </select>
         <label asp-for="GarageId"></label>
@@ -71,39 +71,40 @@
     </div>
 
     <div class="form-check form-switch mb-2">
-        <input asp-for="HasDisabilityAccess" class="form-check-input" />
+        @Html.CheckBoxFor(m => m.HasDisabilityAccess, new { @class = "form-check-input" })
         <label asp-for="HasDisabilityAccess" class="form-check-label"></label>
     </div>
 
     <div class="form-check form-switch mb-2">
-        <input asp-for="HasWiFi" class="form-check-input" />
+        @Html.CheckBoxFor(m => m.HasWiFi, new { @class = "form-check-input" })
         <label asp-for="HasWiFi" class="form-check-label"></label>
     </div>
 
     <div class="form-check form-switch mb-2">
-        <input asp-for="HasBikeRack" class="form-check-input" />
+        @Html.CheckBoxFor(m => m.HasBikeRack, new { @class = "form-check-input" })
         <label asp-for="HasBikeRack" class="form-check-label"></label>
     </div>
 
     <div class="form-check form-switch mb-2">
-        <input asp-for="HasMobileCharging" class="form-check-input" />
+        @Html.CheckBoxFor(m => m.HasMobileCharging, new { @class = "form-check-input" })
         <label asp-for="HasMobileCharging" class="form-check-label"></label>
     </div>
 
     <div class="form-check form-switch mb-2">
-        <input asp-for="HasPassengerInfoSystem" class="form-check-input" />
+        @Html.CheckBoxFor(m => m.HasPassengerInfoSystem, new { @class = "form-check-input" })
         <label asp-for="HasPassengerInfoSystem" class="form-check-label"></label>
     </div>
 
     <div class="form-check form-switch mb-3">
-        <input asp-for="HasCCTV" class="form-check-input" />
+        @Html.CheckBoxFor(m => m.HasCCTV, new { @class = "form-check-input" })
         <label asp-for="HasCCTV" class="form-check-label"></label>
     </div>
 
     <div class="form-check form-switch mb-3">
-        <input asp-for="IsActive" class="form-check-input" />
+        @Html.CheckBoxFor(m => m.IsActive, new { @class = "form-check-input" })
         <label asp-for="IsActive" class="form-check-label"></label>
     </div>
+
 
     <div class="text-end mt-4">
         <button type="submit" class="btn btn-primary">Kaydet</button>

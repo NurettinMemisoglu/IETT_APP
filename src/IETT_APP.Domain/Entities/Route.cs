@@ -17,5 +17,7 @@ namespace IETT_APP.Domain.Entities
         public ICollection<RouteStop<T>> RouteStops { get; set; } = new List<RouteStop<T>>();
         // NEW: navigation to parent Line
         public Line<T> Line { get; set; } = null!;
+
+        public ICollection<TripTask> TripTasks { get; set; } = new List<TripTask>();
     }
 }

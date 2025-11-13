@@ -9,7 +9,8 @@
             $garageSelect.append($('<option>', {
                 value: '',
                 text: '-- Garaj Seçin --',
-                disabled: true
+                disabled: true,
+                selected: true // default olarak seçili
             }));
 
             garages.forEach(g => {
@@ -24,7 +25,11 @@
                 }
             });
 
-            if (selectedId) $garageSelect.val(selectedId);
+            // Sadece geçerli bir selectedId varsa seç
+            if (selectedId && selectedId !== '' && selectedId !== '00000000-0000-0000-0000-000000000000') {
+                $garageSelect.val(selectedId);
+            }
+
             if (callback) setTimeout(callback, 200);
         }).fail(function () {
             alert('Garajlar yüklenemedi.');
@@ -46,14 +51,7 @@
         const model = $('#Model').data('selected');
         if (model != null) $('#Model').val(model);
 
-        // Checkbox’ları modelden set et
-        $('#HasDisabilityAccess').prop('checked', toBool($('#HasDisabilityAccess').data('checked')));
-        $('#HasWiFi').prop('checked', toBool($('#HasWiFi').data('checked')));
-        $('#HasBikeRack').prop('checked', toBool($('#HasBikeRack').data('checked')));
-        $('#HasMobileCharging').prop('checked', toBool($('#HasMobileCharging').data('checked')));
-        $('#HasPassengerInfoSystem').prop('checked', toBool($('#HasPassengerInfoSystem').data('checked')));
-        $('#HasCCTV').prop('checked', toBool($('#HasCCTV').data('checked')));
-        $('#IsActive').prop('checked', toBool($('#IsActive').data('checked')));
+        initFeaturePopovers();
     });
 
     // === FORM SUBMIT ===
@@ -84,12 +82,6 @@
             IsActive: $form.find('[name="IsActive"]').is(':checked')
         };
 
-        // Validation
-        if (!payload.GarageId) { alert("Garaj seçimi zorunludur."); return; }
-        if (payload.ServiceStatus == null) { alert("Servis durumu seçimi zorunludur."); return; }
-        if (payload.Operator == null) { alert("Operatör seçimi zorunludur."); return; }
-        if (payload.Model == null) { alert("Model seçimi zorunludur."); return; }
-
         $.ajax({
             url: isEdit ? '/Planner/Vehicles/Edit' : '/Planner/Vehicles/Create',
             type: 'POST',
@@ -103,7 +95,6 @@
             }
         });
     });
-
 
     // === AKTİF/PASİF TOGGLE ===
     $(document).on('click', '.toggle-vehicle-active', function (e) {
@@ -129,9 +120,17 @@
             $badge.css('transform', 'scale(1)');
         }, 100);
 
-        const $features = $row.find('.features-popover'); // tek hücredeki ikon
+        // Sadece row’daki mevcut data değerlerini alıyoruz
+        const $features = $row.find('.features-popover');
 
-        // Tablodan tüm required alanları alıyoruz, boolean değerler değişmeden kalıyor
+        const HasDisabilityAccess = $features.data('hasdisabilityaccess') === true || $features.data('hasdisabilityaccess') === 'True' || $features.data('hasdisabilityaccess') === 'true';
+        const HasWiFi = $features.data('haswifi') === true || $features.data('haswifi') === 'True' || $features.data('haswifi') === 'true';
+        const HasBikeRack = $features.data('hasbikerack') === true || $features.data('hasbikerack') === 'True' || $features.data('hasbikerack') === 'true';
+        const HasMobileCharging = $features.data('hasmobilecharging') === true || $features.data('hasmobilecharging') === 'True' || $features.data('hasmobilecharging') === 'true';
+        const HasPassengerInfoSystem = $features.data('haspassengerinfosystem') === true || $features.data('haspassengerinfosystem') === 'True' || $features.data('haspassengerinfosystem') === 'true';
+        const HasCCTV = $features.data('hascctv') === true || $features.data('hascctv') === 'True' || $features.data('hascctv') === 'true';
+
+        // String boolean'ları gerçek boolean'a çevir
         const payload = {
             Id: $row.data('id'),
             DoorNumber: $row.find('[data-field="doorNumber"]').text().trim() || '---',
@@ -143,28 +142,27 @@
             Model: parseInt($row.find('[data-field="model"]').data('value')) || 0,
             Year: parseInt($row.find('[data-field="year"]').text()) || 2000,
             TotalKm: parseInt($row.find('[data-field="totalKm"]').text()) || 0,
-            HasDisabilityAccess: $features.data('hasdisabilityaccess') === true || $features.data('hasdisabilityaccess') === 'true',
-            HasWiFi: $features.data('haswifi') === true || $features.data('haswifi') === 'true',
-            HasBikeRack: $features.data('hasbikerack') === true || $features.data('hasbikerack') === 'true',
-            HasMobileCharging: $features.data('hasmobilecharging') === true || $features.data('hasmobilecharging') === 'true',
-            HasPassengerInfoSystem: $features.data('haspassengerinfosystem') === true || $features.data('haspassengerinfosystem') === 'true',
-            HasCCTV: $features.data('hascctv') === true || $features.data('hascctv') === 'true',
+            HasDisabilityAccess,
+            HasWiFi,
+            HasBikeRack,
+            HasMobileCharging,
+            HasPassengerInfoSystem,
+            HasCCTV,
             IsActive: newActive
         };
-
         $.ajax({
             url: '/Planner/Vehicles/Edit',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(payload),
             success: function () {
-                // Badge anlık değişiyor, tablo yenilemeye gerek yok
                 if (newActive) {
                     $badge.removeClass('bg-secondary').addClass('bg-success').text('Aktif');
                 } else {
                     $badge.removeClass('bg-success').addClass('bg-secondary').text('Pasif');
                 }
                 $btn.data('active', newActive.toString());
+                refreshVehiclesTable();
             },
             error: function (xhr) {
                 alert('Durum güncellenemedi: ' + (xhr.responseText || ''));
@@ -172,31 +170,13 @@
         });
     });
 
-
-    // === SİL ===
-    $(document).on('click', '.delete-vehicle', function () {
-        const id = $(this).data('id');
-        if (!confirm('Bu aracı silmek istediğinize emin misiniz?')) return;
-        $.ajax({
-            url: '/Planner/Vehicles/Delete/' + id,
-            type: 'POST',
-            success: function () {
-                refreshVehiclesTable();
-            },  
-            error: function () {
-                alert('Silme işlemi başarısız.') 
-            }
-        });
-    });
-
     // === TABLOYU YENİLE ===
-    function refreshVehiclesTable(term = '') {
+    function refreshVehiclesTable(term  = '') {
         $.get('/Planner/Vehicles/Search', { term }, function (data) {
             $('#vehiclesTableContainer').html(data);
 
             // 1️⃣ Özellikler popover'larını tekrar başlat
             initFeaturePopovers();
-
             // 2️⃣ Garaj hücrelerini kısalt ve ... ekle
             $('#vehiclesTableContainer td[data-field="garage"]')
                 .addClass('vehicle-garage-cell');
@@ -219,10 +199,32 @@
         window.location.href = '/Planner/Vehicles';
     });
 
+    // === EDİT BUTONU ===
+    $(document).on('click', '.edit-vehicle', function () {
+        const id = $(this).data('id');
+        window.location.href = '/Planner/Vehicles/Edit/' + id;
+    });
+
+    // === SİL ===
+    $(document).on('click', '.delete-vehicle', function () {
+        const id = $(this).data('id');
+        if (!confirm('Bu aracı silmek istediğinize emin misiniz?')) return;
+        $.ajax({
+            url: '/Planner/Vehicles/Delete/' + id,
+            type: 'POST',
+            success: function () {
+                refreshVehiclesTable();
+            },
+            error: function () {
+                alert('Silme işlemi başarısız.')
+            }
+        });
+    });
 
     // === Boolean dönüşümü helper ===
     function toBool(value) {
-        return value === true || value === 'true' || value === 'True';
+        // true, 'true', 'True', 1, '1' hepsini true say
+        return value === true || value === 'true' || value === 'True' || value === 1 || value === '1';
     }
 
     // === Tıklanabilir özellikler popover (ikon bazlı) ===
@@ -234,7 +236,7 @@
             const makeRow = (label, isTrue) => `
             <li class="feature-row" style="display:flex; justify-content:space-between; align-items:center; min-width:160px; padding:2px 0;">
                 <span class="feature-label" style="font-size:14px;">${label}</span>
-                <i class="fas ${isTrue ? 'fa-check text-success' : 'fa-times text-danger'} feature-icon" style="font-size:16px;"></i>
+                <i class="fas ${isTrue ? 'fa-sharp fa-regular fa-circle-check' : '<fa-sharp fa-regular fa-circle-xmark'} feature-icon" style="font-size:16px;"></i>
             </li>
         `;
 
@@ -243,12 +245,12 @@
                 <button type="button" class="close-popover btn btn-xs btn-danger"
                         style="position:absolute; top:-8px; right:-8px;">&times;</button>
                 <ul class="list-unstyled mb-0">
-                    ${makeRow('WiFi', toBool($icon.data('haswifi')))}
-                    ${makeRow('Bisiklet', toBool($icon.data('hasbikerack')))}
-                    ${makeRow('Şarj', toBool($icon.data('hasmobilecharging')))}
-                    ${makeRow('BIS', toBool($icon.data('haspassengerinfosystem')))}
-                    ${makeRow('Kamera', toBool($icon.data('hascctv')))}
-                    ${makeRow('Engelli', toBool($icon.data('hasdisabilityaccess')))}
+                    ${makeRow('WiFi Erişimi:', toBool($icon.data('haswifi')))}
+                    ${makeRow('Bisiklet Taşıma Aparatı: ', toBool($icon.data('hasbikerack')))}
+                    ${makeRow('Şarj Cihazı: ', toBool($icon.data('hasmobilecharging')))}
+                    ${makeRow('Yolcu Bilgilendirme Sistemi: ', toBool($icon.data('haspassengerinfosystem')))}
+                    ${makeRow('Kamera (CCTV): ', toBool($icon.data('hascctv')))}
+                    ${makeRow('Engelli Erişimi: ', toBool($icon.data('hasdisabilityaccess')))}
                 </ul>
             </div>
         `;
@@ -271,10 +273,5 @@
             }
         });
     }
-
-    // Sayfa yüklendiğinde popoverları başlat
-    $(document).ready(function () {
-        initFeaturePopovers();
-    });
 
 });
