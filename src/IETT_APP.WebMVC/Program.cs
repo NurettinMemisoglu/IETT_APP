@@ -91,6 +91,10 @@ builder.Services.AddHttpClient<IGarageApiService, GarageApiService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });
+builder.Services.AddHttpClient<ITripTaskApiService, TripTaskApiService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
 
 // ----------------------
 // Cookie & Authentication

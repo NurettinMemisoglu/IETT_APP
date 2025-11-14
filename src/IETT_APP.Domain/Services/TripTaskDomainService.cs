@@ -1,5 +1,4 @@
-﻿using IETT_APP.Domain.Exceptions;
-using IETT_APP.Domain.Interfaces;
+﻿using IETT_APP.Domain.Interfaces;
 
 namespace IETT_APP.Domain.Services
 {
@@ -20,17 +19,17 @@ namespace IETT_APP.Domain.Services
         public async Task ValidateRouteLineMatchAsync(Guid? routeId, Guid? lineId)
         {
             if (routeId == null)
-                throw new ValidationException("RouteId boş olamaz.");
+                throw new Exception("RouteId boş olamaz.");
 
             if (!lineId.HasValue)
-                throw new ValidationException("LineId boş olamaz.");
+                throw new Exception("LineId boş olamaz.");
 
             var route = await _routeRepository.GetByIdAsync(routeId.Value);
             if (route == null)
-                throw new NotFoundException("Route bulunamadı.");
+                throw new Exception("Route bulunamadı.");
 
             if (route.LineId != lineId.Value)
-                throw new ValidationException("Seçilen Route, Line ile eşleşmiyor.");
+                throw new Exception("Seçilen Route, Line ile eşleşmiyor.");
         }
 
 

@@ -1,0 +1,22 @@
+﻿@model IEnumerable<IETT_APP.WebMVC.Areas.Chief.Models.TripTaskViewModel>
+
+@{
+    ViewData["Title"] = "Görev Yönetimi";
+}
+
+<div class="container-fluid mt-4 px-5">
+    <h2 class="mb-3">Trip Task Listesi</h2>
+
+    <div class="d-flex justify-content-between mb-3 flex-wrap">
+        <input type="text" id="searchInput" class="form-control w-auto flex-grow-1 me-2" placeholder="Görev ara..." />
+        <a asp-area="Chief" asp-controller="TripTasks" asp-action="Create" class="btn btn-success">Yeni Görev Ekle</a>
+    </div>
+
+    <div id="tripTasksTableContainer" class="table-responsive rounded shadow-sm p-2 bg-white">
+        @await Html.PartialAsync("_TripTasksTablePartial", Model)
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

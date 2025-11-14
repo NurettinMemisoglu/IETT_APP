@@ -28,7 +28,5 @@ namespace IETT_APP.Application.Dtos.TripTask
         public Guid? RouteId { get; set; }
         public Guid? GarageId { get; set; }
 
-        public bool IsActive { get; set; } = true;
-
     }
 }

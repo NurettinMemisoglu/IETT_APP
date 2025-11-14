@@ -1,0 +1,108 @@
+﻿@model IETT_APP.WebMVC.Areas.Chief.Models.TripTaskViewModel
+
+<form id="tripTaskForm" method="post">
+    <input type="hidden" id="Id" name="Id" value="@Model.Id" />
+
+    <div class="form-floating mb-3">
+        <input asp-for="Title" class="form-control" placeholder="Görev Başlığı" />
+        <label asp-for="Title"></label>
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <textarea asp-for="Description" class="form-control" placeholder="Açıklama"></textarea>
+        <label asp-for="Description"></label>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <!-- Status Dropdown -->
+    <div class="form-floating mb-3">
+        <select asp-for="Status" class="form-select" asp-items="ViewBag.TaskStateList">
+            <option value="" selected disabled>-- Durum Seçin --</option>
+        </select>
+        <label asp-for="Status"></label>
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
+
+    <!-- Foreign Key Dropdowns -->
+    <div class="form-floating mb-3">
+        <select id="LineId" asp-for="LineId" class="form-select" data-selected="@Model?.LineId">
+            <option value="" disabled selected>-- Hat Seçin --</option>
+        </select>
+        <label asp-for="LineId"></label>
+        <span asp-validation-for="LineId" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <select id="RouteId" asp-for="RouteId" class="form-select" data-selected="@Model?.RouteId" disabled>
+            <option value="" disabled selected>-- Önce Hat Seçin --</option>
+        </select>
+        <label asp-for="RouteId"></label>
+        <span asp-validation-for="RouteId" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <select id="GarageId" asp-for="GarageId" class="form-select" data-selected="@Model?.GarageId">
+            <option value="" disabled selected>-- Garaj Seçin --</option>
+        </select>
+        <label asp-for="GarageId"></label>
+        <span asp-validation-for="GarageId" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <select id="VehicleId" asp-for="VehicleId" class="form-select" data-selected="@Model?.VehicleId" disabled>
+            <option value="" disabled selected>-- Önce Garaj Seçin --</option>
+        </select>
+        <label asp-for="VehicleId"></label>
+        <span asp-validation-for="VehicleId" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <select asp-for="OperatorId" class="form-select" asp-items="ViewBag.OperatorList">
+            <option value="" selected disabled>-- Operatör Seçin --</option>
+        </select>
+        <label asp-for="OperatorId"></label>
+        <span asp-validation-for="OperatorId" class="text-danger"></span>
+    </div>
+
+    <!-- Numeric Inputs -->
+    <div class="form-floating mb-3">
+        <input asp-for="PassengerCount" type="number" class="form-control" placeholder="Yolcu Sayısı" />
+        <label asp-for="PassengerCount"></label>
+        <span asp-validation-for="PassengerCount" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <input asp-for="DelayInMinutes" type="number" class="form-control" placeholder="Gecikme (İniş)" />
+        <label asp-for="DelayInMinutes"></label>
+        <span asp-validation-for="DelayInMinutes" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <input asp-for="DelayOutMinutes" type="number" class="form-control" placeholder="Gecikme (Çıkış)" />
+        <label asp-for="DelayOutMinutes"></label>
+        <span asp-validation-for="DelayOutMinutes" class="text-danger"></span>
+    </div>
+
+    <!-- Date Inputs -->
+    <div class="form-floating mb-3">
+        <input asp-for="ScheduledDeparture" type="datetime-local" class="form-control" />
+        <label asp-for="ScheduledDeparture">Planlanan Kalkış</label>
+        <span asp-validation-for="ScheduledDeparture" class="text-danger"></span>
+    </div>
+
+    <div class="form-floating mb-3">
+        <input asp-for="ScheduledArrival" type="datetime-local" class="form-control" />
+        <label asp-for="ScheduledArrival">Planlanan Varış</label>
+        <span asp-validation-for="ScheduledArrival" class="text-danger"></span>
+    </div>
+
+    <div class="text-end mt-4">
+        <button type="submit" class="btn btn-primary">Kaydet</button>
+        <button type="button" class="btn btn-secondary" id="cancelTripTaskBtn">İptal</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

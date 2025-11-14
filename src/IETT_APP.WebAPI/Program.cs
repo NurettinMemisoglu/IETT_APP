@@ -150,11 +150,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// CORS – controllerlardan önce olmalı
-app.UseCors("MvcClient");
-
 // Custom middleware
 app.UseCustomMiddleware();
+
+// CORS – controllerlardan önce olmalı
+app.UseCors("MvcClient");
 
 // Auth
 app.UseAuthentication();

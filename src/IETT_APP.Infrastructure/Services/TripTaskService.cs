@@ -96,5 +96,23 @@ namespace IETT_APP.Infrastructure.Services
             var entity = await _repository.GetByIdAsync(id);
             return entity == null ? null : _mapper.Map<TripTaskDto>(entity);
         }
+
+        // SEARCH
+        public async Task<List<TripTaskDto>> SearchAsync(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query)) return new List<TripTaskDto>();
+
+            var term = query.Trim().ToLowerInvariant();
+            var all = await _repository.GetAllAsync();
+
+            var filtered = all
+                .Where(l => !l.IsDeleted &&
+                           ((l.Title?.ToLowerInvariant().Contains(term) ?? false) ||
+                            (l.Description?.ToLowerInvariant().Contains(term) ?? false)))
+                .ToList();
+
+            return _mapper.Map<List<TripTaskDto>>(filtered);
+        }
+
     }
 }

@@ -36,7 +36,6 @@
   <ItemGroup>
     <Folder Include="Areas\Admin\Data\" />
     <Folder Include="Areas\Chief\Data\" />
-    <Folder Include="Areas\Chief\Models\" />
     <Folder Include="Areas\Driver\Data\" />
     <Folder Include="Areas\Driver\Models\" />
     <Folder Include="Areas\Planner\Data\" />

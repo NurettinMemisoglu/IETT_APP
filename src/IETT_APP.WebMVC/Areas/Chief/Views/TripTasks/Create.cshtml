@@ -1,0 +1,17 @@
+﻿@model IETT_APP.WebMVC.Areas.Chief.Models.TripTaskViewModel
+@{
+    ViewData["Title"] = "Görev Ekle";
+}
+
+<div class="vehicle-header mt-4 mb-3">
+    <h2>Görev Ekle</h2>
+</div>
+
+
+<form id="tripTaskForm" asp-action="Create" method="post">
+    @await Html.PartialAsync("_TripTaskFormPartial", Model)
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

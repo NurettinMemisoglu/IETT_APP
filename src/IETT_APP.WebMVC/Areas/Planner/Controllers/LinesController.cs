@@ -21,6 +21,15 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
             _lineApiService = lineApiService;
         }
 
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAll()
+        {
+            var lines = await _lineApiService.GetAllAsync();
+            return Json(lines);
+        }
+
         public async Task<IActionResult> Index()
         {
 
@@ -96,13 +105,6 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
             var result = await _lineApiService.DeleteAsync(id);
             if (!result) return BadRequest("Silme işlemi başarısız.");
             return Ok(new { message = "Hat başarıyla silindi." });
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var lines = await _lineApiService.GetAllAsync();
-            return Json(lines);
         }
 
         private SelectList GetLineTypeSelectList() => new SelectList(

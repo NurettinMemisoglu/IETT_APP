@@ -9,5 +9,6 @@ namespace IETT_APP.Application.Interfaces
         Task<Guid> AddAsync(TripTaskCreateDto dto);
         Task UpdateAsync(TripTaskUpdateDto dto);
         Task DeleteAsync(Guid id, string? reason = null);
+        Task<List<TripTaskDto>> SearchAsync(string query);
     }
 }

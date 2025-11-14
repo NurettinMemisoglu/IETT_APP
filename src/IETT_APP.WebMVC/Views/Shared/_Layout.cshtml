@@ -305,7 +305,7 @@
                         }
                         else if (User.IsInRole("Chief"))
                         {
-                            @await Html.PartialAsync("_Sidebar_Chief")
+                            @await Html.PartialAsync("~/Areas/Chief/Views/_Sidebar_Chief.cshtml")
                         }
                         else
                         {
@@ -393,6 +393,11 @@
     @if (ViewContext.RouteData.Values["controller"].ToString() == "Vehicles")
     {
         <script src="~/js/vehicles.js?v=@DateTime.Now.Ticks"></script>
+
+    }
+    @if (ViewContext.RouteData.Values["controller"].ToString() == "TripTasks")
+    {
+        <script src="~/js/trip-tasks.js?v=@DateTime.Now.Ticks"></script>
 
     }
     

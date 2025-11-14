@@ -16,6 +16,7 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var garages = await _garageApiService.GetAllAsync();

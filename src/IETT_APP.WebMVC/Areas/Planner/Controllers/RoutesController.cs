@@ -20,6 +20,14 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
             _routeApiService = routeApiService;
         }
 
+        [HttpGet]
+        [AllowAnonymous] // yetki sorunu olursa test için
+        public async Task<IActionResult> GetAll()
+        {
+            var list = await _routeApiService.GetAllAsync();
+            return Json(list);
+        }
+
         // Ana sayfa
         public async Task<IActionResult> Index()
         {

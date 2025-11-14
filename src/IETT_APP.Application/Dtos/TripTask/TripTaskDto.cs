@@ -28,7 +28,11 @@ namespace IETT_APP.Application.Dtos.TripTask
         public Guid? RouteId { get; set; }
         public Guid? GarageId { get; set; }
 
-        public bool IsActive { get; set; } = true;
+        public string? VehicleName { get; set; }
+        public string? OperatorName { get; set; }
+        public string? LineName { get; set; }
+        public string? RouteName { get; set; }
+        public string? GarageName { get; set; }
 
         // Opsiyonel: Read-only alanlar (UI veya log amaçlı)
         public DateTime? CreatedAt { get; set; }

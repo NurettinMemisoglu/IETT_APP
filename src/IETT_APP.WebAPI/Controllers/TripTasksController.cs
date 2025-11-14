@@ -40,7 +40,14 @@ namespace IETT_APP.WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { Message = ex.Message });
+                // Hata detayını logla
+                Console.WriteLine("TripTask Create Hatası:");
+                Console.WriteLine(ex.ToString());
+
+                // Eğer production ise Serilog/NLog kullanabilirsin
+                //Log.Error(ex, "TripTask Create Hatası");
+
+                return BadRequest(new { message = "API hata", detail = ex.Message });
             }
         }
 
@@ -56,6 +63,13 @@ namespace IETT_APP.WebAPI.Controllers
         {
             await _service.DeleteAsync(id, reason);
             return NoContent();
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string query)
+        {
+            var result = await _service.SearchAsync(query);
+            return Ok(result);
         }
     }
 }

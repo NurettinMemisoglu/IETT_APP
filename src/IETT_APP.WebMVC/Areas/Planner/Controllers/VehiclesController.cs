@@ -19,6 +19,13 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
             _vehicleApiService = vehicleApiService;
         }
 
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAll()
+        {
+            var list = await _vehicleApiService.GetAllAsync();
+            return Json(list);
+        }
 
         // GET: VehiclesController
         public async Task<IActionResult> Index()
