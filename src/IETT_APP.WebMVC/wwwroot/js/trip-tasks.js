@@ -283,8 +283,10 @@
 
     // === EDİT ===
     $(document).on('click', '.edit-trip-task', function () {
-        window.location.href = '/Chief/TripTasks/Edit/' + $(this).data('id');
+        const id = $(this).data('id');
+        window.location.href = '/Chief/TripTasks/Edit/' + id;
     });
+
 
     // === SİL ===
     $(document).on('click', '.delete-trip-task', function () {

@@ -28,6 +28,7 @@ namespace IETT_APP.Infrastructure.Persistence.Repositories
                 .Include(t => t.Line)
                 .Include(t => t.Route)
                 .Include(t => t.Garage)
+                .OrderBy(t => t.CreatedAt)
                 .ToListAsync();
         }
 

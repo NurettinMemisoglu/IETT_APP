@@ -1,154 +1,17 @@
-﻿@model IETT_APP.Domain.Entities.TripTask
-
+﻿@model IETT_APP.WebMVC.Areas.Chief.Models.TripTaskViewModel
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Görev Düzenle";
 }
 
-<h1>Edit</h1>
+<div class="container mt-4">
+    <h2 class="mb-3">Görev Düzenle</h2>
 
-<h4>TripTask</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="PassengerCount" class="control-label"></label>
-                <input asp-for="PassengerCount" class="form-control" />
-                <span asp-validation-for="PassengerCount" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DelayInMinutes" class="control-label"></label>
-                <input asp-for="DelayInMinutes" class="form-control" />
-                <span asp-validation-for="DelayInMinutes" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DelayOutMinutes" class="control-label"></label>
-                <input asp-for="DelayOutMinutes" class="form-control" />
-                <span asp-validation-for="DelayOutMinutes" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ScheduledDeparture" class="control-label"></label>
-                <input asp-for="ScheduledDeparture" class="form-control" />
-                <span asp-validation-for="ScheduledDeparture" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ScheduledArrival" class="control-label"></label>
-                <input asp-for="ScheduledArrival" class="form-control" />
-                <span asp-validation-for="ScheduledArrival" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="AdjustedDeparture" class="control-label"></label>
-                <input asp-for="AdjustedDeparture" class="form-control" />
-                <span asp-validation-for="AdjustedDeparture" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="AdjustedArrival" class="control-label"></label>
-                <input asp-for="AdjustedArrival" class="form-control" />
-                <span asp-validation-for="AdjustedArrival" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ActualDeparture" class="control-label"></label>
-                <input asp-for="ActualDeparture" class="form-control" />
-                <span asp-validation-for="ActualDeparture" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ActualArrival" class="control-label"></label>
-                <input asp-for="ActualArrival" class="form-control" />
-                <span asp-validation-for="ActualArrival" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="VehicleId" class="control-label"></label>
-                <select asp-for="VehicleId" class="form-control" asp-items="ViewBag.VehicleId"></select>
-                <span asp-validation-for="VehicleId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="OperatorId" class="control-label"></label>
-                <select asp-for="OperatorId" class="form-control" asp-items="ViewBag.OperatorId"></select>
-                <span asp-validation-for="OperatorId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="LineId" class="control-label"></label>
-                <select asp-for="LineId" class="form-control" asp-items="ViewBag.LineId"></select>
-                <span asp-validation-for="LineId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="RouteId" class="control-label"></label>
-                <select asp-for="RouteId" class="form-control" asp-items="ViewBag.RouteId"></select>
-                <span asp-validation-for="RouteId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="GarageId" class="control-label"></label>
-                <select asp-for="GarageId" class="form-control" asp-items="ViewBag.GarageId"></select>
-                <span asp-validation-for="GarageId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
-                <span asp-validation-for="Title" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Status" class="control-label"></label>
-                <select asp-for="Status" class="form-control"></select>
-                <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CompletedAt" class="control-label"></label>
-                <input asp-for="CompletedAt" class="form-control" />
-                <span asp-validation-for="CompletedAt" class="text-danger"></span>
-            </div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsDeleted" /> @Html.DisplayNameFor(model => model.IsDeleted)
-                </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="CreatedAt" class="control-label"></label>
-                <input asp-for="CreatedAt" class="form-control" />
-                <span asp-validation-for="CreatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CreatedBy" class="control-label"></label>
-                <input asp-for="CreatedBy" class="form-control" />
-                <span asp-validation-for="CreatedBy" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="UpdatedAt" class="control-label"></label>
-                <input asp-for="UpdatedAt" class="form-control" />
-                <span asp-validation-for="UpdatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="UpdatedBy" class="control-label"></label>
-                <input asp-for="UpdatedBy" class="form-control" />
-                <span asp-validation-for="UpdatedBy" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DeletedAt" class="control-label"></label>
-                <input asp-for="DeletedAt" class="form-control" />
-                <span asp-validation-for="DeletedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DeletedBy" class="control-label"></label>
-                <input asp-for="DeletedBy" class="form-control" />
-                <span asp-validation-for="DeletedBy" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+    <form id="tripTaskForm" asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        @await Html.PartialAsync("_TripTaskFormPartial", Model)
+    </form>
+
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <partial name="_ValidationScriptsPartial" />
 }

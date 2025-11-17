@@ -9,11 +9,11 @@
                     <th>Başlık</th>
                     <th>Açıklama</th>
                     <th>Durum</th>
-                    <th>Güzergah</th>
                     <th>Hat</th>
+                    <th>Güzergah</th>
                     <th>Operatör</th>
-                    <th>Araç</th>
                     <th>Garaj</th>
+                    <th>Araç</th>
                     <th>Yolcu Sayısı</th>
                     <th>Gecikme (dk)</th>
                     <th>Planlanan Kalkış</th>
@@ -34,11 +34,11 @@
                             <td data-field="title">@item.Title</td>
                             <td data-field="description">@item.Description</td>
                             <td data-field="status" data-value="@((int)item.Status)">@item.Status.ToDisplayName()</td>
-                            <td data-field="route" data-value="@item.RouteId">@item.RouteName</td>
                             <td data-field="line" data-value="@item.LineId">@item.LineName</td>
+                            <td data-field="route" data-value="@item.RouteId">@item.RouteName</td>
                             <td data-field="operator" data-value="@item.OperatorId">@item.OperatorName</td>
-                            <td data-field="vehicle" data-value="@item.VehicleId">@item.VehicleName</td>
                             <td data-field="garage" data-value="@item.GarageId">@item.GarageName</td>
+                            <td data-field="vehicle" data-value="@item.VehicleId">@item.VehicleName</td>
                             <td data-field="passengerCount" data-value="@item.PassengerCount">@item.PassengerCount</td>
                             <td data-field="delayInMinutes" data-value="@item.DelayInMinutes">@item.DelayInMinutes</td>
                             <td data-field="scheduledDeparture" data-value="@item.ScheduledDeparture?.ToString("yyyy-MM-ddTHH:mm")">@item.ScheduledDeparture?.ToString("yyyy-MM-dd HH:mm")</td>

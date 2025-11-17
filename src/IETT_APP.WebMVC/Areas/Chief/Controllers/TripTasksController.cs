@@ -88,19 +88,27 @@ namespace IETT_APP.WebMVC.Areas.Chief.Controllers
         public async Task<IActionResult> Create([FromBody] TripTaskViewModel vm)
         {
             if (!ModelState.IsValid)
-                return BadRequest(new { message = "Model doğrulama hatası" });
+            {
+                var errors = ModelState
+                    .Where(kvp => kvp.Value.Errors.Any())
+                    .Select(kvp => new { Key = kvp.Key, Errors = kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray() })
+                    .ToList();
+
+                return BadRequest(new { message = "Model doğrulama hatası", details = errors });
+            }
 
             var dto = vm.ToCreateDto();
 
             try
             {
                 var result = await _tripTaskApiService.CreateAsync(dto);
-                return Ok(result);
+                return Ok(result); // Güncellenmiş DTO dönülüyor
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = "API create hata", detail = ex.Message });
+                return BadRequest("API hata: " + ex.Message);
             }
+
         }
 
         // ==============================

@@ -35,8 +35,8 @@ namespace IETT_APP.WebAPI.Controllers
         {
             try
             {
-                var id = await _service.AddAsync(dto);
-                return CreatedAtAction(nameof(GetById), new { id }, id);
+                var newId = await _service.AddAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = newId }, dto);
             }
             catch (Exception ex)
             {
@@ -51,12 +51,25 @@ namespace IETT_APP.WebAPI.Controllers
             }
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Update([FromBody] TripTaskUpdateDto dto)
+        // 🔹 PUT: api/vehicle/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] TripTaskUpdateDto dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!id.Equals(dto.Id))
+                return BadRequest(new { Message = "ID mismatch between route and body." });
+
+            // 🔹 Güncellemeyi yap
             await _service.UpdateAsync(dto);
-            return NoContent();
+
+            // 🔹 Güncellenmiş veriyi DB'den tekrar çek
+            var updatedDto = await _service.GetByIdAsync(dto.Id);
+
+            return Ok(updatedDto);
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id, [FromQuery] string? reason = null)

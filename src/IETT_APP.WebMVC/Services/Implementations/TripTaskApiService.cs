@@ -27,6 +27,9 @@ namespace IETT_APP.WebMVC.Services.Implementations
             var response = await _httpClient.PostAsJsonAsync("api/TripTasks", dto);
             var content = await response.Content.ReadAsStringAsync();
 
+            Console.WriteLine("API CREATE RESPONSE STATUS: " + response.StatusCode);
+            Console.WriteLine("API CREATE RESPONSE BODY: " + content);
+
             if (!response.IsSuccessStatusCode)
                 throw new Exception($"API hata: {response.StatusCode} - {content}");
 

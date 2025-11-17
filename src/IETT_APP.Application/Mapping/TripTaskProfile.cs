@@ -19,7 +19,6 @@ namespace IETT_APP.Application.Mapping
 
             // TripTaskCreateDto -> TripTask
             CreateMap<TripTaskCreateDto, TripTask>()
-
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
