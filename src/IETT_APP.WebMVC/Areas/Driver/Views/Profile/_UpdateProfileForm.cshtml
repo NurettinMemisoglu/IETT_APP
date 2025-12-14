@@ -1,0 +1,64 @@
+﻿@using IETT_APP.WebMVC.Areas.Driver.Models
+@model DriverProfileViewModel
+
+<h5 class="mb-3 text-primary">İletişim Bilgileri</h5>
+<div class="row mb-3">
+    <label class="col-sm-2 col-form-label">Telefon</label>
+    <div class="col-sm-10">
+        <input asp-for="PhoneNumber" class="form-control" placeholder="Telefon Numarası" />
+        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+    </div>
+</div>
+<div class="row mb-3">
+    <label class="col-sm-2 col-form-label">Adres</label>
+    <div class="col-sm-10">
+        <textarea asp-for="Address" class="form-control" rows="2"></textarea>
+    </div>
+</div>
+
+<hr />
+
+<h5 class="mb-3 text-primary">Acil Durum</h5>
+<div class="row mb-3">
+    <label class="col-sm-2 col-form-label">Kişi Adı</label>
+    <div class="col-sm-10">
+        <input asp-for="EmergencyContactName" class="form-control" />
+    </div>
+</div>
+<div class="row mb-3">
+    <label class="col-sm-2 col-form-label">Kişi Telefonu</label>
+    <div class="col-sm-10">
+        <input asp-for="EmergencyContactPhone" class="form-control" />
+    </div>
+</div>
+
+<hr />
+
+<h5 class="mb-3 text-primary">Sağlık Bilgileri</h5>
+<div class="row mb-3">
+    <label class="col-sm-2 col-form-label">Kan Grubu</label>
+    <div class="col-sm-4">
+        <select asp-for="BloodType" class="form-select">
+            <option value="A Rh+">A Rh+</option>
+            <option value="A Rh-">A Rh-</option>
+            <option value="B Rh+">B Rh+</option>
+            <option value="B Rh-">B Rh-</option>
+            <option value="AB Rh+">AB Rh+</option>
+            <option value="AB Rh-">AB Rh-</option>
+            <option value="0 Rh+">0 Rh+</option>
+            <option value="0 Rh-">0 Rh-</option>
+        </select>
+    </div>
+    <div class="col-sm-6">
+        <div class="form-check mt-2">
+            <input asp-for="HasChronicDisease" class="form-check-input" type="checkbox">
+            <label class="form-check-label">Kronik Rahatsızlık Var mı?</label>
+        </div>
+    </div>
+</div>
+<div class="row mb-3">
+    <label class="col-sm-2 col-form-label">Sağlık Notları</label>
+    <div class="col-sm-10">
+        <textarea asp-for="HealthNotes" class="form-control" rows="2" placeholder="Varsa hastalık detayları..."></textarea>
+    </div>
+</div>

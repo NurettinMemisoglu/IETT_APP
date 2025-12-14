@@ -1,0 +1,228 @@
+﻿/* wwwroot/css/admin.css */
+
+:root {
+    /* --- Pastel Renk Paleti --- */
+    --primary-soft: #6c5ce7; /* Yumuşak Mor/Mavi */
+    --secondary-soft: #a29bfe;
+    --success-soft: #00b894; /* Nane Yeşili */
+    --info-soft: #0984e3; /* Okyanus Mavisi */
+    --warning-soft: #fdcb6e; /* Hardal Sarısı */
+    --danger-soft: #ff7675; /* Mercan Kırmızısı */
+    --dark-soft: #2d3436;
+    --light-bg: #f1f2f6; /* Çok açık gri */
+    --white: #ffffff;
+    /* --- Gölgeler --- */
+    --shadow-sm: 0 2px 6px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 15px rgba(0,0,0,0.05);
+    --shadow-hover: 0 8px 25px rgba(108, 92, 231, 0.15); /* Morumsu gölge */
+}
+
+/* 1. GENEL AYARLAR */
+body {
+    background-color: var(--light-bg) !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #444;
+}
+
+.content-wrapper, .app-main {
+    background-color: var(--light-bg) !important;
+}
+
+/* 2. KARTLAR (Card) - Köşeleri yuvarla ve gölge ver */
+.card {
+    border: none !important;
+    border-radius: 15px !important;
+    box-shadow: var(--shadow-sm);
+    background-color: var(--white);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden; /* Taşmaları gizle */
+}
+
+    /* Hover olunca kart hafifçe yukarı kalksın */
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+.card-header {
+    background-color: var(--white) !important;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 1.2rem 1.5rem;
+    font-weight: 600;
+    color: var(--dark-soft);
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-soft);
+}
+
+/* 3. TABLOLAR (Modern Görünüm) */
+.table thead th {
+    background-color: #f8f9fa;
+    color: #636e72;
+    border-bottom: 2px solid #eee;
+    border-top: none;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    padding: 15px;
+}
+
+.table tbody td {
+    vertical-align: middle;
+    padding: 15px;
+    border-bottom: 1px solid #f1f2f6;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+/* Satır üzerine gelince tatlı bir renk */
+.table-hover tbody tr:hover {
+    background-color: #fdfdfd;
+    transform: scale(1.005); /* Çok hafif büyüme */
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    z-index: 2;
+    position: relative;
+}
+
+/* 4. BUTONLAR (Pastel ve Yuvarlak) */
+.btn {
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.btn-sm {
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 0.8rem;
+}
+
+/* Primary Buton (Mor/Mavi) */
+.btn-primary {
+    background-color: var(--primary-soft);
+    color: white;
+}
+
+    .btn-primary:hover {
+        background-color: #5649c0;
+        box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+        transform: translateY(-1px);
+    }
+
+/* Danger Buton (Mercan) */
+.btn-danger {
+    background-color: var(--danger-soft);
+}
+
+    .btn-danger:hover {
+        background-color: #e66767;
+        box-shadow: 0 4px 12px rgba(255, 118, 117, 0.3);
+    }
+
+/* Warning Buton (Hardal) */
+.btn-warning {
+    background-color: var(--warning-soft);
+    color: #fff;
+}
+
+    .btn-warning:hover {
+        background-color: #e1b12c;
+        color: #fff;
+    }
+
+/* Success Buton (Nane) */
+.btn-success {
+    background-color: var(--success-soft);
+}
+
+    .btn-success:hover {
+        background-color: #00a383;
+        box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
+    }
+
+/* 5. BADGES (Etiketler) - Hap şeklinde */
+.badge {
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+.bg-info {
+    background-color: #74b9ff !important; /* Daha yumuşak mavi */
+    color: #fff !important;
+}
+
+.bg-success {
+    background-color: var(--success-soft) !important;
+}
+
+.bg-secondary {
+    background-color: #dfe6e9 !important;
+    color: #636e72 !important;
+}
+
+/* 6. INPUT ALANLARI */
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #dfe6e9;
+    padding: 10px 15px;
+    background-color: #fff;
+    transition: all 0.2s;
+}
+
+    .form-control:focus {
+        border-color: var(--primary-soft);
+        box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15); /* Morumsu glow */
+        background-color: #fff;
+    }
+
+/* 7. SIDEBAR (Sol Menü) */
+/* AdminLTE'nin koyu temasını biraz yumuşatalım */
+.app-sidebar {
+    background-color: #2d3436 !important; /* Koyu gri */
+    box-shadow: 4px 0 15px rgba(0,0,0,0.05) !important;
+}
+
+.sidebar-brand {
+    background-color: #2d3436 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.nav-sidebar .nav-link {
+    border-radius: 8px;
+    margin-bottom: 4px;
+    color: #b2bec3 !important;
+}
+
+    .nav-sidebar .nav-link:hover {
+        background-color: rgba(255,255,255,0.05) !important;
+        color: #fff !important;
+        transform: translateX(5px); /* Sağa kayma efekti */
+    }
+
+    .nav-sidebar .nav-link.active {
+        background-color: var(--primary-soft) !important;
+        color: #fff !important;
+        box-shadow: 0 4px 10px rgba(108, 92, 231, 0.4);
+    }
+
+/* 8. MODAL */
+.modal-content {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    border-radius: 15px 15px 0 0;
+    padding: 1.5rem;
+}

@@ -1660,39 +1660,39 @@ Expr = jQuery.expr = {
 				} );
 		},
 
-		ATTR: function( name, operator, check ) {
+		ATTR: function( name, driver, check ) {
 			return function( elem ) {
 				var result = find.attr( elem, name );
 
 				if ( result == null ) {
-					return operator === "!=";
+					return driver === "!=";
 				}
-				if ( !operator ) {
+				if ( !driver ) {
 					return true;
 				}
 
 				result += "";
 
-				if ( operator === "=" ) {
+				if ( driver === "=" ) {
 					return result === check;
 				}
-				if ( operator === "!=" ) {
+				if ( driver === "!=" ) {
 					return result !== check;
 				}
-				if ( operator === "^=" ) {
+				if ( driver === "^=" ) {
 					return check && result.indexOf( check ) === 0;
 				}
-				if ( operator === "*=" ) {
+				if ( driver === "*=" ) {
 					return check && result.indexOf( check ) > -1;
 				}
-				if ( operator === "$=" ) {
+				if ( driver === "$=" ) {
 					return check && result.slice( -check.length ) === check;
 				}
-				if ( operator === "~=" ) {
+				if ( driver === "~=" ) {
 					return ( " " + result.replace( rwhitespace, " " ) + " " )
 						.indexOf( check ) > -1;
 				}
-				if ( operator === "|=" ) {
+				if ( driver === "|=" ) {
 					return result === check || result.slice( 0, check.length + 1 ) === check + "-";
 				}
 
@@ -2411,7 +2411,7 @@ function matcherFromTokens( tokens ) {
 			// Return special upon seeing a positional matcher
 			if ( matcher[ expando ] ) {
 
-				// Find the next relative operator (if any) for proper handling
+				// Find the next relative driver (if any) for proper handling
 				j = ++i;
 				for ( ; j < len; j++ ) {
 					if ( Expr.relative[ tokens[ j ].type ] ) {

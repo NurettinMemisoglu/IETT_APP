@@ -2,7 +2,8 @@
 {
     public class AdminUserDto
     {
-        public string FullName { get; set; }
+        public string Name { get; set; }
+        public string Surname { get; set; }
         public string Email { get; set; }
 
         // Admin oluştururken şifre de alınacağı için ekliyoruz

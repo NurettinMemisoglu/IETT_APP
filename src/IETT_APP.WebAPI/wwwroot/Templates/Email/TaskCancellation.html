@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #dc3545;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        /* Kırmızı Başlık */
+        .content {
+            padding: 30px;
+            background-color: #ffffff;
+        }
+
+        .info-box {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #f5c6cb;
+            margin: 20px 0;
+        }
+
+        .footer {
+            background-color: #f1f1f1;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2 style="margin:0;">⚠ Görev İptali Bilgilendirmesi</h2>
+        </div>
+        <div class="content">
+            <p>Sayın <strong>{{DriverName}}</strong>,</p>
+            <p>Daha önce tarafınıza atanan sefer görevi <strong>İPTAL EDİLMİŞTİR</strong>.</p>
+
+            <div class="info-box">
+                <p><strong>Hat:</strong> {{LineCode}}</p>
+                <p><strong>Tarih:</strong> {{Date}}</p>
+                <p><strong>İptal Nedeni:</strong> {{Reason}}</p>
+            </div>
+
+            <p>Şu an boşa çıktınız (Available). Yeni görev ataması için operasyon birimiyle iletişime geçebilirsiniz.</p>
+        </div>
+        <div class="footer">
+            Bu e-posta otomatik olarak oluşturulmuştur.<br>
+            &copy; 2025 İETT Operasyon Yönetim Sistemi
+        </div>
+    </div>
+</body>
+</html>

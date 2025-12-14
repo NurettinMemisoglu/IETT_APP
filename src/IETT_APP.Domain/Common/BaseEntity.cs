@@ -1,6 +1,8 @@
-﻿namespace IETT_APP.Domain.Common
+﻿using IETT_APP.Domain.Interfaces;
+
+namespace IETT_APP.Domain.Common
 {
-    public abstract class BaseEntity<T>
+    public abstract class BaseEntity<T> : IAuditableEntity
     {
         public T Id { get; set; } = default!;
 
@@ -15,5 +17,7 @@
 
         public DateTime? DeletedAt { get; set; }
         public string? DeletedBy { get; set; }
+
+        public bool IsActive { get; set; } = true;
     }
 }

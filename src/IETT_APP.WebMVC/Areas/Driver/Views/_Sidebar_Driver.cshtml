@@ -1,0 +1,47 @@
+﻿<ul class="nav sidebar-menu flex-column"
+    data-lte-toggle="treeview"
+    role="navigation"
+    aria-label="Main navigation"
+    data-accordion="false">
+
+    <li class="nav-header">SÜRÜCÜ İŞLEMLERİ</li>
+
+    <li class="nav-item">
+        <a asp-area="Driver" asp-controller="Home" asp-action="Index" class="nav-link">
+            <i class="nav-icon bi bi-speedometer2"></i>
+            <p>Panel (Dashboard)</p>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a asp-area="Driver" asp-controller="Tasks" asp-action="Index" class="nav-link">
+            <i class="nav-icon bi bi-signpost-split"></i>
+            <p>
+                Seferlerim
+            </p>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a asp-area="Driver" asp-controller="Profile" asp-action="Index" class="nav-link">
+            <i class="nav-icon bi bi-person-vcard"></i>
+            <p>Profil Bilgilerim</p>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a asp-area="" asp-controller="MyNotifications" asp-action="Index" class="nav-link">
+            <i class="nav-icon bi bi-bell"></i>
+            <p>Bildirimler</p>
+        </a>
+    </li>
+</ul>
+
+<ul class="nav flex-column" style="position: absolute; bottom: 10px; left: 0; width: 100%;">
+    <li class="nav-item">
+        <a asp-area="" asp-controller="Auth" asp-action="Logout" class="nav-link text-danger">
+            <i class="nav-icon bi bi-box-arrow-right"></i>
+            <p>Çıkış Yap</p>
+        </a>
+    </li>
+</ul>

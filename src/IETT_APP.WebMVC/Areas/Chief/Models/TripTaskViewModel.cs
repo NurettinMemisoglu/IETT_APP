@@ -57,7 +57,7 @@ namespace IETT_APP.WebMVC.Areas.Chief.Models
         public Guid? VehicleId { get; set; }
 
         [Display(Name = "Operatör")]
-        public Guid? OperatorId { get; set; }
+        public Guid? DriverId { get; set; }
 
         [Display(Name = "Hat")]
         public Guid? LineId { get; set; }
@@ -75,14 +75,14 @@ namespace IETT_APP.WebMVC.Areas.Chief.Models
 
         // === UI için okunabilir alanlar ===
         public string? VehicleName { get; set; }
-        public string? OperatorName { get; set; }
+        public string? DriverName { get; set; }
         public string? LineName { get; set; }
         public string? RouteName { get; set; }
         public string? GarageName { get; set; }
 
         // === Dropdown listeler ===
         public SelectList? VehicleList { get; set; }
-        public SelectList? OperatorList { get; set; }
+        public SelectList? DriverList { get; set; }
         public SelectList? LineList { get; set; }
         public SelectList? RouteList { get; set; }
         public SelectList? GarageList { get; set; }

@@ -11,10 +11,12 @@ namespace IETT_APP.Application.Mapping
             // TripTask <-> TripTaskDto
             CreateMap<TripTask, TripTaskDto>()
                 .ForMember(dest => dest.VehicleName, opt => opt.MapFrom(src => src.Vehicle != null ? src.Vehicle.PlateNumber : null))
-                .ForMember(dest => dest.OperatorName, opt => opt.MapFrom(src => src.Operator != null ? src.Operator.Name : null))
+                .ForMember(dest => dest.DriverName, opt => opt.MapFrom(src => src.Driver != null && src.Driver.User != null ? $"{src.Driver.User.Name} {src.Driver.User.Surname}" : null))
                 .ForMember(dest => dest.LineName, opt => opt.MapFrom(src => src.Line != null ? src.Line.Name : null))
                 .ForMember(dest => dest.RouteName, opt => opt.MapFrom(src => src.Route != null ? src.Route.Name : null))
                 .ForMember(dest => dest.GarageName, opt => opt.MapFrom(src => src.Garage != null ? src.Garage.GarageName : null))
+
+
                 .ReverseMap(); // Eğer iki yönlü map gerekiyorsa
 
             // TripTaskCreateDto -> TripTask

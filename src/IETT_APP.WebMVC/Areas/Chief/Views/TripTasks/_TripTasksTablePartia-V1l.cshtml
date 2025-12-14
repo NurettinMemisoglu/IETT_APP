@@ -1,0 +1,83 @@
+﻿@using IETT_APP.Domain.Enums
+@using IETT_APP.WebMVC.Extensions
+@model IEnumerable<IETT_APP.WebMVC.Areas.Chief.Models.TripTaskViewModel>
+
+<div class="card">
+    <div class="card-body table-responsive p-0">
+        <table id="tripTasksTable" class="table table-hover table-striped text-nowrap align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Başlık</th>
+                    <th>Açıklama</th>
+                    <th>Durum</th>
+                    <th>Hat</th>
+                    <th>Güzergah</th>
+                    <th>Operatör</th>
+                    <th>Garaj</th>
+                    <th>Araç</th>
+                    <th>Yolcu Sayısı</th>
+                    <th>Gecikme (dk)</th>
+                    <th>Planlanan Kalkış</th>
+                    <th>Planlanan Varış</th>
+                    <th>Gerçek Kalkış</th>
+                    <th>Gerçek Varış</th>
+                    <th>Oluşturulma</th>
+                    <th>Son Güncelleme</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr data-id="@item.Id">
+                            <td data-field="title">@item.Title</td>
+                            <td data-field="description">@item.Description</td>
+                            <td data-field="status">
+                                @{
+                                    var statusClass = item.Status switch
+                                    {
+                                        TaskState.Pending => "bg-warning text-dark",
+                                        TaskState.InProgress => "bg-primary",
+                                        TaskState.Completed => "bg-success",
+                                        TaskState.Cancelled => "bg-danger",
+                                        _ => "bg-secondary"
+                                    };
+                                }
+                                <span class="badge @statusClass">@item.Status.ToDisplayName()</span>
+                            </td>
+                            <td data-field="line" data-value="@item.LineId">@item.LineName</td>
+                            <td data-field="route" data-value="@item.RouteId">@item.RouteName</td>
+                            <td data-field="driver" data-value="@item.DriverId">@item.DriverName</td>
+                            <td data-field="garage" data-value="@item.GarageId">@item.GarageName</td>
+                            <td data-field="vehicle" data-value="@item.VehicleId">@item.VehicleName</td>
+                            <td data-field="passengerCount" data-value="@item.PassengerCount">@item.PassengerCount</td>
+                            <td data-field="delayInMinutes" data-value="@item.DelayInMinutes">@item.DelayInMinutes</td>
+                            <td data-field="scheduledDeparture" data-value="@item.ScheduledDeparture?.ToString("yyyy-MM-ddTHH:mm")">@item.ScheduledDeparture?.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td data-field="scheduledArrival" data-value="@item.ScheduledArrival?.ToString("yyyy-MM-ddTHH:mm")">@item.ScheduledArrival?.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td data-field="actualDeparture" data-value="@item.ActualDeparture?.ToString("yyyy-MM-ddTHH:mm")">@item.ActualDeparture?.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td data-field="actualArrival" data-value="@item.ActualArrival?.ToString("yyyy-MM-ddTHH:mm")">@item.ActualArrival?.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td data-field="createdAt" data-value="@item.CreatedAt.ToString("yyyy-MM-ddTHH:mm")">@item.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td data-field="updatedAt" data-value="@item.UpdatedAt?.ToString("yyyy-MM-ddTHH:mm")">@item.UpdatedAt?.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning edit-trip-task" data-id="@item.Id">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger delete-trip-task" data-id="@item.Id">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="17" class="text-center text-muted">Kayıtlı görev bulunamadı.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

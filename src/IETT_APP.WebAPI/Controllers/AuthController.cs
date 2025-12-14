@@ -64,5 +64,28 @@ namespace IETT_APP.WebAPI.Controllers
             await _authService.LogoutAsync(userId);
             return Ok(new { message = "Çıkış yapıldı." });
         }
+
+        // POST: api/auth/change-password
+        [HttpPost("change-password")]
+        [Authorize] // Token ZORUNLU
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            // Token içindeki User ID'yi alıyoruz (Güvenlik için)
+            // Body'den ID almak yerine Token'dan almak başkasının şifresini değiştirmeyi engeller.
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId)) return Unauthorized("Kullanıcı kimliği doğrulanamadı.");
+
+            var result = await _authService.ChangePasswordAsync(userId, dto);
+
+            if (result.Succeeded)
+            {
+                return Ok(new { message = result.Message });
+            }
+
+            return BadRequest(new { message = "Hata oluştu", errors = result.Errors });
+        }
     }
 }

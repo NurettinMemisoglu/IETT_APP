@@ -1,124 +1,167 @@
-﻿@using IETT_APP.Domain.Entities
-@using IETT_APP.WebMVC.Areas.Admin.Models
+﻿@using IETT_APP.WebMVC.Areas.Admin.Models
 @model UserViewModel
-@{
-	ViewData["Title"] = "User Management";
 
+@{
+    ViewData["Title"] = "Kullanıcı Yönetimi";
 }
 
-<div class="container mt-4" id="addUserSection">
-	<h2 class="mb-3">Create New User</h2>
-	@if (TempData["SuccessMessage"] != null)
-	{
-		<div class="alert alert-success">@TempData["SuccessMessage"]</div>
-	}
-	@if (TempData["ErrorMessage"] != null)
-	{
-		<div class="alert alert-danger">@TempData["ErrorMessage"]</div>
-	}
-
-	<h5 class="mt-2">
-		<a asp-action="Register" asp-area="Identity" asp-controller="Account" asp-route-fromAdmin="true">
-			Add a User
-		</a>
-</h5>
-</div>
-<div class="container mt-4" id="manageUsersSection">
-	<h2 class="mb-3">Manage Users</h2>
-	<table class="table table-bordered table-striped align-middle">
-		<thead>
-			<tr>
-				<th>Full Name</th>
-				<th>Username</th>
-				<th>Roles</th>
-				<th>Actions</th>
-				<th>Role Placement</th>
-			</tr>
-		</thead>
-		<tbody>
-			@if (Model.Users.Count() == 0)
-			{
-				<tr>
-					<td colspan="4" class="text-center">No users found.</td>
-				</tr>
-			}else
-			{
-				@foreach (var user in Model.Users)
-				{
-					<tr>
-						<td>@user.FullName</td>
-						<td>@user.Email</td>
-						<td>
-							@foreach (var roleName in user.RoleNames)
-							{
-								<div>@roleName</div>
-							}
-						</td>
-						<td>
-							<form method="post" asp-action="Delete" asp-route-id="@user.Id">
-								<button type="submit" class="btn btn-danger btn-sm">
-									Delete User
-								</button>
-							</form>
-						</td>
-						<td>
-							@foreach (var role in Model.Roles)
-							{
-								if (user.RoleNames.Contains(role.Name))
-								{
-									<form method="post" asp-action="RemoveRole" asp-route-userId="@user.Id" asp-route-roleName="@role.Name" class="d-inline">
-										<button type="submit" class="btn btn-warning btn-sm">
-											Remove @role.Name
-										</button>
-									</form>
-								}
-								else
-								{
-									<form method="post" asp-action="AddRole" asp-route-userId="@user.Id" asp-route-roleName="@role.Name" class="d-inline">
-										<button type="submit" class="btn btn-success btn-sm">
-											Add @role.Name
-										</button>
-									</form>
-								}
-							}
-						</td>
-					</tr>
-				}
-
-			}
-			</tbody>
-	</table>
-</div>
-<div class="container mt-4" id="manageRolesSection">
-	<h2 class="mb-3">Manage Roles</h2>
-
-<form method="post" asp-action="CreateRole" class="mb-3">
-	<div class="input-group">
-		<input type="text" id="roleName" name="roleName" class="form-control" placeholder="New Role Name" required />
-		<button type="submit" class="btn btn-primary">Create Role</button>
-	</div>
-</form>
-
-<table class="table table-bordered table-striped table-sm">
-	<thead>
-		<tr>
-			<th>Role Name</th>
-			<th>Actions</th>
-		</tr>
-	</thead>
-	<tbody>
-		@foreach (var role in Model.Roles)
-		{
-			<tr>
-				<td>@role.Name</td>
-				<td>
-					<form method="post" asp-action="DeleteRole" asp-route-roleId="@role.Id" class="d-inline">
-						<button type="submit" class="btsn btn-danger btn-sm">Delete Role</button>
-					</form>
-				</td>
-			</tr>
-		}
-	</tbody>
-</table>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Kullanıcı ve Rol Yönetimi</h1>
 </div>
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card card-primary card-outline mb-4" id="manageUsersSection">
+    <div class="card-header">
+        <h3 class="card-title">Kullanıcılar</h3>
+        <div class="card-tools">
+            <a asp-action="Register" asp-area="" asp-controller="Auth" asp-route-fromAdmin="true" class="btn btn-sm btn-primary">
+                <i class="bi bi-person-plus"></i> Yeni Kullanıcı Ekle
+            </a>
+        </div>
+    </div>
+
+    <div class="card-body table-responsive p-0">
+        <table class="table table-hover table-striped align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Ad Soyad</th>
+                    <th>Email (Kullanıcı Adı)</th>
+                    <th>Mevcut Roller</th>
+                    <th>İşlemler</th>
+                    <th style="width: 40%;">Rol Yönetimi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Users == null || !Model.Users.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">Kullanıcı bulunamadı.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var user in Model.Users)
+                    {
+                        <tr>
+                            <td>@user.Name @user.Surname</td>
+                            <td>@user.Email</td>
+                            <td>
+                                @foreach (var roleName in user.RoleNames)
+                                {
+                                    <span class="badge bg-info text-dark me-1">@roleName</span>
+                                }
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-warning btn-sm"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalEditUser_@user.Id">
+                                    <i class="bi bi-pencil-square"></i> Düzenle
+                                </button>
+
+                                <form method="post" asp-action="Delete" asp-route-id="@user.Id" class="d-inline" onsubmit="return confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?');">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="bi bi-trash"></i> Sil
+                                    </button>
+                                </form>
+
+                                <partial name="_UpdateUserModal" model="user" />
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1">
+                                    @foreach (var role in Model.Roles)
+                                    {
+                                        if (user.RoleNames.Contains(role.Name))
+                                        {
+                                            <form method="post" asp-action="RemoveRole" asp-route-userId="@user.Id" asp-route-roleName="@role.Name">
+                                                <button type="submit" class="btn btn-warning btn-xs" title="@role.Name rolünü kaldır">
+                                                    <i class="bi bi-dash-circle"></i> @role.Name
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form method="post" asp-action="AddRole" asp-route-userId="@user.Id" asp-route-roleName="@role.Name">
+                                                <button type="submit" class="btn btn-outline-success btn-xs" title="@role.Name rolünü ekle">
+                                                    <i class="bi bi-plus-circle"></i> @role.Name
+                                                </button>
+                                            </form>
+                                        }
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row" id="manageRolesSection">
+    <div class="col-md-6">
+        <div class="card card-secondary card-outline">
+            <div class="card-header">
+                <h3 class="card-title">Sistem Rolleri</h3>
+            </div>
+            <div class="card-body">
+
+                <form method="post" asp-action="CreateRole" class="mb-4">
+                    <label class="form-label">Yeni Rol Oluştur</label>
+                    <div class="input-group">
+                        <input type="text" id="roleName" name="roleName" class="form-control" placeholder="Rol Adı (Örn: Manager)" required />
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-plus-lg"></i> Oluştur
+                        </button>
+                    </div>
+                </form>
+
+                <table class="table table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th>Rol Adı</th>
+                            <th style="width: 100px;">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Roles != null && Model.Roles.Any())
+                        {
+                            @foreach (var role in Model.Roles)
+                            {
+                                <tr>
+                                    <td>@role.Name</td>
+                                    <td>
+                                        <form method="post" asp-action="DeleteRole" asp-route-roleId="@role.Name" onsubmit="return confirm('@role.Name rolünü silmek istediğinize emin misiniz?');">
+                                            <button type="submit" class="btn btn-danger btn-sm w-100">
+                                                <i class="bi bi-trash"></i> Sil
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="2" class="text-center">Sistemde tanımlı rol yok.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

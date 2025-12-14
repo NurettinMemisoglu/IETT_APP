@@ -1,19 +1,15 @@
-﻿
-
-using IETT_APP.Domain.Entities;
-using IETT_APP.Infrastructure.Persistence;
-using IETT_APP.WebMVC.Services.Implementations;
+﻿using IETT_APP.WebMVC.Services.Implementations;
+using IETT_APP.WebMVC.Services.Infrastructure;
 using IETT_APP.WebMVC.Services.Interfaces;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Localization;
-using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ----------------------
-// Localization (EN culture)
-// ----------------------
+// ==================================================================================
+// 1. TEMEL AYARLAR (Culture & HttpContext)
+// ==================================================================================
 var defaultCulture = new CultureInfo("en-US");
 var localizationOptions = new RequestLocalizationOptions
 {
@@ -22,122 +18,121 @@ var localizationOptions = new RequestLocalizationOptions
     SupportedUICultures = new List<CultureInfo> { defaultCulture }
 };
 
-// ----------------------
-// Database
-// ----------------------
-var connectionString = builder.Configuration.GetConnectionString("AppDbContextConnection")
-                       ?? throw new InvalidOperationException("Connection string 'AppDbContextConnection' not found.");
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
+CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 
-// ----------------------
-// Identity
-// ----------------------
-builder.Services.AddDefaultIdentity<User>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = false;
-})
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<AppDbContext>();
-
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages(); // Required for Identity UI
 
-// ----------------------
-// Session & Caching
-// ----------------------
+// ==================================================================================
+// 2. SESSION & CACHE
+// ==================================================================================
 builder.Services.AddMemoryCache();
 builder.Services.AddDistributedMemoryCache();
-
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
 });
 
-// ----------------------
-// HttpContext
-// ----------------------
-builder.Services.AddHttpContextAccessor();
+// ==================================================================================
+// 3. AUTHENTICATION (COOKIE)
+// ==================================================================================
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Auth/Login";
+        options.LogoutPath = "/Auth/Logout";
+        options.AccessDeniedPath = "/Auth/AccessDenied";
+        options.Cookie.Name = "IETT_Session";
+        options.ExpireTimeSpan = TimeSpan.FromHours(1);
+        options.SlidingExpiration = true;
+    });
 
-// ----------------------
-// API Servisleri
-// ----------------------
+// ==================================================================================
+// 4. API SERVİSLERİ VE HTTPCLIENT YAPILANDIRMASI
+// ==================================================================================
+
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"]
-                 ?? throw new InvalidOperationException("ApiSettings:BaseUrl is missing.");
+                 ?? throw new InvalidOperationException("ApiSettings:BaseUrl is missing in appsettings.json");
 
+// Token Handler'ı DI Container'a ekle
+builder.Services.AddTransient<JwtDelegatingHandler>();
 
-builder.Services.AddHttpClient<IApiUserService, ApiUserService>(client =>
+// Ortak HttpClient Ayarı
+void ConfigureApi(HttpClient client)
 {
     client.BaseAddress = new Uri(apiBaseUrl);
-});
+    client.DefaultRequestHeaders.Accept.Clear();
+    client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+}
 
-builder.Services.AddHttpClient<IStopApiService, StopApiService>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
-builder.Services.AddHttpClient<ILineApiService, LineApiService>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
-builder.Services.AddHttpClient<IRouteApiService, RouteApiService>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
-builder.Services.AddHttpClient<IVehicleApiService, VehicleApiService>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
-builder.Services.AddHttpClient<IGarageApiService, GarageApiService>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
-builder.Services.AddHttpClient<ITripTaskApiService, TripTaskApiService>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
+// --- Servis Kayıtları ---
 
-// ----------------------
-// Cookie & Authentication
-// ----------------------
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.LoginPath = "/Identity/Account/Login";
-    options.LogoutPath = "/Identity/Account/Logout";
-    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-    options.ExpireTimeSpan = TimeSpan.FromHours(1);
-    options.Cookie.SameSite = SameSiteMode.Strict;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-});
+builder.Services.AddHttpClient<IAuthApiService, AuthApiService>(ConfigureApi)
+    .AddHttpMessageHandler<JwtDelegatingHandler>();
 
-// ----------------------
-// Build App
-// ----------------------
+builder.Services.AddHttpClient<IApiUserService, ApiUserService>(ConfigureApi)
+    .AddHttpMessageHandler<JwtDelegatingHandler>();
 
-// ✅ Global Culture Fix – decimal’ler artık her zaman “.” kullanacak
-CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
-CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
+builder.Services.AddHttpClient<IDriverApiService, DriverApiService>(ConfigureApi)
+    .AddHttpMessageHandler<JwtDelegatingHandler>();
 
+builder.Services.AddHttpClient<IStopApiService, StopApiService>(ConfigureApi)
+    .AddHttpMessageHandler<JwtDelegatingHandler>();
+
+builder.Services.AddHttpClient<ILineApiService, LineApiService>(ConfigureApi)
+    .AddHttpMessageHandler<JwtDelegatingHandler>();
+
+builder.Services.AddHttpClient<IRouteApiService, RouteApiService>(ConfigureApi)
+    .AddHttpMessageHandler<JwtDelegatingHandler>();
+
+builder.Services.AddHttpClient<IVehicleApiService, VehicleApiService>(ConfigureApi)
+    .AddHttpMessageHandler<JwtDelegatingHandler>();
+
+builder.Services.AddHttpClient<IGarageApiService, GarageApiService>(ConfigureApi)
+    .AddHttpMessageHandler<JwtDelegatingHandler>();
+
+builder.Services.AddHttpClient<ITripTaskApiService, TripTaskApiService>(ConfigureApi)
+    .AddHttpMessageHandler<JwtDelegatingHandler>();
+
+builder.Services.AddHttpClient<INotificationApiService, NotificationApiService>(ConfigureApi)
+    .AddHttpMessageHandler<JwtDelegatingHandler>();
+
+// 3. Helper Servisler (Scoped)
+builder.Services.AddScoped<IUserSessionApiService, UserSessionApiService>();
+
+
+// ==================================================================================
+// 5. MIDDLEWARE PIPELINE
+// ==================================================================================
 var app = builder.Build();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRequestLocalization(localizationOptions);
 app.UseRouting();
+
 app.UseSession();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-// ----------------------
 // Route Mappings
-// ----------------------
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
-app.MapRazorPages(); // Enable Identity UI pages
+    pattern: "{controller=Auth}/{action=Login}/{id?}"); // Açılışta Login
 
 app.Run();

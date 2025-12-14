@@ -1,70 +1,29 @@
-﻿<!-- Admin rolü sidebar menu -->
-<ul class="nav sidebar-menu flex-column"
-    data-lte-toggle="treeview"
-    role="navigation"
-    aria-label="Main navigation"
-    data-accordion="false"
-    id="navigation">
+﻿<ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="navigation" data-accordion="false">
 
-    <!-- Users Menu -->
-    <li class="nav-item menu-open">
-        <a href="#" class="nav-link active">
-            <i class="nav-icon bi bi-speedometer"></i>
+    <li class="nav-header">YÖNETİM PANELİ</li>
+
+    <li class="nav-item">
+        <a href="#" class="nav-link">
+            <i class="nav-icon bi bi-people-fill"></i>
             <p>
-                Users
+                Kullanıcılar
                 <i class="nav-arrow bi bi-chevron-right"></i>
             </p>
         </a>
         <ul class="nav nav-treeview">
             <li class="nav-item">
-                <a href="@Url.Action("Index", "User", new { area = "Admin" })#addUserSection" class="nav-link">
+                <a asp-area="Admin" asp-controller="User" asp-action="Index" class="nav-link">
                     <i class="nav-icon bi bi-circle"></i>
-                    <p>Add User</p>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="@Url.Action("Index", "User", new { area = "Admin" })#manageUsersSection" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Manage Users</p>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="@Url.Action("Index", "User", new { area = "Admin" })#manageRolesSection" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Add Role</p>
+                    <p>Listele / Yönet</p>
                 </a>
             </li>
         </ul>
     </li>
 
-
-</ul>
-
-<!-- Alt login/logout kısmı -->
-<ul class="nav flex-column" style="position: absolute; bottom: 10px; left: 0; width: 100%;">
-    @if (!User.Identity.IsAuthenticated)
-    {
-        <li class="nav-item">
-            <a asp-area="Identity" asp-controller="Account" asp-action="Register" class="nav-link">
-                <i class="nav-icon bi bi-person-plus"></i>
-                <p>Register</p>
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a asp-area="Identity" asp-controller="Account" asp-action="Login" class="nav-link">
-                <i class="nav-icon bi bi-box-arrow-in-right"></i>
-                <p>Login</p>
-            </a>
-        </li>
-    }
-    else
-    {
-        <li class="nav-item">
-            <a asp-area="Identity" asp-controller="Account" asp-action="Logout" class="nav-link">
-                <i class="nav-icon bi bi-box-arrow-right"></i>
-                <p>Logout</p>
-            </a>
-        </li>
-    }
+    <li class="nav-item">
+        <a asp-area="Admin" asp-controller="Garage" asp-action="Index" class="nav-link">
+            <i class="nav-icon bi bi-building"></i>
+            <p>Garaj Yönetimi</p>
+        </a>
+    </li>
 </ul>

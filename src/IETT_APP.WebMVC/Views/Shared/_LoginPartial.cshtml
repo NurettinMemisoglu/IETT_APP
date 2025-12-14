@@ -10,13 +10,13 @@
                         <a class="nav-link" asp-controller="Profile" asp-action="Index">Profile</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-action="Logout" asp-area="Identity" asp-controller="Account">Logout</a>
+                        <a class="nav-link" asp-action="Logout" asp-area="" asp-controller="Auth">Logout</a>
                     </li>
                 }
                 else
                 {
                     <li class="nav-item">
-                        <a class="nav-link" asp-action="Login" asp-area="Identity" asp-controller="Account">Sign In</a>
+                        <a class="nav-link" asp-action="Login" asp-controller="Auth">Sign In</a>
                     </li>
                 }
             </ul>

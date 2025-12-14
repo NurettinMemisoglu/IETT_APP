@@ -1,0 +1,83 @@
+﻿@using IETT_APP.WebMVC.Areas.Driver.Models
+@model DriverProfileViewModel
+
+<div class="row">
+    <div class="col-md-6">
+        <h5 class="text-primary border-bottom pb-2"><i class="bi bi-person-lines-fill me-2"></i> İletişim Bilgileri</h5>
+
+        <dl class="row mt-3">
+            <dt class="col-sm-4">Telefon</dt>
+            <dd class="col-sm-8">@Model.PhoneNumber</dd>
+
+            <dt class="col-sm-4">Adres</dt>
+            <dd class="col-sm-8">@(Model.Address ?? "-")</dd>
+
+            <dt class="col-sm-4">E-Posta</dt>
+            <dd class="col-sm-8">@Model.Email</dd>
+        </dl>
+    </div>
+
+    <div class="col-md-6">
+        <h5 class="text-danger border-bottom pb-2"><i class="bi bi-telephone-plus-fill me-2"></i> Acil Durum</h5>
+
+        <dl class="row mt-3">
+            <dt class="col-sm-4">İlgili Kişi</dt>
+            <dd class="col-sm-8">@(Model.EmergencyContactName ?? "-")</dd>
+
+            <dt class="col-sm-4">Telefon</dt>
+            <dd class="col-sm-8">
+                @if (!string.IsNullOrEmpty(Model.EmergencyContactPhone))
+                {
+                    <a href="tel:@Model.EmergencyContactPhone" class="text-decoration-none text-danger fw-bold">
+                        @Model.EmergencyContactPhone
+                    </a>
+                }
+                else
+                {
+                    <span>-</span>
+                }
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-12">
+        <h5 class="text-success border-bottom pb-2"><i class="bi bi-heart-pulse-fill me-2"></i> Sağlık Bilgileri</h5>
+
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-4">Kan Grubu</dt>
+                    <dd class="col-sm-8"><span class="badge bg-danger">@Model.BloodType</span></dd>
+
+                    <dt class="col-sm-4">Kronik Rahatsızlık</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.HasChronicDisease)
+                        {
+                            <span class="badge bg-warning text-dark">VAR</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">YOK</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <dl class="row">
+                    <dt class="col-sm-4">Sağlık Notları</dt>
+                    <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.HealthNotes) ? "Belirtilmemiş" : Model.HealthNotes)</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12 text-end">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateProfileModal">
+            <i class="bi bi-pencil-square me-1"></i> Bilgilerimi Güncelle
+        </button>
+    </div>
+</div>

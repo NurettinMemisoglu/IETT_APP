@@ -1,0 +1,63 @@
+﻿@using IETT_APP.Application.Dtos
+@model IEnumerable<NotificationDto>
+
+@{
+    var count = Model.Count();
+}
+
+<a class="nav-link" data-bs-toggle="dropdown" href="#">
+    <i class="bi bi-bell"></i>
+    @if (count > 0)
+    {
+        <span class="navbar-badge badge text-bg-warning" id="notificationCount">@count</span>
+    }
+    else
+    {
+        <span class="navbar-badge badge text-bg-warning" id="notificationCount" style="display:none;">0</span>
+    }
+</a>
+
+<div class="dropdown-menu dropdown-menu-lg dropdown-menu-end notification-dropdown-menu">
+    <span class="dropdown-item dropdown-header fw-bold text-center py-2" id="notificationHeader">
+        @count Yeni Bildirim
+    </span>
+
+    <div id="notificationList" style="max-height: 350px; overflow-y: auto;">
+        @foreach (var item in Model)
+        {
+            <a href="/MyNotifications/Index#notify-@item.Id" class="dropdown-item notification-item" data-id="@item.Id">
+                <div class="d-flex align-items-start">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="notification-icon-box">
+                            <i class="bi bi-envelope-exclamation fs-5"></i>
+                        </div>
+                    </div>
+
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="notification-title">@item.Title</span>
+                            <span class="notification-time">@item.CreatedAt.ToShortTimeString()</span>
+                        </div>
+
+                        <p class="notification-msg">
+                            @if (item.Message.Length > 60)
+                            {
+                                @item.Message.Substring(0, 60) <text>...</text>
+                            }
+                            else
+                            {
+                                @item.Message
+                            }
+                        </p>
+                    </div>
+                </div>
+            </a>
+        }
+    </div>
+
+    <div class="dropdown-divider m-0"></div>
+
+    <a asp-area="" asp-controller="MyNotifications" asp-action="Index" class="dropdown-item dropdown-footer text-center py-2 text-primary fw-bold">
+        Tüm Bildirimleri Gör
+    </a>
+</div>

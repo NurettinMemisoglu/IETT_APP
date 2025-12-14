@@ -4,14 +4,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace IETT_APP.Infrastructure.Services
 {
-
     public class TokenService : ITokenService
     {
         private readonly IConfiguration _config;
+
         public TokenService(IConfiguration config)
         {
             _config = config;
@@ -20,23 +21,36 @@ namespace IETT_APP.Infrastructure.Services
         public string GenerateToken(User user, IList<string> roles)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_config["Jwt:Key"]);
 
+            // 1. Key'i al (UTF8 daha güvenlidir)
+            // Eğer appsettings boşsa patlamasın diye varsayılan bir key koyduk.
+            var keyString = _config["Jwt:Key"] ?? "SuperSecretKey1234567890_SetInAppSettings";
+            var key = Encoding.UTF8.GetBytes(keyString);
+
+            // 2. Claims (Kimlik Bilgileri)
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email)
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.UserName ?? user.Email ?? ""),
+                new Claim(ClaimTypes.Email, user.Email ?? "")
             };
 
+            // Rolleri ekle
             foreach (var role in roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
+            // 3. Token Ayarları (KRİTİK DÜZELTME BURADA)
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(15),
+                Expires = DateTime.UtcNow.AddHours(1), // Token ömrü (Örn: 1 saat)
+
+                // Program.cs Validasyonuna Uyumlu Olması İçin Şunları Ekledik:
+                Issuer = _config["Jwt:Issuer"] ?? "IETT_API",
+                Audience = _config["Jwt:Audience"] ?? "IETT_Client",
+
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
@@ -44,10 +58,13 @@ namespace IETT_APP.Infrastructure.Services
             return tokenHandler.WriteToken(token);
         }
 
+        // Daha güvenli (Kriptografik) Refresh Token Üretimi
         public string GenerateRefreshToken()
         {
-            return Convert.ToBase64String(Guid.NewGuid().ToByteArray());
-
+            var randomNumber = new byte[32];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
         }
     }
 }

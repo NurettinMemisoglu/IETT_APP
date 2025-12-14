@@ -1,0 +1,66 @@
+﻿@using IETT_APP.WebMVC.Areas.Admin.Models
+@model DashboardViewModel
+
+@{
+    ViewData["Title"] = "Admin Paneli";
+
+    // Kutular için rastgele renk listesi
+    string[] bgColors = { "bg-info", "bg-success", "bg-warning", "bg-danger", "bg-primary", "bg-secondary", "bg-indigo", "bg-navy" };
+    int colorIndex = 0;
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Sistem Özeti</h1>
+</div>
+
+<div class="row">
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-primary">
+            <div class="inner">
+                <h3>@Model.TotalUserCount</h3>
+                <p>Toplam Kullanıcı</p>
+            </div>
+            <div class="icon">
+                <i class="bi bi-people-fill"></i>
+            </div>
+            <a asp-controller="User" asp-action="Index" class="small-box-footer">
+                Detaylar <i class="bi bi-arrow-right-circle"></i>
+            </a>
+        </div>
+    </div>
+
+    @foreach (var role in Model.RoleCounts)
+    {
+        // Renkleri sırayla seç
+        var currentColor = bgColors[colorIndex % bgColors.Length];
+        colorIndex++;
+
+        <div class="col-lg-3 col-6">
+            <div class="small-box @currentColor">
+                <div class="inner">
+                    <h3>@role.Value</h3>
+                    <p>Rol: @role.Key</p>
+                </div>
+                <div class="icon">
+                    @if (role.Key == "Driver")
+                    {
+                        <i class="bi bi-person-badge"></i>
+                    }
+                    else if (role.Key == "Admin")
+                    {
+
+                        <i class="bi bi-shield-lock"></i>
+                    }
+                    else
+                    {
+
+                        <i class="bi bi-person"></i>
+                    }
+                </div>
+                <a href="#" class="small-box-footer">
+                    Detaylar <i class="bi bi-arrow-right-circle"></i>
+                </a>
+            </div>
+        </div>
+    }
+</div>

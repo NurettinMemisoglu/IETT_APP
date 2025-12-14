@@ -1,4 +1,5 @@
 ﻿using IETT_APP.Application.Dtos;
+using IETT_APP.Application.Dtos.IETT_APP.Application.Dtos;
 
 namespace IETT_APP.Application.Interfaces
 {

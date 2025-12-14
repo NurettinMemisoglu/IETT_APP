@@ -25,7 +25,7 @@ namespace IETT_APP.WebMVC.Areas.Chief.Extensions
                 ActualDeparture = dto.ActualDeparture,
                 ActualArrival = dto.ActualArrival,
                 VehicleId = dto.VehicleId,
-                OperatorId = dto.OperatorId,
+                DriverId = dto.DriverId,
                 LineId = dto.LineId,
                 RouteId = dto.RouteId,
                 GarageId = dto.GarageId,
@@ -35,7 +35,7 @@ namespace IETT_APP.WebMVC.Areas.Chief.Extensions
 
                 // Name alanları DTO’dan dolacak
                 VehicleName = dto.VehicleName ?? string.Empty,
-                OperatorName = dto.OperatorName ?? string.Empty,
+                DriverName = dto.DriverName ?? string.Empty,
                 LineName = dto.LineName ?? string.Empty,
                 RouteName = dto.RouteName ?? string.Empty,
                 GarageName = dto.GarageName ?? string.Empty
@@ -49,14 +49,10 @@ namespace IETT_APP.WebMVC.Areas.Chief.Extensions
             {
                 Title = vm.Title,
                 Description = vm.Description,
-                Status = vm.Status,
-                PassengerCount = vm.PassengerCount,
-                DelayInMinutes = vm.DelayInMinutes,
-                DelayOutMinutes = vm.DelayOutMinutes,
                 ScheduledDeparture = vm.ScheduledDeparture,
                 ScheduledArrival = vm.ScheduledArrival,
                 VehicleId = vm.VehicleId,
-                OperatorId = vm.OperatorId,
+                DriverId = vm.DriverId,
                 LineId = vm.LineId,
                 RouteId = vm.RouteId,
                 GarageId = vm.GarageId
@@ -83,7 +79,7 @@ namespace IETT_APP.WebMVC.Areas.Chief.Extensions
                 ActualDeparture = vm.ActualDeparture,
                 ActualArrival = vm.ActualArrival,
                 VehicleId = vm.VehicleId,
-                OperatorId = vm.OperatorId,
+                DriverId = vm.DriverId,
                 LineId = vm.LineId,
                 RouteId = vm.RouteId,
                 GarageId = vm.GarageId

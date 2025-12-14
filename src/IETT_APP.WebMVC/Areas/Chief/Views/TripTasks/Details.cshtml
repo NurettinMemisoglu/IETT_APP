@@ -1,168 +1,188 @@
-﻿@model IETT_APP.Domain.Entities.TripTask
+﻿@using IETT_APP.WebMVC.Areas.Chief.Models
+@using IETT_APP.WebMVC.Extensions
+@using IETT_APP.Domain.Enums
+@model TripTaskViewModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Görev Detayı";
 }
 
-<h1>Details</h1>
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="m-0 fw-bold text-dark">
+            <i class="bi bi-file-text-fill text-info me-2"></i> Görev Detayları
+        </h3>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary shadow-sm">
+                <i class="bi bi-arrow-left me-1"></i> Listeye Dön
+            </a>
+        </div>
+    </div>
 
-<div>
-    <h4>TripTask</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PassengerCount)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PassengerCount)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DelayInMinutes)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DelayInMinutes)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DelayOutMinutes)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DelayOutMinutes)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ScheduledDeparture)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ScheduledDeparture)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ScheduledArrival)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ScheduledArrival)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AdjustedDeparture)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AdjustedDeparture)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AdjustedArrival)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AdjustedArrival)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ActualDeparture)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ActualDeparture)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ActualArrival)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ActualArrival)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Vehicle)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Vehicle.DoorNumber)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Operator)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Operator.EmployeeNumber)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Line)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Line.Code)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Route)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Route.Code)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Garage)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Garage.GarageName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CompletedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CompletedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsDeleted)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsDeleted)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedBy)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UpdatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdatedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UpdatedBy)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DeletedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DeletedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DeletedBy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DeletedBy)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+            <span class="font-monospace"><strong class="text-white-50">GÖREV ID:</strong> @Model.Id</span>
+
+            @{
+                var statusClass = Model.Status switch
+                {
+                    TaskState.Pending => "bg-warning text-dark",
+                    TaskState.InProgress => "bg-primary",
+                    TaskState.Completed => "bg-success",
+                    TaskState.Cancelled => "bg-danger",
+                    TaskState.Incomplete => "bg-secondary",
+                    _ => "bg-light text-dark"
+                };
+            }
+            <span class="badge @statusClass fs-6 px-3 py-2 border border-light">
+                @Model.Status.ToDisplayName()
+            </span>
+        </div>
+
+        <div class="card-body p-0">
+            <table class="table table-bordered table-striped mb-0" style="table-layout: fixed;">
+                <tbody class="align-middle">
+
+                    <tr class="table-primary">
+                        <th colspan="4" class="text-uppercase small fw-bold ps-3 py-2 text-primary">
+                            <i class="bi bi-info-circle me-1"></i> Temel Bilgiler
+                        </th>
+                    </tr>
+                    <tr>
+                        <th width="15%" class="bg-light ps-3">Başlık</th>
+                        <td width="35%" class="fw-bold">@Model.Title</td>
+                        <th width="15%" class="bg-light ps-3">Açıklama</th>
+                        <td width="35%">@(Model.Description ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light ps-3">Hat</th>
+                        <td><span class="badge bg-info text-dark">@Model.LineName</span></td>
+                        <th class="bg-light ps-3">Güzergah</th>
+                        <td>@Model.RouteName</td>
+                    </tr>
+
+                    <tr class="table-primary">
+                        <th colspan="4" class="text-uppercase small fw-bold ps-3 py-2 text-primary">
+                            <i class="bi bi-people-fill me-1"></i> Kaynaklar
+                        </th>
+                    </tr>
+                    <tr>
+                        <th class="bg-light ps-3">Atanan Araç</th>
+                        <td>
+                            <i class="bi bi-bus-front text-secondary me-2"></i>
+                            @(Model.VehicleName ?? "Atanmadı")
+                        </td>
+                        <th class="bg-light ps-3">Operatör (Şoför)</th>
+                        <td>
+                            <i class="bi bi-person-badge text-secondary me-2"></i>
+                            @(Model.DriverName ?? "Atanmadı")
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light ps-3">Çıkış Garajı</th>
+                        <td colspan="3">
+                            <i class="bi bi-building text-secondary me-2"></i>
+                            @(Model.GarageName ?? "Belirtilmedi")
+                        </td>
+                    </tr>
+
+                    <tr class="table-primary">
+                        <th colspan="4" class="text-uppercase small fw-bold ps-3 py-2 text-primary">
+                            <i class="bi bi-clock-history me-1"></i> Zamanlama Analizi (Kalkış / Varış)
+                        </th>
+                    </tr>
+                    <tr>
+                        <th class="bg-light ps-3">Planlanan</th>
+                        <td>@Model.ScheduledDeparture?.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td colspan="2">@Model.ScheduledArrival?.ToString("dd.MM.yyyy HH:mm")</td>
+                    </tr>
+
+                    @if (Model.AdjustedDeparture.HasValue || Model.AdjustedArrival.HasValue)
+                    {
+                        <tr>
+                            <th class="bg-light ps-3 text-warning">Revize Edilen</th>
+                            <td class="text-warning fw-bold">@Model.AdjustedDeparture?.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td colspan="2" class="text-warning fw-bold">@Model.AdjustedArrival?.ToString("dd.MM.yyyy HH:mm")</td>
+                        </tr>
+                    }
+
+                    <tr>
+                        <th class="bg-light ps-3">Gerçekleşen</th>
+                        <td class="@(Model.ActualDeparture.HasValue ? "text-success fw-bold" : "text-muted fst-italic")">
+                            @(Model.ActualDeparture?.ToString("dd.MM.yyyy HH:mm") ?? "Henüz Başlamadı")
+                        </td>
+                        <td colspan="2" class="@(Model.ActualArrival.HasValue ? "text-success fw-bold" : "text-muted fst-italic")">
+                            @(Model.ActualArrival?.ToString("dd.MM.yyyy HH:mm") ?? "Henüz Bitmedi")
+                        </td>
+                    </tr>
+
+                    <tr class="table-primary">
+                        <th colspan="4" class="text-uppercase small fw-bold ps-3 py-2 text-primary">
+                            <i class="bi bi-speedometer2 me-1"></i> Operasyonel Metrikler
+                        </th>
+                    </tr>
+                    <tr>
+                        <th class="bg-light ps-3">Yolcu Sayısı</th>
+                        <td>
+                            <span class="badge bg-light text-dark border">
+                                <i class="bi bi-people-fill me-1"></i> @(Model.PassengerCount ?? 0)
+                            </span>
+                        </td>
+                        <th class="bg-light ps-3">Durum Açıklaması</th>
+                        <td>@(Model.StatusReason ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light ps-3">Gecikme (Giriş)</th>
+                        <td>
+                            @if ((Model.DelayInMinutes ?? 0) > 0)
+                            {
+                                <span class="text-danger fw-bold"><i class="bi bi-arrow-up-right"></i> @Model.DelayInMinutes dk</span>
+                            }
+                            else
+                            {
+                                <span class="text-success">Zamanında</span>
+                            }
+                        </td>
+                        <th class="bg-light ps-3">Gecikme (Çıkış)</th>
+                        <td>
+                            @if ((Model.DelayOutMinutes ?? 0) > 0)
+                            {
+                                <span class="text-danger fw-bold"><i class="bi bi-arrow-up-right"></i> @Model.DelayOutMinutes dk</span>
+                            }
+                            else
+                            {
+                                <span class="text-success">Zamanında</span>
+                            }
+                        </td>
+                    </tr>
+
+                    <tr class="table-primary">
+                        <th colspan="4" class="text-uppercase small fw-bold ps-3 py-2 text-dark">
+                            <i class="bi bi-hdd-stack me-1"></i> Sistem Kayıtları
+                        </th>
+                    </tr>
+                    <tr>
+                        <th class="bg-light ps-3">Oluşturulma</th>
+                        <td>@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm:ss")</td>
+                        <th class="bg-light ps-3">Son Güncelleme</th>
+                        <td>@(Model.UpdatedAt?.ToString("dd.MM.yyyy HH:mm:ss") ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light ps-3">Silinme Durumu</th>
+                        <td colspan="3">
+                            @if (Model.IsDeleted)
+                            {
+                                <span class="badge bg-danger">SİLİNMİŞ KAYIT</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">AKTİF</span>
+                            }
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>

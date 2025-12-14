@@ -1,4 +1,5 @@
 ﻿using IETT_APP.Application.Dtos;
+using IETT_APP.Application.Dtos.IETT_APP.Application.Dtos;
 using IETT_APP.Application.Interfaces;
 using IETT_APP.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -22,7 +23,8 @@ namespace IETT_APP.Infrastructure.Services
             return new ProfileDto
             {
                 Email = user.Email ?? "",
-                FullName = user.FullName ?? ""
+                Name = user.Name ?? "",
+                Surname = user.Surname ?? ""
             };
         }
 
@@ -32,8 +34,8 @@ namespace IETT_APP.Infrastructure.Services
             if (user == null) return false;
 
             user.Email = dto.Email;
-            if (!string.IsNullOrWhiteSpace(dto.FullName))
-                user.FullName = dto.FullName;
+            if (!string.IsNullOrWhiteSpace(dto.Name))
+                user.Name = dto.Name;
 
             var result = await _userManager.UpdateAsync(user);
             return result.Succeeded;

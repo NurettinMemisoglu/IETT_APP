@@ -22,6 +22,186 @@ namespace IETT_APP.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("IETT_APP.Domain.Entities.Driver", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BloodType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DriverType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EmergencyContactName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmergencyContactPhone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmployeeNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("EmploymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("GarageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("HasChronicDisease")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("HealthNotes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LicenseClass")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LicenseDocumentPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LicenseExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LicenseNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProfileImagePath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PsychotechnicDocumentPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("PsychotechnicExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SocialSecurityNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SrcCertificateNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TCIdentityNumber")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("WorkStatus")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeNumber")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("GarageId");
+
+                    b.HasIndex("TCIdentityNumber")
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
+
+                    b.ToTable("Drivers");
+                });
+
+            modelBuilder.Entity("IETT_APP.Domain.Entities.FileRecorder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FileCategory")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileExtension")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OriginalFileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FileRecorders");
+                });
+
             modelBuilder.Entity("IETT_APP.Domain.Entities.Garage<System.Guid>", b =>
                 {
                     b.Property<Guid>("Id")
@@ -122,7 +302,7 @@ namespace IETT_APP.Infrastructure.Migrations
                     b.ToTable("Lines");
                 });
 
-            modelBuilder.Entity("IETT_APP.Domain.Entities.Operator", b =>
+            modelBuilder.Entity("IETT_APP.Domain.Entities.Notification", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -140,17 +320,27 @@ namespace IETT_APP.Infrastructure.Migrations
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("EmployeeNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Name")
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LinkUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -160,9 +350,14 @@ namespace IETT_APP.Infrastructure.Migrations
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Operators");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.Route<System.Guid>", b =>
@@ -281,6 +476,9 @@ namespace IETT_APP.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("AcknowledgedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("ActualArrival")
                         .HasColumnType("datetime2");
 
@@ -318,16 +516,28 @@ namespace IETT_APP.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("DriverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DriverNotes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("EndOdometer")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<Guid?>("GarageId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsAcknowledged")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<Guid?>("LineId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("OperatorId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("PassengerCount")
@@ -342,8 +552,14 @@ namespace IETT_APP.Infrastructure.Migrations
                     b.Property<DateTime?>("ScheduledDeparture")
                         .HasColumnType("datetime2");
 
+                    b.Property<decimal?>("StartOdometer")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
+
+                    b.Property<string>("StatusReason")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -360,11 +576,11 @@ namespace IETT_APP.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DriverId");
+
                     b.HasIndex("GarageId");
 
                     b.HasIndex("LineId");
-
-                    b.HasIndex("OperatorId");
 
                     b.HasIndex("RouteId");
 
@@ -416,6 +632,18 @@ namespace IETT_APP.Infrastructure.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -423,14 +651,20 @@ namespace IETT_APP.Infrastructure.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("FullName")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -452,8 +686,17 @@ namespace IETT_APP.Infrastructure.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Surname")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
@@ -462,12 +705,14 @@ namespace IETT_APP.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
+                        .IsUnique()
+                        .HasDatabaseName("EmailIndex")
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -491,7 +736,6 @@ namespace IETT_APP.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -526,6 +770,12 @@ namespace IETT_APP.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Driver")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FuelLevel")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("GarageId")
                         .HasColumnType("uniqueidentifier");
 
@@ -557,9 +807,6 @@ namespace IETT_APP.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<int>("Model")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Operator")
                         .HasColumnType("int");
 
                     b.Property<string>("PlateNumber")
@@ -724,6 +971,23 @@ namespace IETT_APP.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("IETT_APP.Domain.Entities.Driver", b =>
+                {
+                    b.HasOne("IETT_APP.Domain.Entities.Garage<System.Guid>", "Garage")
+                        .WithMany()
+                        .HasForeignKey("GarageId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("IETT_APP.Domain.Entities.User", "User")
+                        .WithOne("Driver")
+                        .HasForeignKey("IETT_APP.Domain.Entities.Driver", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Garage");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("IETT_APP.Domain.Entities.Garage<System.Guid>", b =>
                 {
                     b.OwnsOne("IETT_APP.Domain.Entities.Location", "Location", b1 =>
@@ -749,6 +1013,15 @@ namespace IETT_APP.Infrastructure.Migrations
 
                     b.Navigation("Location")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("IETT_APP.Domain.Entities.Notification", b =>
+                {
+                    b.HasOne("IETT_APP.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.Route<System.Guid>", b =>
@@ -810,6 +1083,11 @@ namespace IETT_APP.Infrastructure.Migrations
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.TripTask", b =>
                 {
+                    b.HasOne("IETT_APP.Domain.Entities.Driver", "Driver")
+                        .WithMany("TripTasks")
+                        .HasForeignKey("DriverId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("IETT_APP.Domain.Entities.Garage<System.Guid>", "Garage")
                         .WithMany("TripTasks")
                         .HasForeignKey("GarageId");
@@ -817,10 +1095,6 @@ namespace IETT_APP.Infrastructure.Migrations
                     b.HasOne("IETT_APP.Domain.Entities.Line<System.Guid>", "Line")
                         .WithMany("TripTasks")
                         .HasForeignKey("LineId");
-
-                    b.HasOne("IETT_APP.Domain.Entities.Operator", "Operator")
-                        .WithMany("TripTasks")
-                        .HasForeignKey("OperatorId");
 
                     b.HasOne("IETT_APP.Domain.Entities.Route<System.Guid>", "Route")
                         .WithMany("TripTasks")
@@ -830,11 +1104,11 @@ namespace IETT_APP.Infrastructure.Migrations
                         .WithMany("TripTasks")
                         .HasForeignKey("VehicleId");
 
+                    b.Navigation("Driver");
+
                     b.Navigation("Garage");
 
                     b.Navigation("Line");
-
-                    b.Navigation("Operator");
 
                     b.Navigation("Route");
 
@@ -854,9 +1128,7 @@ namespace IETT_APP.Infrastructure.Migrations
                 {
                     b.HasOne("IETT_APP.Domain.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
@@ -923,6 +1195,11 @@ namespace IETT_APP.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("IETT_APP.Domain.Entities.Driver", b =>
+                {
+                    b.Navigation("TripTasks");
+                });
+
             modelBuilder.Entity("IETT_APP.Domain.Entities.Garage<System.Guid>", b =>
                 {
                     b.Navigation("TripTasks");
@@ -932,11 +1209,6 @@ namespace IETT_APP.Infrastructure.Migrations
                 {
                     b.Navigation("Routes");
 
-                    b.Navigation("TripTasks");
-                });
-
-            modelBuilder.Entity("IETT_APP.Domain.Entities.Operator", b =>
-                {
                     b.Navigation("TripTasks");
                 });
 
@@ -955,6 +1227,11 @@ namespace IETT_APP.Infrastructure.Migrations
             modelBuilder.Entity("IETT_APP.Domain.Entities.TripTask", b =>
                 {
                     b.Navigation("TripTaskHistories");
+                });
+
+            modelBuilder.Entity("IETT_APP.Domain.Entities.User", b =>
+                {
+                    b.Navigation("Driver");
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.Vehicle<System.Guid>", b =>

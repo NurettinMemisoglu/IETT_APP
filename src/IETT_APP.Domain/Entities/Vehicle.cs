@@ -15,17 +15,17 @@ namespace IETT_APP.Domain.Entities
         public Garage<T> Garage { get; set; } = null!;
         public ServiceStatus ServiceStatus { get; set; } = ServiceStatus.InService;
         public string? StatusReason { get; set; } = null;
-        public VehicleOperator Operator { get; set; }
+        public VehicleType Driver { get; set; }
         public VehicleModel Model { get; set; }
         public int Year { get; set; }
         public int TotalKm { get; set; }
+        public int FuelLevel { get; set; } // yüzde olarak
         public bool HasDisabilityAccess { get; set; } = true;
         public bool HasWiFi { get; set; } = true;
         public bool HasBikeRack { get; set; } = false;
         public bool HasMobileCharging { get; set; } = false;
         public bool HasPassengerInfoSystem { get; set; } = false;
         public bool HasCCTV { get; set; } = true;
-        public bool IsActive { get; set; } = true;
 
         public ICollection<TripTask> TripTasks { get; set; } = new List<TripTask>();
     }

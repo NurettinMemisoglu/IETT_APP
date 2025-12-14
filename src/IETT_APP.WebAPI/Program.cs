@@ -1,29 +1,31 @@
-﻿using IETT_APP.Application.Interfaces;
+﻿using Hangfire;
+using IETT_APP.Application.Interfaces;
 using IETT_APP.Application.Interfaces.Garages;
 using IETT_APP.Application.Mapping;
 using IETT_APP.Domain.Entities;
 using IETT_APP.Domain.Interfaces;
 using IETT_APP.Domain.Services;
+using IETT_APP.Infrastructure.Hubs;
 using IETT_APP.Infrastructure.Persistence;
 using IETT_APP.Infrastructure.Persistence.Interceptors;
 using IETT_APP.Infrastructure.Persistence.Repositories;
 using IETT_APP.Infrastructure.Persistence.Seed;
 using IETT_APP.Infrastructure.Services;
-using IETT_APP.WebAPI.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models; // Gerekli
 using Scalar.AspNetCore;
 using System.Globalization;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ----------------------
-// Localization (EN culture)
-// ----------------------
+// ==================================================================================
+// 1. GLOBAL CONFIGURATIONS (Culture & Settings)
+// ==================================================================================
 var defaultCulture = new CultureInfo("en-US");
 var localizationOptions = new RequestLocalizationOptions
 {
@@ -31,42 +33,37 @@ var localizationOptions = new RequestLocalizationOptions
     SupportedCultures = new List<CultureInfo> { defaultCulture },
     SupportedUICultures = new List<CultureInfo> { defaultCulture }
 };
+CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
+CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 
-// ✅ Global Culture Fix – her zaman nokta (.) kullan
-CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
-CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
+// ==================================================================================
+// 2. INFRASTRUCTURE SETUP (DB, Identity, Auth)
+// ==================================================================================
+builder.Services.AddSignalR();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<AuditInterceptor>();
+builder.Services.AddScoped<TripTaskHistoryInterceptor>();
 
-// ----------------------
-// Timezone Fix (UTC+3 Türkiye Saati)
-// ----------------------
-TimeZoneInfo turkeyZone = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
-TimeZoneInfo.ClearCachedData();
+builder.Services.AddDbContext<AppDbContext>((sp, options) =>
+{
+    var auditInterceptor = sp.GetRequiredService<AuditInterceptor>();
+    var historyInterceptor = sp.GetRequiredService<TripTaskHistoryInterceptor>();
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+            .AddInterceptors(auditInterceptor, historyInterceptor);
+});
 
-// Tüm DateTime kayıtlarını Türkiye saatine göre ayarlamak için helper
-DateTime nowTurkey = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, turkeyZone);
-
-// Uygulama genelinde DateTime.Now Türkiye saatine eşit olacak şekilde
-AppContext.SetSwitch("System.Globalization.UseNls", true);
-DateTime.SpecifyKind(nowTurkey, DateTimeKind.Local);
-
-// ----------------------
-// Database & Identity
-// ----------------------
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
+    options.User.RequireUniqueEmail = true;
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 6;
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
-
-// ----------------------
-// JWT Authentication
-// ----------------------
-var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
-
+// --- JWT Authentication ---
+var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"] ?? "SuperSecretKey1234567890_SetInAppSettings");
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -85,12 +82,37 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"]
     };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/hubs")))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
-// ----------------------
-// Dependency Injection
-// ----------------------
-// Service Line
+// ==================================================================================
+// 3. DEPENDENCY INJECTION (Services & Repositories)
+// ==================================================================================
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped(typeof(IRouteRepository<>), typeof(RouteRepository<>));
+builder.Services.AddScoped(typeof(ILineRepository<>), typeof(LineRepository<>));
+builder.Services.AddScoped(typeof(IVehicleRepository<>), typeof(VehicleRepository<>));
+builder.Services.AddScoped<ITripTaskRepository, TripTaskRepository>();
+builder.Services.AddScoped<IDriverRepository, DriverRepository>();
+builder.Services.AddScoped<IUserRefreshTokenRepository, UserRefreshTokenRepository>();
+builder.Services.AddScoped<IGarageRepository, GarageRepository>();
+builder.Services.AddScoped<IFileRepository, FileRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
@@ -102,87 +124,246 @@ builder.Services.AddScoped<ILineService<Guid>, LineService<Guid>>();
 builder.Services.AddScoped<IVehicleService<Guid>, VehicleService<Guid>>();
 builder.Services.AddScoped<IGarageService, GarageService>();
 builder.Services.AddScoped<ITripTaskService, TripTaskService>();
+builder.Services.AddScoped<IDriverService, DriverService>();
+builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+builder.Services.AddScoped<IOperationJobService, OperationJobService>();
+
+builder.Services.AddScoped<DriverDomainService>();
 builder.Services.AddScoped<TripTaskDomainService>();
 
-builder.Services.AddScoped<AuditInterceptor>();
-// Repository Line
-builder.Services.AddScoped<IRouteRepository<Guid>, RouteRepository<Guid>>();
-builder.Services.AddScoped<ILineRepository<Guid>, LineRepository<Guid>>();
-builder.Services.AddScoped<IVehicleRepository<Guid>, VehicleRepository<Guid>>();
-builder.Services.AddScoped<ITripTaskRepository, TripTaskRepository>();
-//AutoMapper Line
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<LineProfile>();
     cfg.AddProfile<RouteProfile>();
     cfg.AddProfile<VehicleProfile>();
     cfg.AddProfile<TripTaskProfile>();
+    cfg.AddProfile<UserProfile>();
+    cfg.AddProfile<DriverProfile>();
+    cfg.AddProfile<NotificationProfile>();
 });
 
-// ----------------------
-// CORS
-// ----------------------
+
+// ==================================================================================
+// 4. API CONFIGURATION (CORS, Controllers, OpenAPI)
+// ==================================================================================
+
 var mvcOrigin = builder.Configuration["MvcClient:Url"] ?? "https://localhost:5001";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("MvcClient", p =>
         p.WithOrigins(mvcOrigin)
          .AllowAnyHeader()
-         .AllowAnyMethod());
+         .AllowAnyMethod()
+         .AllowCredentials());
 });
 
-// ----------------------
-// Controllers & OpenAPI
-// ----------------------
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddControllers()
+    // Sonsuz döngü (Circular Reference) hatasını çözmek için:
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
+
+// 🔥 GÜNCELLENMİŞ VE BİRLEŞTİRİLMİŞ OPENAPI AYARI 🔥
+builder.Services.AddOpenApi(options =>
+{
+    // 1. Genel Bilgiler ve JWT
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Info = new OpenApiInfo
+        {
+            Title = "IETT API",
+            Version = "v1",
+            Description = "IETT Operasyon Yönetim Sistemi API"
+        };
+
+        var securityScheme = new OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            In = ParameterLocation.Header,
+            Description = "Token'ı buraya yapıştırın."
+        };
+
+        document.Components ??= new OpenApiComponents();
+        if (!document.Components.SecuritySchemes.ContainsKey("Bearer"))
+        {
+            document.Components.SecuritySchemes.Add("Bearer", securityScheme);
+        }
+
+        document.SecurityRequirements.Add(new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                },
+                new List<string>()
+            }
+        });
+
+        return Task.CompletedTask;
+    });
+
+    // 2. SCALAR DOSYA YÜKLEME DÜZELTMESİ (TEK BLOK)
+    options.AddOperationTransformer((operation, context, cancellationToken) =>
+    {
+        var path = context.Description.RelativePath;
+        if (string.IsNullOrEmpty(path)) return Task.CompletedTask;
+
+        // SENARYO A: Profil Fotoğrafı Yükleme (upload-photo)
+        if (path.Contains("upload-photo", StringComparison.OrdinalIgnoreCase))
+        {
+            if (operation.RequestBody?.Content.ContainsKey("multipart/form-data") == true)
+            {
+                var schema = operation.RequestBody.Content["multipart/form-data"].Schema;
+
+                // Temizle ve yeniden oluştur
+                schema.Properties.Clear();
+                schema.Type = "object";
+
+                schema.Properties.Add("photo", new OpenApiSchema
+                {
+                    Type = "string",
+                    Format = "binary",
+                    Description = "Yüklenecek resim dosyası"
+                });
+
+                schema.Required = new HashSet<string> { "photo" };
+
+                // Diğer content tiplerini temizle
+                operation.RequestBody.Content.Clear();
+                operation.RequestBody.Content.Add("multipart/form-data", new OpenApiMediaType { Schema = schema });
+            }
+        }
+
+        // SENARYO B: Profil Tamamlama (complete-profile)
+        else if (path.Contains("complete-profile", StringComparison.OrdinalIgnoreCase))
+        {
+            if (operation.RequestBody?.Content.ContainsKey("multipart/form-data") == true)
+            {
+                var schema = operation.RequestBody.Content["multipart/form-data"].Schema;
+
+                // Temizle ve yeniden oluştur
+                schema.Properties.Clear();
+                schema.Type = "object";
+
+                // 1. JSON Verisi (String)
+                schema.Properties.Add("data", new OpenApiSchema
+                {
+                    Type = "string",
+                    Format = "", // Dosya sanmasın diye boş
+                    Description = "CompleteProfileDto JSON verisi",
+                    Example = new Microsoft.OpenApi.Any.OpenApiString("{\"EmployeeNumber\": \"12345\"}")
+                });
+
+                // 2. Dosyaları (Binary)
+                schema.Properties.Add("licenseDocument", new OpenApiSchema
+                {
+                    Type = "string",
+                    Format = "binary",
+                    Description = "Ehliyet Belgesi"
+                });
+
+                schema.Properties.Add("psychotechnicDocument", new OpenApiSchema
+                {
+                    Type = "string",
+                    Format = "binary",
+                    Description = "Psikoteknik Belgesi"
+                });
+
+                schema.Required = new HashSet<string> { "data" };
+
+                // Diğer content tiplerini temizle
+                operation.RequestBody.Content.Clear();
+                operation.RequestBody.Content.Add("multipart/form-data", new OpenApiMediaType { Schema = schema });
+            }
+        }
+
+        return Task.CompletedTask;
+    });
+});
+
+// 2. HANGFIRE SQL AYARLARI
+builder.Services.AddHangfire(config => config
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"))); // ConnectionString'in adı
+
+// Hangfire Sunucusunu Ekle
+builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 
-// ----------------------
-// Middleware Pipeline
-// ----------------------
+// ==================================================================================
+// 5. MIDDLEWARE PIPELINE
+// ==================================================================================
+
+app.UseMiddleware<IETT_APP.WebAPI.Middlewares.ExceptionMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
-
+app.UseHangfireDashboard("/hangfire");
+app.UseRequestLocalization(localizationOptions);
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
-// Custom middleware
-app.UseCustomMiddleware();
-
-// CORS – controllerlardan önce olmalı
+// KESİN KURAL: UseCors, Auth'dan ÖNCE gelmeli
 app.UseCors("MvcClient");
 
-// Auth
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Localization (virgül-nokta davranışı için)
-app.UseRequestLocalization(localizationOptions);
+app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notification"); // Endpoint
 
-// ----------------------
-// Database Seed
-// ----------------------
+// ==================================================================================
+// 6. DATABASE SEEDING
+// ==================================================================================
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    await IdentitySeed.SeedAdminAsync(services);
-    await IdentitySeed.SeedPlannerAsync(services);
-    await IdentitySeed.SeedChiefAsync(services);
-    await IdentitySeed.SeedDriverAsync(services);
-    await IdentitySeed.SeedUserAsync(services);
-    await GarageSeed.SeedGaragesAsync(services);
+    try
+    {
+        await IdentitySeed.SeedAsync(services);
+        await GarageSeed.SeedGaragesAsync(services);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
+    }
 }
 
-// ----------------------
-// Controllers
-// ----------------------
-app.MapControllers();
+using (var scope = app.Services.CreateScope())
+{
+    var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
 
-// ----------------------
-// Run
-// ----------------------
+    // A) GECİKME KONTROLÜ
+    // ÖNEMLİ: Cron.Minutely (veya "*/1 * * * *") kullanarak her dakika kontrol etmesini sağlıyoruz.
+    // Böylece 10:00 seferini 10:01'de hemen yakalayabiliriz.
+    recurringJobManager.AddOrUpdate<IOperationJobService>(
+        "check-delayed-trips",
+        service => service.CheckDelayedTripsAsync(),
+        Cron.Minutely // Her 1 dakikada bir çalışır
+    );
+
+    // B) VARDİYA KAPANIŞI
+    // Her gece 03:00'da çalışır
+    recurringJobManager.AddOrUpdate<IOperationJobService>(
+        "auto-close-shift",
+        service => service.AutoCloseShiftAsync(),
+        Cron.Daily(3, 0) // Saat 03:00
+    );
+}
+
 app.Run();

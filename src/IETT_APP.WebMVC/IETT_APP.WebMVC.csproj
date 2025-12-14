@@ -25,6 +25,7 @@
     <PackageReference Include="Microsoft.Identity.Web.DownstreamApi" Version="3.14.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,7 +38,6 @@
     <Folder Include="Areas\Admin\Data\" />
     <Folder Include="Areas\Chief\Data\" />
     <Folder Include="Areas\Driver\Data\" />
-    <Folder Include="Areas\Driver\Models\" />
     <Folder Include="Areas\Planner\Data\" />
     <Folder Include="Areas\Planner\Views\Home\" />
     <Folder Include="wwwroot\assets\css\alt\" />

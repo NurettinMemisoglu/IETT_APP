@@ -1,12 +1,10 @@
-﻿using IETT_APP.Application.Dtos;
-using Microsoft.AspNetCore.Identity;
-
-namespace IETT_APP.WebMVC.Areas.Admin.Models
+﻿namespace IETT_APP.WebMVC.Areas.Admin.Models
 {
     public class UserViewModel
     {
-        public IEnumerable<UserDto> Users { get; set; } = new List<UserDto>();
-        public IEnumerable<IdentityRole> Roles { get; set; } = new List<IdentityRole>();
+        // DEĞİŞİKLİK: Artık UserDto değil, ViewModel listesi tutuyoruz.
+        public IEnumerable<UserUpdateViewModel> Users { get; set; } = new List<UserUpdateViewModel>();
 
+        public IEnumerable<RoleViewModel> Roles { get; set; } = new List<RoleViewModel>();
     }
 }

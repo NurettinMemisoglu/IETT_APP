@@ -1,0 +1,175 @@
+﻿@using IETT_APP.Application.Dtos.Driver
+@model CompleteProfileDto
+
+@{
+    ViewData["Title"] = "Profil Oluştur";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-header bg-white border-bottom py-3">
+                    <h3 class="card-title text-primary fw-bold m-0">
+                        <i class="bi bi-person-vcard me-2"></i> Sürücü Profilini Tamamla
+                    </h3>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <div class="alert alert-light border-start border-info border-4 shadow-sm mb-4" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-info-circle-fill text-info fs-4 me-3"></i>
+                            <div>
+                                <strong class="d-block text-dark">Bilgilendirme</strong>
+                                <span class="text-muted">Lütfen aşağıdaki bilgileri eksiksiz doldurunuz. Belgeleri (Ehliyet, Psikoteknik) <strong>PDF veya Word</strong> formatında yükleyiniz.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="createProfileForm" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4"></div>
+
+                        <div class="mb-4">
+                            <h6 class="text-uppercase text-secondary fw-bold border-bottom pb-2 mb-3">
+                                <i class="bi bi-building me-1"></i> Kurumsal Bilgiler
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label asp-for="EmployeeNumber" class="form-label small text-muted fw-bold">SİCİL NO</label>
+                                    <input asp-for="EmployeeNumber" class="form-control" placeholder="Örn: 12345" />
+                                    <span asp-validation-for="EmployeeNumber" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label asp-for="SocialSecurityNumber" class="form-label small text-muted fw-bold">SGK NO</label>
+                                    <input asp-for="SocialSecurityNumber" class="form-control" placeholder="SGK Numaranız" />
+                                    <span asp-validation-for="SocialSecurityNumber" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label asp-for="TCIdentityNumber" class="form-label small text-muted fw-bold">TC KİMLİK NO</label>
+                                    <input asp-for="TCIdentityNumber" class="form-control" placeholder="11 Haneli" maxlength="11" />
+                                    <span asp-validation-for="TCIdentityNumber" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="text-uppercase text-secondary fw-bold border-bottom pb-2 mb-3">
+                                <i class="bi bi-card-heading me-1"></i> Ehliyet Bilgileri
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label asp-for="LicenseNumber" class="form-label small text-muted fw-bold">EHLİYET NO</label>
+                                    <input asp-for="LicenseNumber" class="form-control" />
+                                    <span asp-validation-for="LicenseNumber" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label asp-for="LicenseClass" class="form-label small text-muted fw-bold">SINIF</label>
+                                    <select asp-for="LicenseClass" class="form-select">
+                                        <option value="">Seçiniz</option>
+                                        <option value="E">E</option>
+                                        <option value="D">D</option>
+                                        <option value="D1">D1</option>
+                                        <option value="B">B</option>
+                                    </select>
+                                    <span asp-validation-for="LicenseClass" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label asp-for="LicenseExpiryDate" class="form-label small text-muted fw-bold">GEÇERLİLİK TARİHİ</label>
+                                    <input asp-for="LicenseExpiryDate" type="date" class="form-control" />
+                                    <span asp-validation-for="LicenseExpiryDate" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-12">
+                                    <label asp-for="LicenseDocument" class="form-label small text-muted fw-bold">EHLİYET BELGESİ (PDF/DOC)</label>
+                                    <input asp-for="LicenseDocument" type="file" class="form-control form-control-sm" accept=".pdf,.doc,.docx" />
+                                    <span asp-validation-for="LicenseDocument" class="text-danger small"></span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="text-uppercase text-secondary fw-bold border-bottom pb-2 mb-3">
+                                <i class="bi bi-clipboard-check me-1"></i> Psikoteknik & SRC
+                            </h6>
+                            <div class="row g-3 mt-1">
+                                <div class="col-md-6">
+                                    <label asp-for="SrcCertificateNumber" class="form-label small text-muted fw-bold">SRC BELGE NO</label>
+                                    <input asp-for="SrcCertificateNumber" class="form-control" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="PsychotechnicExpiryDate" class="form-label small text-muted fw-bold">PSİKOTEKNİK SON TARİH</label>
+                                    <input asp-for="PsychotechnicExpiryDate" type="date" class="form-control" />
+                                </div>
+                                <div class="col-md-12">
+                                    <label asp-for="PsychotechnicDocument" class="form-label small text-muted fw-bold">PSİKOTEKNİK BELGESİ (PDF/DOC)</label>
+                                    <input asp-for="PsychotechnicDocument" type="file" class="form-control form-control-sm" accept=".pdf,.doc,.docx" />
+                                    <span asp-validation-for="PsychotechnicDocument" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="text-uppercase text-secondary fw-bold border-bottom pb-2 mb-3">
+                                <i class="bi bi-heart-pulse me-1"></i> İletişim & Sağlık
+                            </h6>
+
+                            <div class="mb-3">
+                                <label asp-for="Address" class="form-label small text-muted fw-bold">EV ADRESİ</label>
+                                <textarea asp-for="Address" class="form-control" rows="2"></textarea>
+                                <span asp-validation-for="Address" class="text-danger small"></span>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label asp-for="BloodType" class="form-label small text-muted fw-bold">KAN GRUBU</label>
+                                    <select asp-for="BloodType" class="form-select">
+                                        <option value="">Seçiniz</option>
+                                        <option value="0 Rh+">0 Rh+</option>
+                                        <option value="0 Rh-">0 Rh-</option>
+                                        <option value="A Rh+">A Rh+</option>
+                                        <option value="A Rh-">A Rh-</option>
+                                        <option value="B Rh+">B Rh+</option>
+                                        <option value="B Rh-">B Rh-</option>
+                                        <option value="AB Rh+">AB Rh+</option>
+                                        <option value="AB Rh-">AB Rh-</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label asp-for="EmergencyContactName" class="form-label small text-muted fw-bold">ACİL DURUM KİŞİSİ</label>
+                                    <input asp-for="EmergencyContactName" class="form-control" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label asp-for="EmergencyContactPhone" class="form-label small text-muted fw-bold">ACİL DURUM TEL</label>
+                                    <input asp-for="EmergencyContactPhone" class="form-control" placeholder="5XX..." />
+                                </div>
+                            </div>
+
+                            <div class="mt-3 p-3 bg-light rounded">
+                                <div class="form-check form-switch">
+                                    <input asp-for="HasChronicDisease" class="form-check-input" type="checkbox" id="chronicCheck">
+                                    <label class="form-check-label fw-bold text-danger" for="chronicCheck">Kronik bir rahatsızlığınız var mı?</label>
+                                </div>
+                                <input asp-for="HealthNotes" class="form-control mt-2" placeholder="Varsa detay giriniz (Kullandığınız ilaçlar vb.)..." />
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <button type="button" id="btnCreateSave" class="btn btn-success px-4">
+                                <i class="bi bi-check-lg me-1"></i> Kaydet ve Tamamla
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/driver-profile.js"></script>
+}

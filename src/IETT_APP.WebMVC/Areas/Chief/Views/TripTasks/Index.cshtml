@@ -1,22 +1,108 @@
-﻿@model IEnumerable<IETT_APP.WebMVC.Areas.Chief.Models.TripTaskViewModel>
+﻿@using IETT_APP.WebMVC.Areas.Chief.Models
+@using IETT_APP.Domain.Enums
+@model IEnumerable<TripTaskViewModel>
 
 @{
     ViewData["Title"] = "Görev Yönetimi";
+
+    var pendingTasks = Model.Where(t => t.Status == TaskState.Pending).ToList();
+    var acceptedTasks = Model.Where(t => t.Status == TaskState.Accepted).ToList(); // YENİ EKLENEN
+    var activeTasks = Model.Where(t => t.Status == TaskState.InProgress).ToList();
+    var completedTasks = Model.Where(t => t.Status == TaskState.Completed).ToList();
+    var cancelledTasks = Model.Where(t => t.Status == TaskState.Cancelled || t.Status == TaskState.Incomplete).ToList();
 }
 
-<div class="container-fluid mt-4 px-5">
-    <h2 class="mb-3">Trip Task Listesi</h2>
-
-    <div class="d-flex justify-content-between mb-3 flex-wrap">
-        <input type="text" id="searchInput" class="form-control w-auto flex-grow-1 me-2" placeholder="Görev ara..." />
-        <a asp-area="Chief" asp-controller="TripTasks" asp-action="Create" class="btn btn-success">Yeni Görev Ekle</a>
+<div class="container-fluid mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="m-0 fw-bold text-dark"><i class="bi bi-list-task text-primary me-2"></i> Sefer Görevleri</h3>
+        <a asp-action="Create" class="btn btn-success shadow-sm">
+            <i class="bi bi-plus-lg me-1"></i> Yeni Görev Ata
+        </a>
     </div>
 
-    <div id="tripTasksTableContainer" class="table-responsive rounded shadow-sm p-2 bg-white">
-        @await Html.PartialAsync("_TripTasksTablePartial", Model)
+    <div class="card card-primary card-outline card-tabs shadow-sm border-0">
+        <div class="p-2 border-bottom bg-white">
+            <div class="input-group input-group-sm" style="width: 300px;">
+                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
+                <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Listede ara..." />
+            </div>
+        </div>
+        <div class="card-header p-0 pt-1 border-bottom-0 bg-light">
+            <ul class="nav nav-tabs" id="taskTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="tab-all" data-bs-toggle="pill" href="#content-all" role="tab">
+                        <i class="bi bi-layers me-1"></i> Tümü (@Model.Count())
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" id="tab-pending" data-bs-toggle="pill" href="#content-pending" role="tab">
+                        <i class="bi bi-hourglass-split me-1 text-warning"></i> Bekleyen (@pendingTasks.Count)
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" id="tab-accepted" data-bs-toggle="pill" href="#content-accepted" role="tab">
+                        <i class="bi bi-person-check-fill me-1 text-info"></i> Kabul Edildi (@acceptedTasks.Count)
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" id="tab-active" data-bs-toggle="pill" href="#content-active" role="tab">
+                        <i class="bi bi-play-circle-fill me-1 text-primary"></i> Sahada (@activeTasks.Count)
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" id="tab-completed" data-bs-toggle="pill" href="#content-completed" role="tab">
+                        <i class="bi bi-check-circle-fill me-1 text-success"></i> Tamamlanan (@completedTasks.Count)
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" id="tab-cancelled" data-bs-toggle="pill" href="#content-cancelled" role="tab">
+                        <i class="bi bi-x-circle-fill me-1 text-danger"></i> İptal/Sorunlu (@cancelledTasks.Count)
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <div class="card-body p-0">
+            <div class="tab-content" id="taskTabsContent">
+
+                <div class="tab-pane fade show active" id="content-all" role="tabpanel">
+                    <div id="tripTasksTableContainer">
+                        @await Html.PartialAsync("_TripTasksTablePartial", Model)
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="content-pending" role="tabpanel">
+                    @await Html.PartialAsync("_TripTasksTablePartial", pendingTasks)
+                </div>
+
+                <div class="tab-pane fade" id="content-accepted" role="tabpanel">
+                    @await Html.PartialAsync("_TripTasksTablePartial", acceptedTasks)
+                </div>
+
+                <div class="tab-pane fade" id="content-active" role="tabpanel">
+                    @await Html.PartialAsync("_TripTasksTablePartial", activeTasks)
+                </div>
+
+                <div class="tab-pane fade" id="content-completed" role="tabpanel">
+                    @await Html.PartialAsync("_TripTasksTablePartial", completedTasks)
+                </div>
+
+                <div class="tab-pane fade" id="content-cancelled" role="tabpanel">
+                    @await Html.PartialAsync("_TripTasksTablePartial", cancelledTasks)
+                </div>
+
+            </div>
+        </div>
     </div>
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/chief-triptask.js"></script>
 }

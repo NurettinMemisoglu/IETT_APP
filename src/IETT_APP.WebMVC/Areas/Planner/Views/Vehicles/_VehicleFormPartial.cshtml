@@ -40,13 +40,13 @@
         <span asp-validation-for="ServiceStatus" class="text-danger"></span>
     </div>
 
-    <!-- Operator Dropdown -->
+    <!-- Driver Dropdown -->
     <div class="form-floating mb-3">
-        <select asp-for="Operator" class="form-select" asp-items="ViewBag.VehicleOperatorList">
+        <select asp-for="Driver" class="form-select" asp-items="ViewBag.VehicleOperatorList">
             <option value="" selected disabled >-- Operatör Seçin --</option>
         </select>
-        <label asp-for="Operator"></label>
-        <span asp-validation-for="Operator" class="text-danger"></span>
+        <label asp-for="Driver"></label>
+        <span asp-validation-for="Driver" class="text-danger"></span>
     </div>
 
     <!-- Model Dropdown -->

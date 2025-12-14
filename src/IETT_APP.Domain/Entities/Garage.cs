@@ -9,7 +9,6 @@ namespace IETT_APP.Domain.Entities
         public int Fileld { get; set; }
         public int YearStarted { get; set; } // Hizmete başlama yılı
         public Location Location { get; set; } = new Location();
-        public bool IsActive { get; set; } = true;
 
         public ICollection<TripTask> TripTasks { get; set; } = new List<TripTask>();
     }

@@ -1,17 +1,52 @@
-﻿@model IETT_APP.WebMVC.Areas.Chief.Models.TripTaskViewModel
+﻿@using IETT_APP.WebMVC.Areas.Chief.Models
+@model TripTaskViewModel
+
 @{
     ViewData["Title"] = "Görev Düzenle";
 }
 
-<div class="container mt-4">
-    <h2 class="mb-3">Görev Düzenle</h2>
+<div class="container-fluid mt-4">
+    <div class="card card-warning card-outline shadow-sm">
+        <div class="card-header">
+            <h3 class="card-title fw-bold">
+                <i class="bi bi-pencil-square me-2"></i> Görev Düzenle
+            </h3>
+            <div class="card-tools">
+                <span class="badge bg-secondary">ID: @Model.Id.ToString().Substring(0, 8)...</span>
+            </div>
+        </div>
+        <div class="card-body">
 
-    <form id="tripTaskForm" asp-action="Edit" method="post">
-        @Html.AntiForgeryToken()
-        @await Html.PartialAsync("_TripTaskFormPartial", Model)
-    </form>
+            <form id="tripTaskForm">
+                @await Html.PartialAsync("_TripTaskFormPartial", Model)
 
+                <div class="row mt-4">
+                    <div class="col-12 text-end">
+                        <a asp-action="Index" asp-controller="TripTasks" asp-area="Chief" class="btn btn-secondary me-2">
+                            <i class="bi bi-x-lg"></i> İptal
+                        </a>
+
+                        <button type="button" id="btnSaveTask" class="btn btn-warning px-4 text-dark fw-bold">
+                            <i class="bi bi-check-lg"></i> Değişiklikleri Kaydet
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
 </div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        var allLines = @Html.Raw(ViewBag.LinesJson ?? "[]");
+        var allRoutes = @Html.Raw(ViewBag.RoutesJson ?? "[]");
+        var allGarages = @Html.Raw(ViewBag.GaragesJson ?? "[]");
+        var allVehicles = @Html.Raw(ViewBag.VehiclesJson ?? "[]");
+        var allDrivers = @Html.Raw(ViewBag.DriversJson ?? "[]");
+    </script>
+
+    <script src="~/js/chief-triptask.js"></script>
 }

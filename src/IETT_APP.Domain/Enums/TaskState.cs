@@ -6,13 +6,15 @@ namespace IETT_APP.Domain.Enums
     {
         [Display(Name = "Beklemede")]
         Pending = 1,
+        [Display(Name = "Kabul Edildi")]
+        Accepted = 2,
         [Display(Name = "Devam Ediyor")]
-        InProgress = 2,
+        InProgress = 3,
         [Display(Name = "Tamamlandı")]
-        Completed = 3,
+        Completed = 4,
         [Display(Name = "İptal Edildi")]
-        Cancelled = 4,
+        Cancelled = 5,
         [Display(Name = "Yarım Kaldı")]
-        Incomplete = 5,
+        Incomplete = 6,
     }
 }

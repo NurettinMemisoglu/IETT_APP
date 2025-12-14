@@ -13,7 +13,7 @@ namespace IETT_APP.Application.Dtos.Vehicle
         public T GarageId { get; set; } = default!;
 
         public ServiceStatus ServiceStatus { get; set; }
-        public VehicleOperator Operator { get; set; }
+        public VehicleType Driver { get; set; }
 
         public VehicleModel Model { get; set; }
 

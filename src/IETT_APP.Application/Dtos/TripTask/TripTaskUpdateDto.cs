@@ -23,7 +23,7 @@ namespace IETT_APP.Application.Dtos.TripTask
         public DateTime? ActualArrival { get; set; }
 
         public Guid? VehicleId { get; set; }
-        public Guid? OperatorId { get; set; }
+        public Guid? DriverId { get; set; }
         public Guid? LineId { get; set; }
         public Guid? RouteId { get; set; }
         public Guid? GarageId { get; set; }

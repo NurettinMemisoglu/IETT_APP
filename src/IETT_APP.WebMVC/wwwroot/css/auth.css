@@ -1,0 +1,26 @@
+﻿body.login-page {
+    background-color: #e9ecef;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+}
+
+.login-box {
+    width: 400px;
+    padding: 15px;
+}
+
+/* Kart gölgesi ve kenarları için */
+.card-outline.card-primary {
+    border-top: 3px solid #007bff;
+    box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
+}
+
+.login-logo a {
+    color: #495057;
+    font-size: 2.1rem;
+    font-weight: 300;
+    text-decoration: none;
+}

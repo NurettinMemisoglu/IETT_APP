@@ -9,6 +9,14 @@ namespace IETT_APP.Application.Dtos.TripTask
         public string Description { get; set; } = string.Empty;
         public TaskState Status { get; set; }
 
+        public bool IsAcknowledged { get; set; }
+        public DateTime? AcknowledgedAt { get; set; }
+
+        public decimal? StartOdometer { get; set; }
+        public decimal? EndOdometer { get; set; }
+
+        public string? CancellationReason { get; set; }
+
         public string? StatusReason { get; set; }
 
         public int? PassengerCount { get; set; }
@@ -23,13 +31,13 @@ namespace IETT_APP.Application.Dtos.TripTask
         public DateTime? ActualArrival { get; set; }
 
         public Guid? VehicleId { get; set; }
-        public Guid? OperatorId { get; set; }
+        public Guid? DriverId { get; set; }
         public Guid? LineId { get; set; }
         public Guid? RouteId { get; set; }
         public Guid? GarageId { get; set; }
 
         public string? VehicleName { get; set; }
-        public string? OperatorName { get; set; }
+        public string? DriverName { get; set; }
         public string? LineName { get; set; }
         public string? RouteName { get; set; }
         public string? GarageName { get; set; }

@@ -1,0 +1,127 @@
+﻿@using IETT_APP.WebMVC.Areas.Driver.Models
+@using IETT_APP.Domain.Enums
+@model DriverProfileViewModel
+
+@{
+    ViewData["Title"] = "Profilim";
+}
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6"><h1>Sürücü Profili</h1></div>
+        </div>
+    </div>
+</section>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="col-md-3">
+                <div class="card card-primary card-outline">
+                    <div class="card-body box-profile">
+                        <div class="text-center position-relative group-image-upload">
+                            @{
+                                var imgPath = !string.IsNullOrEmpty(Model.ProfileImagePath)
+                                ? $"https://localhost:7254{Model.ProfileImagePath}"
+                                : "/assets/img/user2-160x160.jpg";
+                            }
+                            <img class="profile-user-img img-fluid img-circle" src="@imgPath" id="profileImagePreview" alt="Profil" style="width:120px;height:120px;object-fit:cover;cursor:pointer;">
+                            <div class="image-upload-overlay" onclick="$('#imageInput').click();"><i class="bi bi-camera-fill"></i></div>
+                            <input type="file" id="imageInput" accept="image/*" style="display: none;" />
+                        </div>
+                        <h3 class="profile-username text-center mt-3">@Model.FullName</h3>
+                        <p class="text-muted text-center">@Model.EmployeeNumber</p>
+                        <ul class="list-group list-group-unbordered mb-3">
+                            <li class="list-group-item"><b>Garaj</b> <a class="float-end">@Model.GarageName</a></li>
+                            <li class="list-group-item"><b>Durum</b> <a class="float-end"><span class="badge bg-success">@Model.WorkStatus</span></a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header p-2">
+                        <ul class="nav nav-pills">
+                            <li class="nav-item"><a class="nav-link active" href="#details" data-bs-toggle="tab">Profil Bilgilerim</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#documents" data-bs-toggle="tab">Belgeler & Lisanslar</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#password" data-bs-toggle="tab">Şifre Değiştir</a></li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content">
+
+                            <div class="active tab-pane" id="details">
+                                @await Html.PartialAsync("_ProfileDetails", Model)
+                            </div>
+
+                            <div class="tab-pane" id="documents">
+                                @await Html.PartialAsync("_DocumentsInfo", Model)
+                            </div>
+
+                            <div class="tab-pane" id="password">
+                                @await Html.PartialAsync("_ChangePassword", new ChangePasswordViewModel())
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="updateProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Bilgilerimi Güncelle</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <form id="profileForm">
+                    <input type="hidden" asp-for="Id" />
+                    @await Html.PartialAsync("_UpdateProfileForm", Model)
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" id="saveProfileBtn" class="btn btn-primary">Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/driver-profile.js"></script>
+    <style>
+        .group-image-upload {
+            position: relative;
+            display: inline-block;
+        }
+
+        .image-upload-overlay {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 120px;
+            width: 120px;
+            margin: auto;
+            border-radius: 50%;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .group-image-upload:hover .image-upload-overlay {
+            display: flex;
+        }
+    </style>
+}

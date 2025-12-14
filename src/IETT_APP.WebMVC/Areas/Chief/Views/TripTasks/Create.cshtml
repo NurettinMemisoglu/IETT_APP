@@ -1,17 +1,43 @@
-﻿@model IETT_APP.WebMVC.Areas.Chief.Models.TripTaskViewModel
+﻿@using IETT_APP.WebMVC.Areas.Chief.Models
+@model TripTaskViewModel
+
 @{
-    ViewData["Title"] = "Görev Ekle";
+    ViewData["Title"] = "Yeni Görev Atama";
 }
 
-<div class="vehicle-header mt-4 mb-3">
-    <h2>Görev Ekle</h2>
+<div class="container-fluid mt-4">
+    <div class="card card-success card-outline shadow-sm">
+        <div class="card-header">
+            <h3 class="card-title fw-bold"><i class="bi bi-calendar-plus me-2"></i> Yeni Sefer Görevi Ata</h3>
+        </div>
+        <div class="card-body">
+
+            <form id="tripTaskForm">
+                @await Html.PartialAsync("_TripTaskFormPartial", Model)
+
+                <div class="row mt-4">
+                    <div class="col-12 text-end">
+                        <a asp-action="Index" asp-controller="TripTasks" asp-area="Chief" class="btn btn-secondary me-2">İptal</a>
+
+                        <button type="button" id="btnSaveTask" class="btn btn-success px-4">
+                            <i class="bi bi-check-lg"></i> Görevi Oluştur ve Ata
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
 </div>
 
-
-<form id="tripTaskForm" asp-action="Create" method="post">
-    @await Html.PartialAsync("_TripTaskFormPartial", Model)
-</form>
-
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <script>
+        var allLines = @Html.Raw(ViewBag.LinesJson ?? "[]");
+        var allRoutes = @Html.Raw(ViewBag.RoutesJson ?? "[]");
+        var allGarages = @Html.Raw(ViewBag.GaragesJson ?? "[]");
+        var allVehicles = @Html.Raw(ViewBag.VehiclesJson ?? "[]");
+        var allDrivers = @Html.Raw(ViewBag.DriversJson ?? "[]");
+    </script>
+
+    <script src="~/js/chief-triptask.js"></script>
 }

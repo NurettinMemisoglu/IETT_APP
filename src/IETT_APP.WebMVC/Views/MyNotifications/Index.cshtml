@@ -1,0 +1,211 @@
+﻿@model IEnumerable<IETT_APP.Application.Dtos.NotificationDto>
+@{
+    ViewData["Title"] = "Bildirimlerim";
+    var unreadCount = Model.Count(x => !x.IsRead);
+    var sortedList = Model.OrderBy(x => x.IsRead).ThenByDescending(x => x.CreatedAt).ToList();
+}
+
+<style>
+    /* Modern Bildirim Kartı Stili */
+    .notification-card {
+        border: none;
+        border-radius: 12px;
+        transition: all 0.2s ease-in-out;
+        background-color: #fff;
+        border-left: 4px solid transparent; /* Varsayılan kenarlık */
+        margin-bottom: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+
+        .notification-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            z-index: 2;
+        }
+
+    /* Okunmamış Bildirim Stili */
+    .notification-unread {
+        border-left-color: #0d6efd; /* Mavi Çizgi */
+        background-color: #f8fbff; /* Çok hafif mavi arka plan */
+    }
+
+        .notification-unread .notify-title {
+            font-weight: 700 !important;
+            color: #0d6efd;
+        }
+
+    /* İkon Kutusu */
+    .notify-icon-box {
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    /* Renk Temaları */
+    .theme-info {
+        background-color: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+    }
+
+    .theme-warning {
+        background-color: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+    }
+
+    .theme-danger {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+
+    .theme-success {
+        background-color: rgba(25, 135, 84, 0.1);
+        color: #198754;
+    }
+
+    /* Metinler */
+    .notify-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 2px;
+    }
+
+    .notify-time {
+        font-size: 0.8rem;
+        color: #999;
+    }
+
+    .notify-body {
+        font-size: 0.9rem;
+        color: #555;
+        line-height: 1.5;
+    }
+
+    /* Butonlar */
+    .notify-actions {
+        opacity: 0.6;
+        transition: opacity 0.2s;
+    }
+
+    .notification-card:hover .notify-actions {
+        opacity: 1;
+    }
+</style>
+
+<div class="container mt-4 mb-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark m-0"><i class="bi bi-bell text-primary me-2"></i>Bildirimlerim</h3>
+            <p class="text-muted small m-0">Tüm operasyonel uyarılar ve görev atamaları burada listelenir.</p>
+        </div>
+        <div>
+            @if (unreadCount > 0)
+            {
+                <span class="badge bg-danger rounded-pill px-3 py-2 fs-6 shadow-sm">
+                    @unreadCount Okunmamış
+                </span>
+            }
+            else
+            {
+                <span class="badge bg-light text-muted border rounded-pill px-3 py-2 fs-6">
+                    Hepsi Okundu
+                </span>
+            }
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+
+            <div id="fullNotificationList">
+
+                @if (sortedList.Any())
+                {
+                    foreach (var item in sortedList)
+                    {
+                        // İkon ve Renk Belirleme
+                        string iconClass = "bi-info-circle-fill";
+                        string themeClass = "theme-info";
+
+                        if (item.Type == "TaskAssignment") { iconClass = "bi-bus-front-fill"; themeClass = "theme-success"; }
+                        else if (item.Type == "TaskUpdate") { iconClass = "bi-pencil-square"; themeClass = "theme-warning"; }
+                        else if (item.Type == "Critical" || item.Type == "Warning") { iconClass = "bi-exclamation-triangle-fill"; themeClass = "theme-danger"; }
+
+                        // Kart HTML (ID formatı notify-{guid} olacak)
+                        <div class="card notification-card p-3 @(item.IsRead ? "" : "notification-unread")" id="notify-@item.Id">
+                            <div class="d-flex align-items-start">
+
+                                <div class="notify-icon-box @themeClass me-3">
+                                    <i class="bi @iconClass"></i>
+                                </div>
+
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="notify-title">@item.Title</h6>
+                                        <span class="notify-time">
+                                            <i class="bi bi-clock me-1"></i> @item.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                                        </span>
+                                    </div>
+                                    <p class="notify-body m-0">@item.Message</p>
+                                </div>
+
+                                <div class="ms-3 d-flex flex-column align-items-end gap-2 notify-actions">
+
+                                    @if (!string.IsNullOrEmpty(item.LinkUrl))
+                                    {
+                                        <a href="@item.LinkUrl" class="btn btn-sm btn-outline-primary rounded-pill px-3 view-btn" data-id="@item.Id">
+                                            İncele <i class="bi bi-arrow-right-short"></i>
+                                        </a>
+                                    }
+
+                                    @if (!item.IsRead)
+                                    {
+                                        <button class="btn btn-sm btn-light text-muted border rounded-pill px-3 mark-read-btn" data-id="@item.Id" title="Okundu işaretle">
+                                            <i class="bi bi-check2"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-success small fw-bold"><i class="bi bi-check2-all"></i> Okundu</span>
+                                    }
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div id="emptyNotificationState" class="text-center py-5">
+                        <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+                            <i class="bi bi-bell-slash text-secondary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="text-muted">Hiç bildiriminiz yok.</h5>
+                        <p class="text-secondary small">Şu an için her şey yolunda görünüyor.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Tarayıcının "Geri" tuşuyla gelindiğini algıla ve sayfayı yenile
+        window.addEventListener("pageshow", function (event) {
+            var historyTraversal = event.persisted ||
+                                   (typeof window.performance != "undefined" &&
+                                    window.performance.navigation.type === 2);
+            if (historyTraversal) {
+                // Sayfa önbellekten geldiyse zorla yenile
+                window.location.reload();
+            }
+        });
+    </script>
+}

@@ -32,7 +32,7 @@ namespace IETT_APP.WebMVC.Areas.Planner.Models
 
         [Display(Name = "Operatör")]
         [Required]
-        public VehicleOperator Operator { get; set; }
+        public VehicleType Driver { get; set; }
 
         [Display(Name = "Model")]
         [Required]

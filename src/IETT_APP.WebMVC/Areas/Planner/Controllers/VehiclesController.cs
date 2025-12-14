@@ -82,7 +82,7 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
         {
             ViewBag.ServiceStatusList = EnumSelectListHelper.ToSelectList<ServiceStatus>();
             ViewBag.VehicleModelList = EnumSelectListHelper.ToSelectList<VehicleModel>();
-            ViewBag.VehicleOperatorList = EnumSelectListHelper.ToSelectList<VehicleOperator>();
+            ViewBag.VehicleOperatorList = EnumSelectListHelper.ToSelectList<VehicleType>();
 
             return View(new VehicleViewModel { IsActive = true });
         }
@@ -127,7 +127,7 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
                 // Enum dropdown listeleri
                 ViewBag.ServiceStatusList = EnumSelectListHelper.ToSelectList<ServiceStatus>();
                 ViewBag.VehicleModelList = EnumSelectListHelper.ToSelectList<VehicleModel>();
-                ViewBag.VehicleOperatorList = EnumSelectListHelper.ToSelectList<VehicleOperator>();
+                ViewBag.VehicleOperatorList = EnumSelectListHelper.ToSelectList<VehicleType>();
 
                 // Modeli ViewModel’e mapleyip view’e gönder
                 return View(vehicle.ToViewModel());

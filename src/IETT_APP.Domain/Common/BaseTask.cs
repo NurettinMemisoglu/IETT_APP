@@ -8,6 +8,7 @@ namespace IETT_APP.Domain.Common
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public TaskState Status { get; set; } = TaskState.Pending;
+        public string? StatusReason { get; set; }
         public DateTime? CompletedAt { get; set; }
     }
 

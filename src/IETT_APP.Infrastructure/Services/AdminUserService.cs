@@ -35,7 +35,8 @@ namespace IETT_APP.Infrastructure.Services
 
             var user = new User
             {
-                FullName = dto.FullName,
+                Name = dto.Name,
+                Surname = dto.Surname,
                 Email = dto.Email,
                 EmailConfirmed = true
             };

@@ -1,0 +1,185 @@
+﻿/* 🌟 TRIP TASK FORM STYLING */
+form#tripTaskForm {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto 2rem auto;
+    border-radius: 10px;
+    background: #fff; /* Beyaz Arka Plan (Daha temiz görünüm) */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); /* Hafif gölge */
+    padding: 25px;
+    box-sizing: border-box;
+    border: 1px solid #e9ecef;
+}
+
+    /* 🌟 Form-floating input & select */
+    form#tripTaskForm .form-floating {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    /* Input ve Select Genel Stil */
+    form#tripTaskForm .form-control,
+    form#tripTaskForm .form-select {
+        font-size: 0.9rem;
+        color: #495057;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        padding: 1rem 0.75rem 0.65rem 0.75rem; /* Label için üstten boşluk */
+        box-shadow: none;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+        form#tripTaskForm .form-control:focus,
+        form#tripTaskForm .form-select:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+    /* 🌟 LABEL (Floating Effect Düzeltmesi) */
+    form#tripTaskForm .form-floating > label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 1rem 0.75rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        pointer-events: none;
+        border: 1px solid transparent;
+        transform-origin: 0 0;
+        transition: opacity .1s ease-in-out, transform .1s ease-in-out;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    /* Dolu veya Odaklanmışken Label'ı Yukarı Taşı */
+    form#tripTaskForm .form-floating > .form-control:focus ~ label,
+    form#tripTaskForm .form-floating > .form-control:not(:placeholder-shown) ~ label,
+    form#tripTaskForm .form-floating > .form-select ~ label {
+        opacity: 0.65;
+        transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+        background-color: #fff; /* Label arkası temiz olsun */
+        padding: 0 0.4rem;
+        height: auto;
+        width: auto;
+        z-index: 2; /* Inputun üzerinde dursun */
+    }
+
+    /* 🌟 SELECT2 STYLING (Bootstrap Uyumlu) */
+    form#tripTaskForm .select2-container {
+        width: 100% !important;
+        display: block;
+    }
+
+        form#tripTaskForm .select2-container .select2-selection--single {
+            height: 3.5rem; /* Floating label yüksekliği ile aynı */
+            padding: 0.75rem 0.75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+        }
+
+    form#tripTaskForm .select2-container--default .select2-selection--single .select2-selection__rendered {
+        padding-left: 0;
+        color: #495057;
+        margin-top: 10px; /* Label'ın altına inmesi için */
+    }
+
+    form#tripTaskForm .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 3.5rem;
+        top: 0;
+        right: 10px;
+    }
+
+    /* Select2 Focus */
+    form#tripTaskForm .select2-container--default.select2-container--focus .select2-selection--single {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+/* Select2 Dropdown */
+.select2-dropdown {
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    z-index: 9999; /* En üstte */
+}
+
+/* 🌟 ÖZEL ALANLAR */
+
+/* Header */
+.triptask-header {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto 1.5rem auto;
+    padding: 0 15px;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 10px;
+}
+
+    .triptask-header h2 {
+        font-weight: 600;
+        color: #343a40;
+        margin: 0;
+    }
+
+/* Checkbox */
+form#tripTaskForm .form-check-label {
+    font-size: 0.9rem;
+    color: #495057;
+    margin-left: 0.5rem;
+    cursor: pointer;
+}
+
+form#tripTaskForm .form-check-input {
+    width: 1.2rem;
+    height: 1.2rem;
+    cursor: pointer;
+}
+
+/* Butonlar */
+form#tripTaskForm .btn {
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    border-radius: 5px;
+    transition: all 0.2s;
+}
+
+form#tripTaskForm .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+    form#tripTaskForm .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+    }
+
+form#tripTaskForm .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+    form#tripTaskForm .btn-secondary:hover {
+        background-color: #5a6268;
+        border-color: #545b62;
+    }
+
+/* Responsive */
+@media (max-width: 768px) {
+    form#tripTaskForm {
+        padding: 15px;
+    }
+
+    .triptask-header h2 {
+        font-size: 1.5rem;
+    }
+}

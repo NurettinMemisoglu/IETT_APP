@@ -12,7 +12,6 @@ namespace IETT_APP.Domain.Entities
         public int TimeInMinutes { get; set; }
         public T LineId { get; set; } = default!;
 
-        public bool IsActive { get; set; } = true;
 
         public ICollection<RouteStop<T>> RouteStops { get; set; } = new List<RouteStop<T>>();
         // NEW: navigation to parent Line

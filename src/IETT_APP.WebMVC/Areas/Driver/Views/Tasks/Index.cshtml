@@ -1,0 +1,218 @@
+﻿@using IETT_APP.WebMVC.Areas.Driver.Models
+@using IETT_APP.Domain.Enums
+@using IETT_APP.WebMVC.Extensions
+@model IEnumerable<DriverTripTaskViewModel>
+
+@{
+    ViewData["Title"] = "Görevlerim";
+
+    // Revize saat varsa onu baz al, yoksa planlanan saati baz al.
+    var sortedTasks = Model.OrderByDescending(t => t.AdjustedDeparture ?? t.ScheduledDeparture).ToList();
+}
+
+<div class="container-fluid mt-3">
+    <h3 class="mb-4 fw-bold"><i class="bi bi-list-task text-primary me-2"></i> Görevlerim</h3>
+
+    @if (!sortedTasks.Any()) // Model yerine sortedTasks kontrol ediliyor
+    {
+        <div class="alert alert-info shadow-sm">
+            <i class="bi bi-info-circle-fill me-2"></i> Şu an size atanmış aktif bir görev bulunmamaktadır.
+        </div>
+    }
+    else
+    {
+        <div class="row" id="tasksContainer">
+            @foreach (var task in sortedTasks) // Model yerine sortedTasks döngüye giriyor
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card shadow-sm border-0 h-100 task-card @GetStatusBorderClass(task.Status)">
+
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                            <span class="fw-bold text-truncate text-primary" style="max-width: 50%;">@task.Title</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge @GetStatusBadgeClass(task.Status)">@task.Status.ToDisplayName()</span>
+                                <a asp-action="Details" asp-route-id="@task.Id" class="btn btn-sm btn-light border rounded-circle" title="Detayları Gör" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="bi bi-info-lg text-secondary"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <small class="text-muted d-block">Hat / Güzergah</small>
+                                <span class="fw-bold fs-5">@task.LineName</span> <br>
+                                <span class="text-secondary small">@task.RouteName</span>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Araç</small>
+                                    <span class="fw-bold"><i class="bi bi-bus-front"></i> @task.VehicleName</span>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <small class="text-muted d-block">Saat</small>
+                                    @{
+                                        // Burada gösterim için yine aynı mantığı kullanıyoruz
+                                        var time = task.AdjustedDeparture ?? task.ScheduledDeparture;
+                                    }
+                                    <span class="fw-bold text-primary">
+                                        <i class="bi bi-clock"></i> @time?.ToString("HH:mm")
+                                    </span>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(task.Description))
+                            {
+                                <div class="mt-3 p-2 bg-light rounded small text-muted">
+                                    <i class="bi bi-info-circle me-1"></i> @task.Description
+                                </div>
+                            }
+                        </div>
+
+                        <div class="card-footer bg-white border-top-0 pb-3">
+                            <div class="d-grid gap-2">
+                                @if (task.Status == TaskState.Pending)
+                                {
+                                    <button class="btn btn-success btn-accept" data-id="@task.Id">
+                                        <i class="bi bi-check-lg"></i> Kabul Et
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-reject" data-id="@task.Id">
+                                        <i class="bi bi-x-lg"></i> Reddet
+                                    </button>
+                                }
+                                else if (task.Status == TaskState.Accepted)
+                                {
+                                    <button class="btn btn-primary btn-start py-2" data-id="@task.Id">
+                                        <i class="bi bi-play-fill fs-5"></i> SEFERİ BAŞLAT
+                                    </button>
+                                }
+                                else if (task.Status == TaskState.InProgress)
+                                {
+                                    <button class="btn btn-success btn-complete py-2" data-id="@task.Id">
+                                        <i class="bi bi-flag-fill"></i> SEFERİ BİTİR
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm btn-fail" data-id="@task.Id">
+                                        <i class="bi bi-exclamation-triangle"></i> Sorun Bildir
+                                    </button>
+                                }
+                                else
+                                {
+                                    <a asp-action="Details" asp-route-id="@task.Id" class="btn btn-secondary">
+                                        <i class="bi bi-eye"></i> Detayları İncele
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Görevi Reddet</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="rejectTaskId">
+                <div class="mb-3">
+                    <label class="form-label">Reddetme Nedeni (Zorunlu)</label>
+                    <textarea id="rejectReason" class="form-control" rows="3" placeholder="Neden reddediyorsunuz?"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                <button type="button" class="btn btn-danger" id="confirmRejectBtn">Görevi Reddet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="completeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Seferi Tamamla</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="completeTaskId">
+
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label class="form-label fw-bold">Yolcu Sayısı</label>
+                        <input type="number" id="passengerInput" class="form-control" placeholder="0">
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label class="form-label fw-bold">Yakıt / Şarj %</label>
+                        <input type="number" id="fuelInput" class="form-control" placeholder="% Doluluk" min="0" max="100">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Bitiş Kilometresi</label>
+                    <input type="number" id="odometerInput" class="form-control form-control-lg" placeholder="Araçtaki son KM">
+                    <div class="form-text text-primary" id="kmWarning"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Notlar (Opsiyonel)</label>
+                    <textarea id="driverNoteInput" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-success" id="confirmCompleteBtn">Kaydet ve Bitir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="failModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">Sorun Bildir (Yarım Kaldı)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="failTaskId">
+                <div class="alert alert-warning small">
+                    <i class="bi bi-exclamation-circle"></i> Bu işlem görevi <strong>Yarım Kaldı</strong> olarak işaretler ve aracı servis dışı bırakabilir.
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Sorun / Arıza Açıklaması</label>
+                    <textarea id="failReason" class="form-control" rows="3" placeholder="Arıza, Kaza vb..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                <button type="button" class="btn btn-warning" id="confirmFailBtn">Bildir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/driver-tasks.js"></script>
+}
+
+@functions {
+    string GetStatusBadgeClass(TaskState status) => status switch
+    {
+        TaskState.Pending => "bg-warning text-dark",
+        TaskState.Accepted => "bg-info text-dark",
+        TaskState.InProgress => "bg-primary",
+        TaskState.Completed => "bg-success",
+        TaskState.Cancelled => "bg-danger",
+        TaskState.Incomplete => "bg-secondary",
+        _ => "bg-light text-dark"
+    };
+
+    string GetStatusBorderClass(TaskState status) => status == TaskState.InProgress ? "border-primary border-2" : "";
+}

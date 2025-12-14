@@ -1,108 +1,188 @@
-﻿@model IETT_APP.WebMVC.Areas.Chief.Models.TripTaskViewModel
+﻿@using IETT_APP.WebMVC.Areas.Chief.Models
+@model TripTaskViewModel
 
-<form id="tripTaskForm" method="post">
-    <input type="hidden" id="Id" name="Id" value="@Model.Id" />
+<input type="hidden" id="Id" name="Id" value="@Model.Id" />
 
-    <div class="form-floating mb-3">
-        <input asp-for="Title" class="form-control" placeholder="Görev Başlığı" />
-        <label asp-for="Title"></label>
-        <span asp-validation-for="Title" class="text-danger"></span>
-    </div>
+@{
+    bool isEditMode = Model.Id != Guid.Empty;
 
-    <div class="form-floating mb-3">
-        <textarea asp-for="Description" class="form-control" placeholder="Açıklama"></textarea>
-        <label asp-for="Description"></label>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
+    // Stil mantığı
+    string inputStyle = isEditMode ? "background-color: #f8f9fa;" : "background-color: #fff;";
+    string readonlyAttr = isEditMode ? "readonly" : null;
 
-    <!-- Status Dropdown -->
-    <div class="form-floating mb-3">
-        <select asp-for="Status" class="form-select" asp-items="ViewBag.TaskStateList">
-            <option value="" selected disabled>-- Durum Seçin --</option>
-        </select>
-        <label asp-for="Status"></label>
-        <span asp-validation-for="Status" class="text-danger"></span>
-    </div>
-
-    <!-- Foreign Key Dropdowns -->
-    <div class="form-floating mb-3">
-        <select id="LineId" asp-for="LineId" class="form-select" data-selected="@Model?.LineId">
-            <option value="" disabled selected>-- Hat Seçin --</option>
-        </select>
-        <label asp-for="LineId"></label>
-        <span asp-validation-for="LineId" class="text-danger"></span>
-    </div>
-
-    <div class="form-floating mb-3">
-        <select id="RouteId" asp-for="RouteId" class="form-select" data-selected="@Model?.RouteId" disabled>
-            <option value="" disabled selected>-- Önce Hat Seçin --</option>
-        </select>
-        <label asp-for="RouteId"></label>
-        <span asp-validation-for="RouteId" class="text-danger"></span>
-    </div>
-
-    <div class="form-floating mb-3">
-        <select id="GarageId" asp-for="GarageId" class="form-select" data-selected="@Model?.GarageId">
-            <option value="" disabled selected>-- Garaj Seçin --</option>
-        </select>
-        <label asp-for="GarageId"></label>
-        <span asp-validation-for="GarageId" class="text-danger"></span>
-    </div>
-
-    <div class="form-floating mb-3">
-        <select id="VehicleId" asp-for="VehicleId" class="form-select" data-selected="@Model?.VehicleId" disabled>
-            <option value="" disabled selected>-- Önce Garaj Seçin --</option>
-        </select>
-        <label asp-for="VehicleId"></label>
-        <span asp-validation-for="VehicleId" class="text-danger"></span>
-    </div>
-
-    <div class="form-floating mb-3">
-        <select asp-for="OperatorId" class="form-select" asp-items="ViewBag.OperatorList">
-            <option value="" selected disabled>-- Operatör Seçin --</option>
-        </select>
-        <label asp-for="OperatorId"></label>
-        <span asp-validation-for="OperatorId" class="text-danger"></span>
-    </div>
-
-    <!-- Numeric Inputs -->
-    <div class="form-floating mb-3">
-        <input asp-for="PassengerCount" type="number" class="form-control" placeholder="Yolcu Sayısı" />
-        <label asp-for="PassengerCount"></label>
-        <span asp-validation-for="PassengerCount" class="text-danger"></span>
-    </div>
-
-    <div class="form-floating mb-3">
-        <input asp-for="DelayInMinutes" type="number" class="form-control" placeholder="Gecikme (İniş)" />
-        <label asp-for="DelayInMinutes"></label>
-        <span asp-validation-for="DelayInMinutes" class="text-danger"></span>
-    </div>
-
-    <div class="form-floating mb-3">
-        <input asp-for="DelayOutMinutes" type="number" class="form-control" placeholder="Gecikme (Çıkış)" />
-        <label asp-for="DelayOutMinutes"></label>
-        <span asp-validation-for="DelayOutMinutes" class="text-danger"></span>
-    </div>
-
-    <!-- Date Inputs -->
-    <div class="form-floating mb-3">
-        <input asp-for="ScheduledDeparture" type="datetime-local" class="form-control" />
-        <label asp-for="ScheduledDeparture">Planlanan Kalkış</label>
-        <span asp-validation-for="ScheduledDeparture" class="text-danger"></span>
-    </div>
-
-    <div class="form-floating mb-3">
-        <input asp-for="ScheduledArrival" type="datetime-local" class="form-control" />
-        <label asp-for="ScheduledArrival">Planlanan Varış</label>
-        <span asp-validation-for="ScheduledArrival" class="text-danger"></span>
-    </div>
-
-    <div class="text-end mt-4">
-        <button type="submit" class="btn btn-primary">Kaydet</button>
-        <button type="button" class="btn btn-secondary" id="cancelTripTaskBtn">İptal</button>
-    </div>
-</form>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    // Tarih formatlama mantığını buraya taşıdık (Hatayı çözen kısım)
+    string scheduledArrivalVal = Model.ScheduledArrival.HasValue ? Model.ScheduledArrival.Value.ToString("dd.MM.yyyy HH:mm") : "";
+    string scheduledDepartureVal = Model.ScheduledDeparture.HasValue ? Model.ScheduledDeparture.Value.ToString("dd.MM.yyyy HH:mm") : "";
+    string adjustedDepartureVal = Model.AdjustedDeparture.HasValue ? Model.AdjustedDeparture.Value.ToString("dd.MM.yyyy HH:mm") : "";
+    string adjustedArrivalVal = Model.AdjustedArrival.HasValue ? Model.AdjustedArrival.Value.ToString("dd.MM.yyyy HH:mm") : "";
 }
+
+<div class="row">
+    <div class="col-md-6 border-end">
+        <h5 class="text-secondary mb-3 border-bottom pb-2">
+            <i class="bi bi-map me-1"></i> Sefer Bilgileri
+        </h5>
+
+        <div class="form-floating mb-3">
+            <input asp-for="Title" class="form-control" placeholder="Görev Başlığı" />
+            <label asp-for="Title">Görev Başlığı</label>
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <textarea asp-for="Description" class="form-control" placeholder="Açıklama" style="height: 100px"></textarea>
+            <label asp-for="Description">Açıklama</label>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <select id="LineId" asp-for="LineId" class="form-select select2" data-selected="@Model?.LineId">
+                <option value="" disabled selected>Yükleniyor...</option>
+            </select>
+            <label asp-for="LineId">Hat Seçimi</label>
+            <span asp-validation-for="LineId" class="text-danger"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <select id="RouteId" asp-for="RouteId" class="form-select select2" data-selected="@Model?.RouteId" disabled>
+                <option value="" disabled selected>-- Önce Hat Seçin --</option>
+            </select>
+            <label asp-for="RouteId">Güzergah</label>
+            <span asp-validation-for="RouteId" class="text-danger"></span>
+        </div>
+
+        <div class="row g-2">
+            <div class="col-md-6">
+                <div class="form-floating mb-3">
+                    <input asp-for="ScheduledArrival" type="text"
+                           class="form-control date-input-with-icon"
+                           value="@scheduledArrivalVal"
+                           readonly="@readonlyAttr"
+                           style="@inputStyle"
+                           placeholder="dd.MM.yyyy HH:mm"
+                           maxlength="16" />
+                    <label asp-for="ScheduledArrival">Planlanan Varış</label>
+                    <span asp-validation-for="ScheduledArrival" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-floating mb-3">
+                    <input asp-for="ScheduledDeparture" type="text"
+                           class="form-control date-input-with-icon"
+                           value="@scheduledDepartureVal"
+                           readonly="@readonlyAttr"
+                           style="@inputStyle"
+                           placeholder="dd.MM.yyyy HH:mm"
+                           maxlength="16" />
+                    <label asp-for="ScheduledDeparture">Planlanan Kalkış</label>
+                    <span asp-validation-for="ScheduledDeparture" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 ps-md-4">
+        <h5 class="text-secondary mb-3 border-bottom pb-2">
+            <i class="bi bi-person-badge me-1"></i> Kaynak Atama
+        </h5>
+        <div class="form-floating mb-3">
+            <select id="GarageId" asp-for="GarageId" class="form-select select2" data-selected="@Model?.GarageId">
+                <option value="" disabled selected>Yükleniyor...</option>
+            </select>
+            <label asp-for="GarageId">Garaj</label>
+            <span asp-validation-for="GarageId" class="text-danger"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <select id="VehicleId" asp-for="VehicleId" class="form-select select2" data-selected="@Model?.VehicleId" disabled>
+                <option value="" disabled selected>-- Önce Garaj Seçin --</option>
+            </select>
+            <label asp-for="VehicleId">Araç</label>
+            <span asp-validation-for="VehicleId" class="text-danger"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <select id="DriverId" asp-for="DriverId" class="form-select select2" data-selected="@Model?.DriverId">
+                <option value="" selected disabled>Yükleniyor...</option>
+            </select>
+            <label asp-for="DriverId">Sürücü (Operatör)</label>
+            <span asp-validation-for="DriverId" class="text-danger"></span>
+        </div>
+
+        @if (isEditMode)
+        {
+            <div class="card bg-light border-warning mt-4 shadow-sm">
+                <div class="card-header bg-warning text-dark fw-bold small py-1">
+                    <i class="bi bi-gear-fill me-1"></i> Operasyonel Yönetim
+                </div>
+                <div class="card-body p-3">
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="AdjustedDeparture" type="text"
+                                       class="form-control date-input-with-icon"
+                                       value="@adjustedDepartureVal"
+                                       style="background-color: #fff;"
+                                       placeholder="dd.MM.yyyy HH:mm"
+                                       maxlength="16" />
+                                <label asp-for="AdjustedDeparture" class="text-warning fw-bold">Revize Kalkış (Yeni)</label>
+                                <span asp-validation-for="AdjustedDeparture" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="AdjustedArrival" type="text"
+                                       class="form-control date-input-with-icon"
+                                       value="@adjustedArrivalVal"
+                                       style="background-color: #fff;"
+                                       placeholder="dd.MM.yyyy HH:mm"
+                                       maxlength="16" />
+                                <label asp-for="AdjustedArrival" class="text-warning fw-bold">Revize Varış (Yeni)</label>
+                                <span asp-validation-for="AdjustedArrival" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <select asp-for="Status" class="form-select" asp-items="ViewBag.TaskStateList"></select>
+                        <label asp-for="Status">Görev Durumu</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="StatusReason" class="form-control" placeholder="İptal Nedeni" />
+                        <label asp-for="StatusReason">Durum Açıklaması</label>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input asp-for="PassengerCount" type="number" class="form-control" />
+                                <label asp-for="PassengerCount">Yolcu</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input asp-for="DelayInMinutes" type="number" class="form-control" />
+                                <label asp-for="DelayInMinutes">Gecikme (G)</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input asp-for="DelayOutMinutes" type="number" class="form-control" />
+                                <label asp-for="DelayOutMinutes">Gecikme (Ç)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        }
+        else
+        {
+            <input type="hidden" id="Status" name="Status" value="1" />
+            <input type="hidden" name="PassengerCount" value="0" />
+        }
+    </div>
+</div>

@@ -45,8 +45,8 @@
         const serviceStatus = $('#ServiceStatus').data('selected');
         if (serviceStatus != null) $('#ServiceStatus').val(serviceStatus);
 
-        const operator = $('#Operator').data('selected');
-        if (operator != null) $('#Operator').val(operator);
+        const driver = $('#Operator').data('selected');
+        if (driver != null) $('#Operator').val(driver);
 
         const model = $('#Model').data('selected');
         if (model != null) $('#Model').val(model);
@@ -138,7 +138,7 @@
             Capacity: parseInt($row.find('[data-field="capacity"]').text()) || 1,
             GarageId: $row.find('[data-field="garage"]').data('garageid') || $row.find('[data-field="garage"]').text().trim(),
             ServiceStatus: parseInt($row.find('[data-field="serviceStatus"]').data('value')) || 0,
-            Operator: parseInt($row.find('[data-field="operator"]').data('value')) || 0,
+            Operator: parseInt($row.find('[data-field="driver"]').data('value')) || 0,
             Model: parseInt($row.find('[data-field="model"]').data('value')) || 0,
             Year: parseInt($row.find('[data-field="year"]').text()) || 2000,
             TotalKm: parseInt($row.find('[data-field="totalKm"]').text()) || 0,

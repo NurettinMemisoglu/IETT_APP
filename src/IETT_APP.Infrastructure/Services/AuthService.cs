@@ -1,26 +1,26 @@
 ﻿using IETT_APP.Application.Dtos;
 using IETT_APP.Application.Interfaces;
+using IETT_APP.Application.Wrappers;
 using IETT_APP.Domain.Entities;
-using IETT_APP.Infrastructure.Persistence;
+using IETT_APP.Domain.Interfaces; // Repository Interface burada
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace IETT_APP.Infrastructure.Services
 {
     public class AuthService : IAuthService
     {
         private readonly UserManager<User> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ITokenService _tokenService;
-        private readonly AppDbContext _context;
+        private readonly IUserRefreshTokenRepository _refreshTokenRepository; // Yeni Repo
 
-        public AuthService(UserManager<User> userManager, RoleManager<IdentityRole> roleManager,
-            ITokenService tokenService, AppDbContext context)
+        public AuthService(
+            UserManager<User> userManager,
+            ITokenService tokenService,
+            IUserRefreshTokenRepository refreshTokenRepository)
         {
             _userManager = userManager;
-            _roleManager = roleManager;
             _tokenService = tokenService;
-            _context = context;
+            _refreshTokenRepository = refreshTokenRepository;
         }
 
         public async Task<AuthResponseDto?> RegisterAsync(RegisterUserDto dto)
@@ -28,29 +28,30 @@ namespace IETT_APP.Infrastructure.Services
             var user = new User
             {
                 Email = dto.Email,
-                // Use email as username to remove username from UI concerns
                 UserName = dto.Email,
-                FullName = dto.FullName
+                Name = dto.Name,
+                Surname = dto.Surname,
+                IsActive = true // Varsayılan aktif
             };
 
             var result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded) return null;
 
-            if (!await _roleManager.RoleExistsAsync("User"))
-                await _roleManager.CreateAsync(new IdentityRole { Name = "User" });
+            // HATA DÜZELTME: Rol oluşturma kodu silindi. Seed zaten yapıyor.
+            // Sadece atama yapıyoruz. Hata almamak için try-catch eklenebilir.
             await _userManager.AddToRoleAsync(user, "User");
 
             var roles = await _userManager.GetRolesAsync(user);
             var accessToken = _tokenService.GenerateToken(user, roles);
-
             var refreshToken = _tokenService.GenerateRefreshToken();
-            _context.UserRefreshTokens.Add(new UserRefreshToken
+
+            // Repository Kullanımı
+            await _refreshTokenRepository.AddAsync(new UserRefreshToken
             {
                 UserId = user.Id,
                 Token = refreshToken,
                 ExpiryTime = DateTime.UtcNow.AddDays(7)
             });
-            await _context.SaveChangesAsync();
 
             return new AuthResponseDto
             {
@@ -59,24 +60,26 @@ namespace IETT_APP.Infrastructure.Services
             };
         }
 
-        // Login unchanged (it already finds by email)
         public async Task<AuthResponseDto?> LoginAsync(LoginUserDto dto)
         {
             var user = await _userManager.FindByEmailAsync(dto.Email);
             if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
                 return null;
 
+            // Pasif kullanıcı kontrolü (Kurumsal kural)
+            if (!user.IsActive) return null; // Veya özel hata fırlatılabilir
+
             var roles = await _userManager.GetRolesAsync(user);
             var accessToken = _tokenService.GenerateToken(user, roles);
-
             var refreshToken = _tokenService.GenerateRefreshToken();
-            _context.UserRefreshTokens.Add(new UserRefreshToken
+
+            // Repository Kullanımı
+            await _refreshTokenRepository.AddAsync(new UserRefreshToken
             {
                 UserId = user.Id,
                 Token = refreshToken,
                 ExpiryTime = DateTime.UtcNow.AddDays(7)
             });
-            await _context.SaveChangesAsync();
 
             return new AuthResponseDto
             {
@@ -87,9 +90,8 @@ namespace IETT_APP.Infrastructure.Services
 
         public async Task<AuthResponseDto?> RefreshTokenAsync(string refreshToken)
         {
-            var tokenEntry = await _context.UserRefreshTokens
-                .Include(t => t.User)
-                .FirstOrDefaultAsync(t => t.Token == refreshToken);
+            // Repository Kullanımı
+            var tokenEntry = await _refreshTokenRepository.GetByTokenAsync(refreshToken);
 
             if (tokenEntry == null || tokenEntry.ExpiryTime < DateTime.UtcNow)
                 return null;
@@ -98,14 +100,15 @@ namespace IETT_APP.Infrastructure.Services
             var accessToken = _tokenService.GenerateToken(tokenEntry.User, roles);
             var newRefreshToken = _tokenService.GenerateRefreshToken();
 
-            _context.UserRefreshTokens.Remove(tokenEntry);
-            _context.UserRefreshTokens.Add(new UserRefreshToken
+            // Rotation: Eskiyi sil, yeniyi ekle
+            await _refreshTokenRepository.DeleteAsync(tokenEntry);
+
+            await _refreshTokenRepository.AddAsync(new UserRefreshToken
             {
                 UserId = tokenEntry.UserId,
                 Token = newRefreshToken,
                 ExpiryTime = DateTime.UtcNow.AddDays(7)
             });
-            await _context.SaveChangesAsync();
 
             return new AuthResponseDto
             {
@@ -116,9 +119,34 @@ namespace IETT_APP.Infrastructure.Services
 
         public async Task LogoutAsync(string userId)
         {
-            var tokens = _context.UserRefreshTokens.Where(t => t.UserId == userId);
-            _context.UserRefreshTokens.RemoveRange(tokens);
-            await _context.SaveChangesAsync();
+            // Kullanıcının tüm oturumlarını kapatmak için:
+            await _refreshTokenRepository.DeleteAllByUserIdAsync(userId);
+        }
+
+        public async Task<ServiceResult> ChangePasswordAsync(string userId, ChangePasswordDto dto)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return ServiceResult.Failure("Kullanıcı bulunamadı.");
+            }
+
+            var verificationResult = _userManager.PasswordHasher.VerifyHashedPassword(user, user.PasswordHash!, dto.NewPassword);
+
+            if (verificationResult == PasswordVerificationResult.Success)
+            {
+                return ServiceResult.Failure("Yeni şifreniz eski şifrenizle aynı olamaz.");
+            }
+
+            var result = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                var errors = result.Errors.Select(e => e.Description).ToList();
+                return ServiceResult.Failure(errors);
+            }
+
+            return ServiceResult.Success("Şifre başarıyla değiştirildi.");
         }
     }
 }
