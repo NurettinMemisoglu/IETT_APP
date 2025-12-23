@@ -2,106 +2,133 @@
 @model IEnumerable<IETT_APP.WebMVC.Areas.Planner.Models.RouteViewModel>
 @inject IETT_APP.WebMVC.Services.Interfaces.ILineApiService LineService
 @inject IETT_APP.WebMVC.Services.Interfaces.IStopApiService StopService
+
 @await Html.PartialAsync("_StopsModalPartial")
 
-<div class="card">
-    <div class="card-body table-responsive p-0">
-        <table class="table table-hover table-striped text-nowrap">
-            <thead class="table-dark">
-                <tr>
-                    <th>Kod</th>
-                    <th>Ad</th>
-                    <th>Yön</th>
-                    <th>Hat</th>
-                    <th>Duraklar</th>
-                    <th>Hat Uzunluğu(M)</th>
-                    <th>Hat Süresi(DK)</th>
-                    <th>Durum</th>
-                    <th>Oluşturulma Tarihi</th>
-                    <th>Son Düzenlenme Tarihi</th>
-                    <th>İşlemler</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model != null && Model.Any())
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0 custom-table">
+        <thead class="table-dark">
+            <tr>
+                <th style="padding-left: 20px;">GÜZERGAH BİLGİSİ</th>
+                <th>HAT / YÖN</th>
+                <th>DURAKLAR</th>
+                <th>METRİKLER (M / DK)</th>
+                <th>DURUM</th>
+                <th class="text-end" style="padding-right: 20px;">İŞLEMLER</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
                 {
-                    foreach (var item in Model)
-                    {
-                        var lineName = !string.IsNullOrEmpty(item.LineName)
-                            ? item.LineName
-                            : LineService.GetByIdAsync(item.LineId).Result?.Name ?? "—";
+                    // --- Veri Hazırlığı ---
+                    var lineName = !string.IsNullOrEmpty(item.LineName) ? item.LineName : LineService.GetByIdAsync(item.LineId).Result?.Name ?? "—";
+                    var lineCode = LineService.GetByIdAsync(item.LineId).Result?.Code ?? "?";
 
-                        var stopNames = item.StopIds != null && item.StopIds.Any()
-                            ? item.StopIds.Select(id => StopService.GetByIdAsync(id.ToString()).Result?.Name ?? "—").ToList()
-                            : new List<string>();
+                    var stopNames = item.StopIds != null && item.StopIds.Any()
+                    ? item.StopIds.Select(id => StopService.GetByIdAsync(id.ToString()).Result?.Name ?? "—").ToList()
+                    : new List<string>();
 
-                        item.StopNames = stopNames;
+                    item.StopNames = stopNames;
+                    var stopNamesJson = System.Text.Json.JsonSerializer.Serialize(item.StopNames);
+                    var stopIdsJson = System.Text.Json.JsonSerializer.Serialize(item.StopIds);
+                    // ---------------------
 
-                        var stopNamesJson = System.Text.Json.JsonSerializer.Serialize(item.StopNames);
-                        var stopIdsJson = System.Text.Json.JsonSerializer.Serialize(item.StopIds);
+                    // 🔥 ÖNEMLİ: Tüm verileri buraya data- attribute olarak ekliyoruz
+                    <tr data-id="@item.Id"
+                        data-code="@item.Code"
+                        data-name="@item.Name"
+                        data-length="@item.LengthInM"
+                        data-time="@item.TimeInMinutes"
+                        data-direction="@((int)item.RoutesDirection)"
+                        data-lineid="@item.LineId"
+                        data-active="@item.IsActive.ToString().ToLower()"
+                        data-stopids='@stopIdsJson'
+                        data-stopnames='@stopNamesJson'>
 
-                        <tr data-id="@item.Id">
-                            <td class="route-code">@item.Code</td>
-                            <td class="route-name">@item.Name</td>
-                            <td class="route-direction" data-value="@((int)item.RoutesDirection)">
-                                @item.RoutesDirection.ToDisplayName()
-                            </td>
-                            <td class="route-line" data-lineid="@item.LineId">
-                                @(LineService.GetByIdAsync(item.LineId).Result?.Code ?? "—")
-                            </td>
+                        <td style="padding-left: 20px;">
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold text-primary mb-1">@item.Name</span>
+                                <div class="text-muted small">
+                                    <i class="bi bi-hash me-1"></i> @item.Code
+                                </div>
+                            </div>
+                        </td>
 
-                            <td>
-                                @if (item.StopNames != null && item.StopNames.Any())
+                        <td>
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="badge bg-dark me-2">@lineCode</span>
+                                <small class="text-muted">@lineName</small>
+                            </div>
+                            <div>
+                                <span class="badge bg-light text-dark border">
+                                    <i class="bi bi-arrow-left-right me-1"></i> @item.RoutesDirection.ToDisplayName()
+                                </span>
+                            </div>
+                        </td>
+
+                        <td>
+                            @if (item.StopNames != null && item.StopNames.Any())
+                            {
+                                <button class="btn btn-sm btn-soft-primary view-stops"
+                                        data-stopids='@stopIdsJson'>
+                                    <i class="bi bi-sign-stop-fill"></i> @item.StopNames.Count Durak
+                                </button>
+                            }
+                            else
+                            {
+                                <span class="text-muted small"><i class="bi bi-dash-circle"></i> Tanımsız</span>
+                            }
+                        </td>
+
+                        <td>
+                            <div class="d-flex flex-column small">
+                                <span class="text-dark mb-1"><i class="bi bi-rulers me-1 text-secondary"></i> @item.LengthInM m</span>
+                                <span class="text-dark"><i class="bi bi-clock me-1 text-secondary"></i> @item.TimeInMinutes dk</span>
+                            </div>
+                        </td>
+
+                        <td>
+                            <button class="toggle-route-active border-0 bg-transparent p-0" style="cursor: pointer;">
+                                @if (item.IsActive)
                                 {
-                                    <button class="btn btn-sm btn-outline-primary view-stops"
-                                            data-stops='@stopNamesJson'
-                                            data-stopids='@stopIdsJson'>
-                                        Durakları Gör
-                                    </button>
+                                    <span class="custom-badge badge-green">Aktif</span>
                                 }
                                 else
                                 {
-                                    <span class="text-muted">—</span>
+                                    <span class="custom-badge badge-gray">Pasif</span>
                                 }
-                            </td>
+                            </button>
+                        </td>
 
-                            <td class="route-length">@item.LengthInM</td>
-                            <td class="route-time">@item.TimeInMinutes</td>
-                            <td>
-                                <button class="toggle-route-active"
+                        <td class="text-end" style="padding-right: 20px;">
+                            <div class="btn-group shadow-sm" role="group">
+                                <button class="btn btn-sm btn-outline-warning edit-route"
+                                        onclick="window.location.href='@Url.Action("Edit", "Routes", new { id = item.Id })'"
+                                        title="Düzenle">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+
+                                <button class="btn btn-sm btn-outline-danger delete-route"
                                         data-id="@item.Id"
-                                        data-active="@item.IsActive.ToString().ToLower()"
-                                        style="min-width: 50px; padding: 0; border: none; background: transparent; cursor: pointer;">
-                                    @if (item.IsActive)
-                                    {
-                                        <span class="badge bg-success rounded-pill" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">Aktif</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary rounded-pill" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">Pasif</span>
-                                    }
+                                        title="Sil">
+                                    <i class="bi bi-trash"></i>
                                 </button>
-                            </td>
-                            <td>@item.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                            <td>@item.UpdatedAt?.ToString("yyyy-MM-dd HH:mm")</td>
-                            <td>
-                                <button class="btn btn-sm btn-warning edit-route" data-id="@item.Id" title="Düzenle" action="POST">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger delete-route" data-id="@item.Id" title="Sil">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="11" class="text-center text-muted">Kayıtlı rota bulunamadı.</td>
+                            </div>
+                        </td>
                     </tr>
                 }
-            </tbody>
-        </table>
-    </div>
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-map fs-1 d-block mb-3 opacity-25"></i>
+                        <span>Kayıtlı rota bulunamadı.</span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>

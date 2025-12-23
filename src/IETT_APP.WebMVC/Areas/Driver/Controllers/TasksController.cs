@@ -4,6 +4,7 @@ using IETT_APP.WebMVC.Areas.Driver.Models;
 using IETT_APP.WebMVC.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace IETT_APP.WebMVC.Areas.Driver.Controllers
 {
@@ -11,11 +12,13 @@ namespace IETT_APP.WebMVC.Areas.Driver.Controllers
     [Authorize(Roles = "Driver")]
     public class TasksController : Controller
     {
-        private readonly ITripTaskApiService _taskService;
+        private readonly ITripTaskApiService _tripTaskApiService;
+        private readonly IDriverApiService _driverService;
 
-        public TasksController(ITripTaskApiService taskService)
+        public TasksController(ITripTaskApiService tripTaskApiService, IDriverApiService driverService)
         {
-            _taskService = taskService;
+            _tripTaskApiService = tripTaskApiService;
+            _driverService = driverService;
         }
 
         // ============================================================
@@ -24,14 +27,25 @@ namespace IETT_APP.WebMVC.Areas.Driver.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
+            // --- GÜVENLİK KONTROLÜ BAŞLANGICI ---
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // Profil var mı kontrol et
+            var driver = await _driverService.GetByUserIdAsync(userId);
+            if (driver == null)
+            {
+                TempData["ErrorMessage"] = "Görevlerinizi görmek için önce profilinizi tamamlamalısınız.";
+                // Profil yoksa direkt Profil Oluşturma sayfasına postala
+                return RedirectToAction("Create", "Profile");
+            }
+            // --- GÜVENLİK KONTROLÜ BİTİŞİ ---
+
             try
             {
-                // API'den sadece bu şoföre ait görevleri çek
-                var taskDtos = await _taskService.GetMyTasksAsync();
+                var taskDtos = await _tripTaskApiService.GetMyTasksAsync();
 
-                // DTO -> ViewModel Dönüşümü (Extension Method ile)
                 var viewModels = taskDtos
-                    .OrderBy(t => t.ScheduledDeparture) // En yakın tarihli görev en üstte
+                    .OrderBy(t => t.ScheduledDeparture)
                     .Select(t => t.ToDriverViewModel())
                     .ToList();
 
@@ -40,32 +54,27 @@ namespace IETT_APP.WebMVC.Areas.Driver.Controllers
             catch
             {
                 TempData["ErrorMessage"] = "Görevler yüklenirken bir hata oluştu.";
+                // Profil var ama teknik hata varsa boş liste dön
                 return View(new List<DriverTripTaskViewModel>());
             }
         }
 
         // ============================================================
-        // DETAY SAYFASI
+        // 2. DETAY SAYFASI
         // ============================================================
         [HttpGet]
         public async Task<IActionResult> Details(Guid id)
         {
             try
             {
-                // 1. Veriyi API'den çek
-                var taskDto = await _taskService.GetByIdAsync(id);
+                var taskDto = await _tripTaskApiService.GetByIdAsync(id);
 
                 if (taskDto == null)
                 {
                     return NotFound();
                 }
 
-                // 2. Güvenlik Kontrolü (Opsiyonel ama önerilir):
-                // Şoför sadece kendi görevini görebilmeli.
-                // Bu kontrolü API'de yapmak en doğrusudur ama burada da basitçe bakabiliriz
-                // veya sadece veriyi gösteririz.
-
-                // 3. ViewModel'e Çevir
+                // DTO -> ViewModel Dönüşümü
                 var viewModel = taskDto.ToDriverViewModel();
 
                 return View(viewModel);
@@ -78,68 +87,63 @@ namespace IETT_APP.WebMVC.Areas.Driver.Controllers
         }
 
         // ============================================================
-        // 2. OPERASYONEL AKSİYONLAR (AJAX ile Çağrılacak)
+        // 3. AKSİYONLAR (AJAX)
         // ============================================================
 
-        // KABUL ET
         [HttpPost]
         public async Task<IActionResult> Accept(Guid id)
         {
-            var result = await _taskService.AcceptTripAsync(id);
-            if (result.Succeeded) return Ok(new { message = "Görev kabul edildi." });
-            return BadRequest(new { message = result.Message });
+            var result = await _tripTaskApiService.AcceptTripAsync(id);
+            if (result.Succeeded) return Json(new { success = true, message = "Görev kabul edildi." });
+            return BadRequest(new { success = false, message = result.Message });
         }
 
-        // REDDET (Sebep ile)
+        [HttpPost]
+        public async Task<IActionResult> Start(Guid id)
+        {
+            var result = await _tripTaskApiService.StartTripAsync(id);
+            if (result.Succeeded) return Json(new { success = true, message = "Sefer başlatıldı. İyi yolculuklar!" });
+            return BadRequest(new { success = false, message = result.Message });
+        }
+
         [HttpPost]
         public async Task<IActionResult> Reject(Guid id, [FromBody] RejectTripRequestDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Reason))
-                return BadRequest(new { message = "Reddetme nedeni zorunludur." });
+                return BadRequest(new { success = false, message = "Reddetme nedeni zorunludur." });
 
-            var result = await _taskService.RejectTripAsync(id, dto);
-            if (result.Succeeded) return Ok(new { message = "Görev reddedildi." });
-            return BadRequest(new { message = result.Message });
+            var result = await _tripTaskApiService.RejectTripAsync(id, dto);
+            if (result.Succeeded) return Json(new { success = true, message = "Görev reddedildi." });
+            return BadRequest(new { success = false, message = result.Message });
         }
 
-        // SEFERİ BAŞLAT (Otomatik KM ve Araç Statüsü)
-        [HttpPost]
-        public async Task<IActionResult> Start(Guid id)
-        {
-            var result = await _taskService.StartTripAsync(id);
-            if (result.Succeeded) return Ok(new { message = "Sefer başlatıldı. İyi yolculuklar!" });
-            return BadRequest(new { message = result.Message });
-        }
-
-        // SEFERİ BİTİR (Yolcu Sayısı ve KM Girişi ile)
         [HttpPost]
         public async Task<IActionResult> Complete(Guid id, [FromBody] CompleteTripRequestDto dto)
         {
-            // Basit Validasyon
-            if (dto.PassengerCount < 0) return BadRequest(new { message = "Yolcu sayısı negatif olamaz." });
-            if (dto.EndOdometerInput <= 0) return BadRequest(new { message = "Geçerli bir kilometre giriniz." });
+            // Validasyon
+            if (dto.PassengerCount < 0) return BadRequest(new { success = false, message = "Yolcu sayısı negatif olamaz." });
+            if (dto.EndOdometerInput <= 0) return BadRequest(new { success = false, message = "Geçerli bir kilometre giriniz." });
 
-            var result = await _taskService.CompleteTripAsync(id, dto);
+            var result = await _tripTaskApiService.CompleteTripAsync(id, dto);
 
             if (result.Succeeded)
-                return Ok(new { message = "Sefer başarıyla tamamlandı. Geçmiş olsun." });
+                return Json(new { success = true, message = "Sefer başarıyla tamamlandı. Geçmiş olsun." });
 
-            return BadRequest(new { message = result.Message });
+            return BadRequest(new { success = false, message = result.Message });
         }
 
-        // SORUN BİLDİR / YARIM KALDI
         [HttpPost]
         public async Task<IActionResult> Fail(Guid id, [FromBody] FailTripRequestDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Reason))
-                return BadRequest(new { message = "Sorun açıklaması zorunludur." });
+                return BadRequest(new { success = false, message = "Sorun açıklaması zorunludur." });
 
-            var result = await _taskService.FailTripAsync(id, dto);
+            var result = await _tripTaskApiService.FailTripAsync(id, dto);
 
             if (result.Succeeded)
-                return Ok(new { message = "Durum merkeze bildirildi." });
+                return Json(new { success = true, message = "Durum merkeze bildirildi." });
 
-            return BadRequest(new { message = result.Message });
+            return BadRequest(new { success = false, message = result.Message });
         }
     }
 }

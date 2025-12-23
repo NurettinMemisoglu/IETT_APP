@@ -3,14 +3,35 @@
     ViewData["Title"] = "Yeni Güzergâh Ekle";
 }
 
-<div class="route-header mt-4 mb-3">
-    <h2>Yeni Güzergâh Ekle</h2>
-</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/planner-routes.css" asp-append-version="true" />
+}
 
-<form id="routeForm" asp-action="Execute" method="post">
-    @await Html.PartialAsync("_RouteFormPartial", Model)
-</form>
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12">
+
+            <div class="card card-success card-outline shadow-sm border-top-0" style="border-top: 3px solid #198754 !important;">
+
+                <div class="card-header bg-white">
+                    <h3 class="card-title fw-bold text-success m-0">
+                        <i class="bi bi-plus-circle me-2"></i> Yeni Güzergâh Ekle
+                    </h3>
+                </div>
+
+                <div class="card-body bg-light">
+                    <form id="routeForm" asp-action="Execute" method="post">
+                        @await Html.PartialAsync("_RouteFormPartial", Model)
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/routes.js"></script>
+    <script src="~/js/routes-map.js"></script>
 }

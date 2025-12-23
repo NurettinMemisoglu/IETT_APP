@@ -2,103 +2,169 @@
 @model IEnumerable<IETT_APP.WebMVC.Areas.Planner.Models.VehicleViewModel>
 @inject IETT_APP.WebMVC.Services.Interfaces.IGarageApiService GarageService
 
-<div class="card">
-    <div class="card-body table-responsive p-0">
-        <table id="vehiclesTable" class="table table-hover table-striped text-nowrap align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>Kapı No</th>
-                    <th>Plaka</th>
-                    <th>Kapasite</th>
-                    <th>Garaj</th>
-                    <th>Servis Durumu</th>
-                    <th>Operatör</th>
-                    <th>Model</th>
-                    <th>Yıl</th>
-                    <th>Kilometre</th>
-                    <th>Özellikler</th>
-                    <th>Durum</th>
-                    <th>Oluşturulma</th>
-                    <th>Son Güncelleme</th>
-                    <th>İşlemler</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model != null && Model.Any())
+<div class="table-responsive">
+    <table id="vehiclesTable" class="table table-hover align-middle mb-0 custom-table">
+        <thead>
+            <tr>
+                <th style="padding-left: 20px;">ARAÇ KİMLİĞİ</th>
+                <th>GARAJ / KONUM</th>
+                <th>TİP / MODEL</th>
+                <th class="text-center">KAPASİTE</th>
+                <th class="text-center">SAYAÇ</th>
+                <th class="text-center">SERVİS</th>
+                <th class="text-center">ÖZELLİKLER</th>
+                <th class="text-center">DURUM</th>
+                <th class="text-center">TARİHLER</th>
+                <th style="padding-right: 20px;" class="text-end">İŞLEMLER</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
                 {
-                    foreach (var item in Model)
-                    {
-                        var garageName = !string.IsNullOrEmpty(item.GarageName)
-                        ? item.GarageName
-                        : GarageService.GetByIdAsync(item.GarageId).Result?.GarageName ?? "—";
+                    var garageName = !string.IsNullOrEmpty(item.GarageName)
+                    ? item.GarageName
+                    : GarageService.GetByIdAsync(item.GarageId).Result?.GarageName ?? "—";
 
-                        <tr data-id="@item.Id">
-                            <td data-field="doorNumber">@item.DoorNumber</td>
-                            <td data-field="plateNumber">@item.PlateNumber</td>
-                            <td data-field="capacity">@item.Capacity</td>
-                            <td class="vehicle-garage-cell"
-                                data-field="garage"
-                                data-garageid="@item.GarageId"
-                                title="@garageName">
-                                @garageName
-                            </td>
-                            <td data-field="serviceStatus" data-value="@((int)item.ServiceStatus)">@item.ServiceStatus.ToDisplayName()</td>
-                            <td data-field="driver" data-value="@((int)item.Driver)">@item.Driver.ToDisplayName()</td>
-                            <td data-field="model" data-value="@((int)item.Model)">@item.Model.ToDisplayName()</td>
-                            <td data-field="year">@item.Year</td>
-                            <td data-field="totalKm">@item.TotalKm</td>
+                    <tr data-id="@item.Id">
 
+                        <td style="padding-left: 20px;">
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold text-primary" style="font-size: 1rem;">@item.DoorNumber</span>
+                                <span class="text-muted small font-monospace">
+                                    <i class="bi bi-card-heading me-1"></i>@item.PlateNumber
+                                </span>
+                            </div>
+                        </td>
 
-                            <!-- Tek hücrede tıklanabilir özellikler popover -->
-                            <td>
-                                <i class="fa-solid fa-circle-info features-popover"
-                                   data-haswifi="@item.HasWiFi"
-                                   data-hasbikerack="@item.HasBikeRack"
-                                   data-hasmobilecharging="@item.HasMobileCharging"
-                                   data-haspassengerinfosystem="@item.HasPassengerInfoSystem"
-                                   data-hascctv="@item.HasCCTV"
-                                   data-hasdisabilityaccess="@item.HasDisabilityAccess"
-                                   style="cursor:pointer;"
-                                   tabindex="0"></i>
-                            </td>
+                        <td>
+                            <div class="d-flex align-items-center text-dark">
+                                <i class="bi bi-building me-2 text-secondary"></i>
+                                <span class="fw-medium">@garageName</span>
+                            </div>
+                        </td>
 
-                            <td>
-                                <button class="toggle-vehicle-active"
-                                        data-id="@item.Id"
-                                        data-active="@item.IsActive.ToString().ToLower()"
-                                        style="min-width: 50px; padding: 0; border: none; background: transparent; cursor: pointer;">
-                                    @if (item.IsActive)
-                                    {
-                                        <span class="badge bg-success rounded-pill" style="font-size:0.8rem; padding:0.35rem 0.75rem;">Aktif</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary rounded-pill" style="font-size:0.8rem; padding:0.35rem 0.75rem;">Pasif</span>
-                                    }
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="fw-semibold">@item.Model.ToDisplayName()</span>
+                                <span class="text-muted small">@item.Year Model</span>
+                            </div>
+                        </td>
+
+                        <td class="text-center">
+                            <span class="custom-badge badge-info-soft">
+                                @item.Capacity Yolcu
+                            </span>
+                        </td>
+
+                        <td class="text-center">
+                            <div class="d-flex flex-column justify-content-center">
+                                <span class="fw-bold text-secondary">@item.TotalKm.ToString("N0")</span>
+                                <span class="text-muted" style="font-size: 0.75rem;">km</span>
+                            </div>
+                        </td>
+
+                        <td class="text-center">
+                            <span class="custom-badge badge-yellow shadow-sm"
+                                  style="cursor: help;"
+                                  data-bs-toggle="tooltip"
+                                  data-bs-placement="top"
+                                  title="@(!string.IsNullOrEmpty(item.StatusReason) ? item.StatusReason : item.ServiceStatus.ToDisplayName())">
+                                @item.ServiceStatus.ToDisplayName()
+                            </span>
+                        </td>
+
+                        <td class="text-center">
+                            <div class="d-flex flex-column align-items-center justify-content-center gap-1">
+
+                                <div class="d-flex gap-2" style="font-size: 1.1rem;">
+                                    <i class="bi bi-wifi @(item.HasWiFi ? "text-primary" : "text-muted opacity-25")"
+                                       data-bs-toggle="tooltip" data-bs-placement="top"
+                                       title="@(item.HasWiFi ? "WiFi Var" : "WiFi Yok")"></i>
+
+                                    <i class="bi bi-camera-video-fill @(item.HasCCTV ? "text-danger" : "text-muted opacity-25")"
+                                       data-bs-toggle="tooltip" data-bs-placement="top"
+                                       title="@(item.HasCCTV ? "Kamera Var" : "Kamera Yok")"></i>
+
+                                    <i class="bi bi-person-wheelchair @(item.HasDisabilityAccess ? "text-success" : "text-muted opacity-25")"
+                                       data-bs-toggle="tooltip" data-bs-placement="top"
+                                       title="@(item.HasDisabilityAccess ? "Engelli Uygun" : "Engelli Uygun Değil")"></i>
+                                </div>
+
+                                <div class="d-flex gap-2" style="font-size: 1.1rem;">
+                                    <i class="bi bi-battery-charging @(item.HasMobileCharging ? "text-warning" : "text-muted opacity-25")"
+                                       data-bs-toggle="tooltip" data-bs-placement="top"
+                                       title="@(item.HasMobileCharging ? "USB Şarj Var" : "USB Şarj Yok")"></i>
+
+                                    <i class="bi bi-bicycle @(item.HasBikeRack ? "text-info" : "text-muted opacity-25")"
+                                       data-bs-toggle="tooltip" data-bs-placement="top"
+                                       title="@(item.HasBikeRack ? "Bisiklet Aparatı Var" : "Bisiklet Aparatı Yok")"></i>
+
+                                    <i class="bi bi-display @(item.HasPassengerInfoSystem ? "text-dark" : "text-muted opacity-25")"
+                                       data-bs-toggle="tooltip" data-bs-placement="top"
+                                       title="@(item.HasPassengerInfoSystem ? "Bilgilendirme Ekranı Var" : "Bilgilendirme Ekranı Yok")"></i>
+                                </div>
+
+                            </div>
+                        </td>
+
+                        <td class="text-center">
+                            <button class="toggle-vehicle-active bg-transparent border-0 p-0"
+                                    data-id="@item.Id"
+                                    data-active="@item.IsActive.ToString().ToLower()"
+                                    title="Durumu Değiştir">
+                                @if (item.IsActive)
+                                {
+                                    <span class="status-pill status-active">Aktif</span>
+                                }
+                                else
+                                {
+                                    <span class="status-pill status-passive">Pasif</span>
+                                }
+                            </button>
+                        </td>
+
+                        <td class="text-center">
+                            <div class="d-flex flex-column small text-muted align-items-center">
+                                <span class="mb-1" title="Oluşturulma">
+                                    <i class="bi bi-calendar-check me-1 text-success"></i>
+                                    @item.CreatedAt?.ToString("dd.MM.yyyy HH:mm")
+                                </span>
+                                @if (item.UpdatedAt.HasValue)
+                                {
+                                    <span title="Güncellenme">
+                                        <i class="bi bi-pencil-square me-1 text-warning"></i>
+                                        @item.UpdatedAt.Value.ToString("dd.MM.yyyy HH:mm")
+                                    </span>
+                                }
+                            </div>
+                        </td>
+
+                        <td class="text-end" style="padding-right: 20px;">
+                            <div class="btn-group shadow-sm" role="group">
+
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning" title="Düzenle">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+
+                                <button class="btn btn-sm btn-outline-danger delete-vehicle" data-id="@item.Id" title="Sil">
+                                    <i class="bi bi-trash"></i>
                                 </button>
-                            </td>
-
-                            <td>@item.CreatedAt?.ToString("yyyy-MM-dd HH:mm")</td>
-                            <td>@item.UpdatedAt?.ToString("yyyy-MM-dd HH:mm")</td>
-
-                            <td>
-                                <button class="btn btn-sm btn-warning edit-vehicle" data-id="@item.Id">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger delete-vehicle" data-id="@item.Id">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="14" class="text-center text-muted">Kayıtlı araç bulunamadı.</td>
+                            </div>
+                        </td>
                     </tr>
                 }
-            </tbody>
-        </table>
-    </div>
+            }
+            else
+            {
+                <tr>
+                    <td colspan="10" class="text-center py-5 text-muted">
+                        <i class="bi bi-bus-front fs-1 d-block mb-3 opacity-25"></i>
+                        <span>Kayıtlı araç bulunamadı.</span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>

@@ -1,4 +1,5 @@
 ﻿using IETT_APP.Application.Dtos;
+using IETT_APP.Application.Dtos.Driver;
 using IETT_APP.WebMVC.Models;
 using IETT_APP.WebMVC.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
@@ -6,43 +7,36 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Text.Json; // JSON İÇİN GEREKLİ
 
 namespace IETT_APP.WebMVC.Controllers
 {
-    // AllowAnonymous: Giriş yapmamış kullanıcıların bu controller'a erişebilmesi için şarttır.
     [AllowAnonymous]
     public class AuthController : Controller
     {
         private readonly IAuthApiService _authApiService;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(IAuthApiService authApiService)
+        public AuthController(IAuthApiService authApiService, IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _authApiService = authApiService;
+            _httpClientFactory = httpClientFactory;
+            _configuration = configuration;
         }
 
-        // ============================================================
-        // LOGIN (GİRİŞ)
-        // ============================================================
-
+        // GET: Login (Aynı Kalacak)
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
         {
-            // Eğer kullanıcı zaten giriş yapmışsa, tekrar Login sayfasını görmesin.
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
-                // Eğer bir sayfadan "yetkisiz" diye kovulup buraya geldiyse (ReturnUrl varsa),
-                // onu tekrar o sayfaya göndermek döngü yaratır. Ana sayfaya atalım.
-                if (!string.IsNullOrEmpty(returnUrl))
-                {
-                    return RedirectToAction("Index", "Home", new { area = "" });
-                }
-
-                // Normal bir şekilde geldiyse rolüne uygun panele yönlendir.
+                if (!string.IsNullOrEmpty(returnUrl)) return RedirectToAction("Index", "Home", new { area = "" });
                 var roles = User.FindAll(ClaimTypes.Role).Select(c => c.Value);
                 return RedirectByRole(roles);
             }
-
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
@@ -52,13 +46,9 @@ namespace IETT_APP.WebMVC.Controllers
         {
             if (!ModelState.IsValid) return View(model);
 
-            var loginDto = new LoginUserDto
-            {
-                Email = model.Email,
-                Password = model.Password
-            };
+            var loginDto = new LoginUserDto { Email = model.Email, Password = model.Password };
 
-            // API'ye İstek At
+            // 1. API'ye Login İsteği
             var authResponse = await _authApiService.LoginAsync(loginDto);
 
             if (authResponse != null && !string.IsNullOrEmpty(authResponse.AccessToken))
@@ -66,70 +56,94 @@ namespace IETT_APP.WebMVC.Controllers
                 var handler = new JwtSecurityTokenHandler();
                 var jwtToken = handler.ReadJwtToken(authResponse.AccessToken);
 
-                // 1. Temel Token'ları Listeye Ekle
                 var claims = new List<Claim>
                 {
                     new Claim("AccessToken", authResponse.AccessToken),
                     new Claim("RefreshToken", authResponse.RefreshToken)
                 };
 
-                // 2. API Claimlerini MVC Standartlarına Çevir (MAPPING)
-                // Bu adım çok kritiktir. API "nameid" gönderir, MVC "NameIdentifier" arar.
                 foreach (var claim in jwtToken.Claims)
                 {
-                    // ROL MAPPING
+                    // Claim mapping (Aynı kalacak)
                     if (claim.Type == "role" || claim.Type == ClaimTypes.Role || claim.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role")
-                    {
                         claims.Add(new Claim(ClaimTypes.Role, claim.Value));
-                    }
-                    // ID MAPPING (nameid -> NameIdentifier)
                     else if (claim.Type == "nameid" || claim.Type == "sub" || claim.Type == "id")
-                    {
                         claims.Add(new Claim(ClaimTypes.NameIdentifier, claim.Value));
-                    }
-                    // İSİM MAPPING (unique_name -> Name)
                     else if (claim.Type == "unique_name" || claim.Type == "name")
-                    {
                         claims.Add(new Claim(ClaimTypes.Name, claim.Value));
-                    }
-                    // EMAIL MAPPING
                     else if (claim.Type == "email")
-                    {
                         claims.Add(new Claim(ClaimTypes.Email, claim.Value));
-                    }
                     else
-                    {
-                        // Diğerlerini olduğu gibi ekle (exp, iat, nbf hariç tutulabilir ama zararı yok)
                         claims.Add(claim);
-                    }
                 }
 
-                // 3. Kimlik Kartını (Identity) Oluştur
-                // Role ve Name tiplerini açıkça belirtiyoruz ki User.IsInRole() doğru çalışsın.
-                var claimsIdentity = new ClaimsIdentity(
-                    claims,
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    ClaimTypes.Name,
-                    ClaimTypes.Role);
+                // =========================================================================
+                // 🛠️ DÜZELTME & DEBUG: RESİM ÇEKME İŞLEMİ
+                // =========================================================================
+                if (claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Driver"))
+                {
+                    try
+                    {
+                        var userId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
+                        // DEBUG 1: UserId Kontrolü
+                        Console.WriteLine($"[LOGIN DEBUG] Kullanıcı ID bulundu: {userId}");
+
+                        if (!string.IsNullOrEmpty(userId))
+                        {
+                            var client = _httpClientFactory.CreateClient();
+                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authResponse.AccessToken);
+
+                            // URL'i Temizle (Çift slash hatasını önle)
+                            var baseUrl = _configuration["ApiSettings:BaseUrl"]?.TrimEnd('/');
+                            var requestUrl = $"{baseUrl}/api/drivers/user/{userId}";
+
+                            // DEBUG 2: İstek URL'i
+                            Console.WriteLine($"[LOGIN DEBUG] İstek atılıyor: {requestUrl}");
+
+                            var response = await client.GetAsync(requestUrl);
+
+                            if (response.IsSuccessStatusCode)
+                            {
+                                // ÖNEMLİ: Büyük/Küçük harf duyarsızlığı ayarı (PropertyNameCaseInsensitive)
+                                var jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                                var driverDto = await response.Content.ReadFromJsonAsync<DriverDto>(jsonOptions);
+
+                                // DEBUG 3: Veri Geldi mi?
+                                if (driverDto == null) Console.WriteLine("[LOGIN DEBUG] API'den veri NULL döndü.");
+                                else Console.WriteLine($"[LOGIN DEBUG] Veri geldi. Resim Yolu: {driverDto.ProfileImagePath}");
+
+                                if (driverDto != null && !string.IsNullOrEmpty(driverDto.ProfileImagePath))
+                                {
+                                    claims.Add(new Claim("ProfileImage", driverDto.ProfileImagePath));
+                                    Console.WriteLine("[LOGIN DEBUG] Claim EKLENDİ!");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine($"[LOGIN DEBUG] API Hatası: {response.StatusCode}");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[LOGIN DEBUG] KRİTİK HATA: {ex.Message}");
+                    }
+                }
+                // =========================================================================
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme, ClaimTypes.Name, ClaimTypes.Role);
                 var authProperties = new AuthenticationProperties
                 {
-                    IsPersistent = true, // "Beni Hatırla" varsayılan açık
+                    IsPersistent = true,
                     ExpiresUtc = jwtToken.ValidTo,
                     AllowRefresh = true
                 };
 
-                // 4. Tarayıcıya Cookie Yaz (Oturum Başlat)
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity),
-                    authProperties);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
 
-                // 5. Yönlendirme
-                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                    return Redirect(returnUrl);
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)) return Redirect(returnUrl);
 
-                // Rolleri yeni oluşturduğumuz claim listesinden çekip yönlendir
                 var roles = claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
                 return RedirectByRole(roles);
             }
@@ -278,7 +292,7 @@ namespace IETT_APP.WebMVC.Controllers
 
             if (roles.Contains("Planner")) return RedirectToAction("Index", "Home", new { area = "Planner" });
 
-            if (roles.Contains("Driver")) return RedirectToAction("Index", "Home", new { area = "Driver" }); // Driver Dashboard
+            if (roles.Contains("Driver")) return RedirectToAction("Index", "Home", new { area = "Driver" });
 
             // Varsayılan (Rolsüz veya Sadece User)
             return RedirectToAction("Index", "Home", new { area = "" });

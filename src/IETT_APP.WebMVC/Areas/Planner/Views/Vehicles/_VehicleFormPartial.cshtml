@@ -1,117 +1,144 @@
 ﻿@model IETT_APP.WebMVC.Areas.Planner.Models.VehicleViewModel
 
-<form id="vehicleForm" method="post">
+<div class="vehicle-form-wrapper">
     <input type="hidden" id="Id" name="Id" value="@Model.Id" />
 
+    <div class="row">
+        <div class="col-md-5 border-end pe-md-4">
 
-    <div class="form-floating mb-3">
-        <input asp-for="DoorNumber" class="form-control" placeholder="Kapı Numarası" />
-        <label asp-for="DoorNumber"></label>
-        <span asp-validation-for="DoorNumber" class="text-danger"></span>
+            <h5 class="vehicle-section-header">
+                <i class="bi bi-info-circle me-1"></i> Kimlik ve Operasyon
+            </h5>
+
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="form-floating mb-3">
+                        <input asp-for="DoorNumber" class="form-control" placeholder="Kapı No" />
+                        <label asp-for="DoorNumber">Kapı No</label>
+                        <span asp-validation-for="DoorNumber" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="form-floating mb-3">
+                        <input asp-for="PlateNumber" class="form-control" placeholder="Plaka" />
+                        <label asp-for="PlateNumber">Plaka</label>
+                        <span asp-validation-for="PlateNumber" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-floating mb-3">
+                <select asp-for="GarageId" id="GarageId" class="form-select"
+                        data-selected="@((Model.GarageId == Guid.Empty) ? string.Empty : Model.GarageId.ToString())">
+                    <option value="" disabled selected>-- Yükleniyor --</option>
+                </select>
+                <label asp-for="GarageId">Bağlı Olduğu Garaj</label>
+                <span asp-validation-for="GarageId" class="text-danger"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <select asp-for="ServiceStatus" id="ServiceStatus" class="form-select" asp-items="ViewBag.ServiceStatusList"
+                        data-selected="@((int)Model.ServiceStatus)">
+                    <option value="" selected disabled>-- Servis Durumu --</option>
+                </select>
+                <label asp-for="ServiceStatus">Servis Durumu</label>
+                <span asp-validation-for="ServiceStatus" class="text-danger"></span>
+            </div>
+
+            <div class="form-check form-switch p-3 bg-light rounded border d-flex justify-content-end align-items-center mb-3">
+                <label asp-for="IsActive" class="form-check-label fw-bold me-3" style="cursor: pointer;">Araç Aktif</label>
+                <input asp-for="IsActive" class="form-check-input m-0" style="cursor: pointer; transform: scale(1.2);" />
+            </div>
+
+        </div>
+
+        <div class="col-md-7 ps-md-4">
+
+            <h5 class="vehicle-section-header">
+                <i class="bi bi-wrench-adjustable me-1"></i> Teknik Özellikler
+            </h5>
+
+            <div class="row g-2 mb-3">
+                <div class="col-md-4">
+                    <div class="form-floating">
+                        <select asp-for="Model" id="Model" class="form-select" asp-items="ViewBag.VehicleModelList"
+                                data-selected="@((int)Model.Model)">
+                            <option value="" selected disabled>-- Model --</option>
+                        </select>
+                        <label asp-for="Model">Model</label>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-floating">
+                        <input asp-for="Year" class="form-control" type="number" placeholder="Yıl" />
+                        <label asp-for="Year">Üretim Yılı</label>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-floating">
+                        <input asp-for="Capacity" class="form-control" type="number" placeholder="Kapasite" />
+                        <label asp-for="Capacity">Kapasite</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-floating mb-4">
+                <input asp-for="TotalKm" class="form-control" type="number" placeholder="KM" />
+                <label asp-for="TotalKm">Toplam Kilometre</label>
+            </div>
+
+            <h5 class="vehicle-section-header">
+                <i class="bi bi-stars me-1"></i> Donanım ve Özellikler
+            </h5>
+
+            <div class="features-grid">
+                <div class="feature-item">
+                    <label for="HasDisabilityAccess"><i class="bi bi-person-wheelchair me-2 text-primary"></i>Engelli</label>
+                    <div class="form-check form-switch m-0">
+                        <input asp-for="HasDisabilityAccess" class="form-check-input" />
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <label for="HasWiFi"><i class="bi bi-wifi me-2 text-info"></i>WiFi</label>
+                    <div class="form-check form-switch m-0">
+                        <input asp-for="HasWiFi" class="form-check-input" />
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <label for="HasBikeRack"><i class="bi bi-bicycle me-2 text-success"></i>Bisiklet</label>
+                    <div class="form-check form-switch m-0">
+                        <input asp-for="HasBikeRack" class="form-check-input" />
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <label for="HasMobileCharging"><i class="bi bi-battery-charging me-2 text-warning"></i>USB Şarj</label>
+                    <div class="form-check form-switch m-0">
+                        <input asp-for="HasMobileCharging" class="form-check-input" />
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <label for="HasPassengerInfoSystem"><i class="bi bi-display me-2 text-dark"></i>Bilgi Ekranı</label>
+                    <div class="form-check form-switch m-0">
+                        <input asp-for="HasPassengerInfoSystem" class="form-check-input" />
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <label for="HasCCTV"><i class="bi bi-camera-video me-2 text-danger"></i>Kamera</label>
+                    <div class="form-check form-switch m-0">
+                        <input asp-for="HasCCTV" class="form-check-input" />
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <div class="form-floating mb-3">
-        <input asp-for="PlateNumber" class="form-control" placeholder="Plaka Numarası" />
-        <label asp-for="PlateNumber"></label>
-        <span asp-validation-for="PlateNumber" class="text-danger"></span>
+    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+        <a asp-action="Index" class="btn btn-secondary px-4">
+            <i class="bi bi-x-lg me-1"></i> İptal
+        </a>
+        <button type="submit" class="btn btn-success px-4 fw-bold">
+            <i class="bi bi-check-lg me-1"></i> Kaydet
+        </button>
     </div>
-
-    <div class="form-floating mb-3">
-        <input asp-for="Capacity" class="form-control" type="number" placeholder="Kapasite" />
-        <label asp-for="Capacity"></label>
-        <span asp-validation-for="Capacity" class="text-danger"></span>
-    </div>
-
-    <!-- Garage Dropdown (JS ile yükleniyor) -->
-    <div class="form-floating mb-3">
-        <select asp-for="GarageId" id="GarageId" class="form-select"
-                data-selected="@((Model.GarageId == Guid.Empty) ? string.Empty : Model.GarageId.ToString())">
-            <option value="" disabled selected>-- Garaj Seçin --</option>
-        </select>
-        <label asp-for="GarageId"></label>
-    </div>
-
-    <!-- Service Status Dropdown -->
-    <div class="form-floating mb-3">
-        <select asp-for="ServiceStatus" class="form-select" asp-items="ViewBag.ServiceStatusList">
-            <option value="" selected disabled>-- Servis Durumu Seçin --</option>
-        </select>
-        <label asp-for="ServiceStatus"></label>
-        <span asp-validation-for="ServiceStatus" class="text-danger"></span>
-    </div>
-
-    <!-- Driver Dropdown -->
-    <div class="form-floating mb-3">
-        <select asp-for="Driver" class="form-select" asp-items="ViewBag.VehicleOperatorList">
-            <option value="" selected disabled >-- Operatör Seçin --</option>
-        </select>
-        <label asp-for="Driver"></label>
-        <span asp-validation-for="Driver" class="text-danger"></span>
-    </div>
-
-    <!-- Model Dropdown -->
-    <div class="form-floating mb-3">
-        <select asp-for="Model" class="form-select" asp-items="ViewBag.VehicleModelList">
-            <option value="" selected disabled>-- Model Seçin --</option>
-        </select>
-        <label asp-for="Model"></label>
-        <span asp-validation-for="Model" class="text-danger"></span>
-    </div>
-
-    <div class="form-floating mb-3">
-        <input asp-for="Year" class="form-control" type="number" placeholder="Üretim Yılı" />
-        <label asp-for="Year"></label>
-        <span asp-validation-for="Year" class="text-danger"></span>
-    </div>
-
-    <div class="form-floating mb-3">
-        <input asp-for="TotalKm" class="form-control" type="number" placeholder="Toplam Kilometre" />
-        <label asp-for="TotalKm"></label>
-        <span asp-validation-for="TotalKm" class="text-danger"></span>
-    </div>
-
-    <div class="form-check form-switch mb-2">
-        @Html.CheckBoxFor(m => m.HasDisabilityAccess, new { @class = "form-check-input" })
-        <label asp-for="HasDisabilityAccess" class="form-check-label"></label>
-    </div>
-
-    <div class="form-check form-switch mb-2">
-        @Html.CheckBoxFor(m => m.HasWiFi, new { @class = "form-check-input" })
-        <label asp-for="HasWiFi" class="form-check-label"></label>
-    </div>
-
-    <div class="form-check form-switch mb-2">
-        @Html.CheckBoxFor(m => m.HasBikeRack, new { @class = "form-check-input" })
-        <label asp-for="HasBikeRack" class="form-check-label"></label>
-    </div>
-
-    <div class="form-check form-switch mb-2">
-        @Html.CheckBoxFor(m => m.HasMobileCharging, new { @class = "form-check-input" })
-        <label asp-for="HasMobileCharging" class="form-check-label"></label>
-    </div>
-
-    <div class="form-check form-switch mb-2">
-        @Html.CheckBoxFor(m => m.HasPassengerInfoSystem, new { @class = "form-check-input" })
-        <label asp-for="HasPassengerInfoSystem" class="form-check-label"></label>
-    </div>
-
-    <div class="form-check form-switch mb-3">
-        @Html.CheckBoxFor(m => m.HasCCTV, new { @class = "form-check-input" })
-        <label asp-for="HasCCTV" class="form-check-label"></label>
-    </div>
-
-    <div class="form-check form-switch mb-3">
-        @Html.CheckBoxFor(m => m.IsActive, new { @class = "form-check-input" })
-        <label asp-for="IsActive" class="form-check-label"></label>
-    </div>
-
-
-    <div class="text-end mt-4">
-        <button type="submit" class="btn btn-primary">Kaydet</button>
-        <button type="button" class="btn btn-secondary" id="cancelVehicleBtn">İptal</button>
-    </div>
-</form>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+</div>

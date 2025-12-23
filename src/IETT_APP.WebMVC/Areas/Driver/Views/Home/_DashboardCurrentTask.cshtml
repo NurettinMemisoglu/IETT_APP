@@ -1,0 +1,127 @@
+﻿@using IETT_APP.Domain.Enums
+@using IETT_APP.Application.Dtos.Driver
+@model DashboardTaskDto
+
+@if (Model != null)
+{
+    DateTime effectiveDate = Model.TaskDate;
+    string datePart = effectiveDate.ToString("dd.MM");
+    string timePart = Model.FormattedTime;
+
+    string cardStyleClass = "task-accepted-style";
+    string statusText = "Sıradaki Görev";
+
+    if (Model.Status == TaskState.InProgress)
+    {
+        cardStyleClass = "task-active-gradient";
+        statusText = "Şu An Sahadasınız";
+    }
+    else if (Model.Status == TaskState.Pending)
+    {
+        cardStyleClass = "task-pending-gradient";
+        statusText = "Onay Bekliyor";
+    }
+
+    string delayClass = (Model.DelayMinutes > 0 && Model.Status != TaskState.InProgress) ? "delayed-border" : "";
+
+    <div class="card task-card mb-5 @cardStyleClass @delayClass">
+        <div class="watermark-icon"><i class="bi bi-bus-front-fill"></i></div>
+        <div class="card-body p-4 position-relative">
+
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="badge bg-white bg-opacity-25 border border-white border-opacity-25 rounded-pill px-3 py-2 fw-normal" style="backdrop-filter: blur(4px); color: inherit;">
+                    <i class="bi bi-broadcast me-1"></i> @statusText
+                </span>
+                <div class="text-end">
+                    <h2 class="fw-bold mb-0 display-6" style="line-height: 1;">@timePart</h2>
+                    <small class="text-muted-custom fw-bold" style="font-size: 0.9rem;">@datePart</small>
+                </div>
+            </div>
+
+            @if (Model.DelayMinutes > 0 && Model.Status != TaskState.InProgress)
+            {
+                <div class="badge bg-danger text-white mb-3 shadow-sm px-3 py-2 rounded-pill">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> +@Model.DelayMinutes dk Gecikme
+                </div>
+            }
+
+            <div class="mt-2 mb-4">
+                <a href="/Driver/Tasks/Details/@Model.Id" class="text-decoration-none text-reset">
+                    <div class="d-flex align-items-center">
+                        <span class="fs-1 fw-bold me-3">@Model.LineCode</span>
+                        <div class="border-start border-2 px-3" style="border-color: rgba(128,128,128, 0.3) !important;">
+                            <span class="d-block fs-5 fw-600 lh-sm">@Model.Title</span>
+                            <small class="text-muted-custom d-block mt-1 text-truncate" style="max-width: 250px;">
+                                <i class="bi bi-geo-alt-fill me-1"></i> @Model.RouteName
+                            </small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-6">
+                    <div class="info-box-glass">
+                        <small class="d-block text-uppercase opacity-75" style="font-size: 0.7rem;">ARAÇ PLAKA</small>
+                        <span class="fw-bold fs-5">@Model.VehiclePlate</span>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="info-box-glass">
+                        <small class="d-block text-uppercase opacity-75" style="font-size: 0.7rem;">KAPI NO</small>
+                        <span class="fw-bold fs-5">@Model.DoorNumber</span>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="opacity-25 my-4">
+
+            <div>
+                @if (Model.Status == TaskState.InProgress)
+                {
+                    <button class="btn w-100 py-3 rounded-pill shadow-lg btn-complete btn-complete-glass mb-3" data-id="@Model.Id">
+                        <i class="bi bi-flag-fill me-2"></i> SEFERİ TAMAMLA
+                    </button>
+                    <button class="btn w-100 py-3 rounded-pill btn-fail shadow-sm mt-2" data-id="@Model.Id">
+                        <i class="bi bi-exclamation-octagon-fill me-2"></i> SORUN BİLDİR / İPTAL
+                    </button>
+                }
+                else if (Model.Status == TaskState.Accepted)
+                {
+                    <button class="btn w-100 py-3 rounded-pill fw-bold shadow-sm btn-start pulse-animation btn-start-custom" data-id="@Model.Id">
+                        <i class="bi bi-play-circle-fill me-2"></i> SEFERİ BAŞLAT
+                    </button>
+                    <button class="btn w-100 py-3 rounded-pill btn-fail shadow-sm mt-2" data-id="@Model.Id">
+                        <i class="bi bi-exclamation-octagon-fill me-2"></i> SORUN BİLDİR / İPTAL
+                    </button>
+                }
+                else
+                {
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <button class="btn w-100 py-3 rounded-pill fw-bold shadow-sm btn-accept btn-accept-custom" data-id="@Model.Id">
+                                <i class="bi bi-check-lg me-2"></i> KABUL ET
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button class="btn w-100 py-3 rounded-pill fw-bold shadow-sm btn-reject" data-id="@Model.Id">
+                                <i class="bi bi-x-lg me-2"></i> REDDET
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+}
+else
+{
+    <div class="text-center py-5 mb-4 bg-white rounded-4 shadow-sm border">
+        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+            <i class="bi bi-cup-hot fs-1 text-secondary"></i>
+        </div>
+        <h4 class="fw-bold text-muted">Aktif Görev Yok</h4>
+        <p class="text-muted mb-0">Şu an atanmış bir seferiniz bulunmuyor.</p>
+    </div>
+}

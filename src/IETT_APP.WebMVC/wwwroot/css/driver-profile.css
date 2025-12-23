@@ -1,0 +1,95 @@
+﻿.profile-hero {
+    background: linear-gradient(135deg, #0d6efd 0%, #0043a8 100%);
+    border-radius: 0 0 25px 25px; /* Sadece alt köşeler yuvarlak */
+    padding-bottom: 60px;
+    margin-top: -20px; /* Navbar boşluğunu kapatmak için */
+    margin-left: -15px;
+    margin-right: -15px; /* Container padding'ini aşmak için */
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Mobilde padding düzeltmesi */
+@media (min-width: 768px) {
+    .profile-hero {
+        border-radius: 20px;
+        margin: 0;
+        padding-bottom: 40px;
+    }
+}
+
+/* Profil Resmi */
+.profile-img-container {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    margin: 0 auto;
+}
+
+.profile-img-main {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 4px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    background-color: white;
+}
+
+.profile-upload-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: #fff;
+    color: #333;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+    .profile-upload-btn:hover {
+        transform: scale(1.1);
+    }
+
+/* Modern Tabs */
+.nav-pills-custom .nav-link {
+    color: #6c757d;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    font-weight: 600;
+    padding: 12px 20px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .nav-pills-custom .nav-link.active {
+        background: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3);
+    }
+
+    .nav-pills-custom .nav-link i {
+        font-size: 1.1rem;
+        margin-right: 8px;
+    }
+
+/* İçerik Kartı */
+.content-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+    border: 1px solid #f0f0f0;
+    overflow: hidden;
+}

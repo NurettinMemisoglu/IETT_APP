@@ -1,4 +1,5 @@
-﻿using IETT_APP.WebMVC.Services.Implementations;
+﻿using IETT_APP.Infrastructure.Converters;
+using IETT_APP.WebMVC.Services.Implementations;
 using IETT_APP.WebMVC.Services.Infrastructure;
 using IETT_APP.WebMVC.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -22,7 +23,15 @@ CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
 CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        // Tarih formatı dönüştürücüsünü ekliyoruz
+        options.JsonSerializerOptions.Converters.Add(new TrDateTimeConverter());
+
+        // (Opsiyonel) Property isimlerini olduğu gibi koru (camelCase yapma)
+        // options.JsonSerializerOptions.PropertyNamingPolicy = null; 
+    });
 
 // ==================================================================================
 // 2. SESSION & CACHE

@@ -25,5 +25,6 @@ namespace IETT_APP.WebMVC.Services.Interfaces
 
         // DTO yerine direkt IFormFile kullanıyoruz
         Task<ServiceResult<string>> UploadProfileImageAsync(Guid driverId, IFormFile photo);
+        Task<DriverDashboardDto?> GetDashboardAsync();
     }
 }

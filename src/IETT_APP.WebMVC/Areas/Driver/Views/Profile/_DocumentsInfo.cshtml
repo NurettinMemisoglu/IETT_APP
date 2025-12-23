@@ -1,119 +1,130 @@
 ﻿@using IETT_APP.WebMVC.Areas.Driver.Models
 @model DriverProfileViewModel
 
-<div class="alert alert-info d-flex align-items-center shadow-sm" role="alert">
-    <i class="bi bi-info-circle-fill me-3 fs-4"></i>
-    <div>
-        Bu alandaki bilgiler İnsan Kaynakları tarafından yönetilmektedir.
-        Hata olduğunu düşünüyorsanız veya belge güncellemeniz gerekiyorsa amirliğinizle görüşünüz.
+<div class="alert alert-info d-flex align-items-start shadow-sm border-0 bg-info bg-opacity-10 text-dark rounded-3 mb-4" role="alert">
+    <i class="bi bi-info-circle-fill me-3 fs-4 text-info"></i>
+    <div class="small">
+        <strong>Bilgilendirme:</strong> Bu alandaki belgeler İnsan Kaynakları tarafından yönetilmektedir.
+        Hata olduğunu düşünüyorsanız amirliğinizle görüşünüz.
     </div>
 </div>
 
-<div class="table-responsive shadow-sm rounded">
-    <table class="table table-hover align-middle mb-0">
-        <thead class="table-light">
-            <tr>
-                <th style="width: 35%">Belge Türü</th>
-                <th style="width: 40%">Bilgi / Durum</th>
-                <th style="width: 25%" class="text-end">Dosya</th>
-            </tr>
-        </thead>
-        <tbody>
+<div class="card border shadow-sm rounded-4 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th class="ps-4 py-3 text-secondary text-uppercase small">Belge Adı</th>
+                    <th class="py-3 text-secondary text-uppercase small">Durum / Tarih</th>
+                    <th class="pe-4 py-3 text-end text-secondary text-uppercase small">İşlem</th>
+                </tr>
+            </thead>
+            <tbody>
 
-            <tr>
-                <td class="fw-bold text-secondary">Ehliyet Numarası</td>
-                <td>@(Model.LicenseNumber ?? "-") / Sınıf: <span class="badge bg-primary">@(Model.LicenseClass ?? "-")</span></td>
-                <td class="text-end"></td>
-            </tr>
-
-            <tr>
-                <td class="fw-bold text-secondary">Ehliyet Son Geçerlilik</td>
-                @{
-                    var licenseDate = Model.LicenseExpiryDate;
-                    var isLicenseExpired = licenseDate.HasValue && licenseDate.Value < DateTime.Now;
-                    var licenseClass = isLicenseExpired ? "text-danger fw-bold" : "text-success";
-                }
-                <td class="@licenseClass">
-                    @(licenseDate?.ToShortDateString() ?? "-")
-                    @if (isLicenseExpired)
-                    {
-                        <span class="badge bg-danger ms-2">SÜRESİ DOLMUŞ</span>
-                    }
-                </td>
-                <td class="text-end">
-                    @if (!string.IsNullOrEmpty(Model.LicenseDocumentPath))
-                    {
-                        //Dinamik İkon
-                        var ext = System.IO.Path.GetExtension(Model.LicenseDocumentPath).ToLowerInvariant();
-                        var iconClass = ext switch
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded p-2 me-3">
+                                <i class="bi bi-car-front-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark">Sürücü Belgesi</div>
+                                <div class="small text-muted">Sınıf: @(Model.LicenseClass ?? "-")</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        @{
+                            var licDate = Model.LicenseExpiryDate;
+                            var licExpired = licDate.HasValue && licDate.Value < DateTime.Now;
+                        }
+                        @if (licExpired)
                         {
-                            ".pdf" => "bi-file-earmark-pdf-fill",
-                            ".doc" or ".docx" => "bi-file-earmark-text-fill",
-                            _ => "bi-file-earmark-arrow-down" // Varsayılan İndir İkonu
-                        };
+                            <span class="badge bg-danger mb-1">SÜRESİ DOLMUŞ</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success mb-1">GEÇERLİ</span>
+                        }
+                        <div class="small text-muted">Bitiş: @(licDate?.ToShortDateString() ?? "-")</div>
+                    </td>
+                    <td class="text-end pe-4">
+                        @if (!string.IsNullOrEmpty(Model.LicenseDocumentPath))
+                        {
+                            <a href="@($"https://localhost:7254{Model.LicenseDocumentPath}")" download class="btn btn-sm btn-light border text-primary rounded-pill">
+                                <i class="bi bi-download"></i> <span class="d-none d-sm-inline ms-1">İndir</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted small fst-italic">Dosya Yok</span>
+                        }
+                    </td>
+                </tr>
 
-                        <a href="@($"https://localhost:7254{Model.LicenseDocumentPath}")"
-                           download
-                           class="btn btn-sm btn-danger"
-                           title="Dosyayı İndir (@ext)">
-                            <i class="bi @iconClass me-1"></i> İndir
-                        </a>
-                    }
-                    else
-                    {
-                        <span class="text-muted small fst-italic">Yüklenmemiş</span>
-                    }
-                </td>
-            </tr>
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning bg-opacity-10 text-warning rounded p-2 me-3">
+                                <i class="bi bi-file-medical-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark">Psikoteknik</div>
+                                <div class="small text-muted">Sağlık Raporu</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        @{
+                            var psyDate = Model.PsychotechnicExpiryDate;
+                            var psyExpired = psyDate.HasValue && psyDate.Value < DateTime.Now;
+                        }
+                        @if (psyExpired)
+                        {
+                            <span class="badge bg-danger mb-1">SÜRESİ DOLMUŞ</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success mb-1">GEÇERLİ</span>
+                        }
+                        <div class="small text-muted">Bitiş: @(psyDate?.ToShortDateString() ?? "-")</div>
+                    </td>
+                    <td class="text-end pe-4">
+                        @if (!string.IsNullOrEmpty(Model.PsychotechnicDocumentPath))
+                        {
+                            <a href="@($"https://localhost:7254{Model.PsychotechnicDocumentPath}")" download class="btn btn-sm btn-light border text-primary rounded-pill">
+                                <i class="bi bi-download"></i> <span class="d-none d-sm-inline ms-1">İndir</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted small fst-italic">Dosya Yok</span>
+                        }
+                    </td>
+                </tr>
 
-            <tr>
-                <td class="fw-bold text-secondary">Psikoteknik Son Geçerlilik</td>
-                @{
-                    var psychoDate = Model.PsychotechnicExpiryDate;
-                    var isPsychoExpired = psychoDate.HasValue && psychoDate.Value < DateTime.Now;
-                    var psychoClass = isPsychoExpired ? "text-danger fw-bold" : "text-success";
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-secondary bg-opacity-10 text-secondary rounded p-2 me-3">
+                                <i class="bi bi-card-checklist fs-5"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark">SRC Belgesi</div>
+                                <div class="small text-muted">Mesleki Yeterlilik</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary bg-opacity-10 text-dark border mb-1">TANIMLI</span>
+                        <div class="small text-muted">No: @(Model.SrcCertificateNumber ?? "-")</div>
+                    </td>
+                    <td class="text-end pe-4">
+                        <span class="text-muted small fst-italic">Dosya Yok</span>
+                    </td>
+                </tr>
 
-                    // Dinamik İkon
-                    var psychoExt = System.IO.Path.GetExtension(Model.PsychotechnicDocumentPath ?? "").ToLowerInvariant();
-                    var psychoIconClass = psychoExt switch
-                    {
-                        ".pdf" => "bi-file-earmark-pdf-fill",
-                        ".doc" or ".docx" => "bi-file-earmark-text-fill",
-                        _ => "bi-file-earmark-arrow-down"
-                    };
-                }
-                <td class="@psychoClass">
-                    @(psychoDate?.ToShortDateString() ?? "-")
-                    @if (isPsychoExpired)
-                    {
-                        <span class="badge bg-danger ms-2">SÜRESİ DOLMUŞ</span>
-                    }
-                </td>
-                <td class="text-end">
-                    @if (!string.IsNullOrEmpty(Model.PsychotechnicDocumentPath))
-                    {
-                        <a href="@($"https://localhost:7254{Model.PsychotechnicDocumentPath}")"
-                           download
-                           class="btn btn-sm btn-danger"
-                           title="Dosyayı İndir (@psychoExt)">
-                            <i class="bi @psychoIconClass me-1"></i> İndir
-                        </a>
-                    }
-                    else
-                    {
-                        <span class="text-muted small fst-italic">Yüklenmemiş</span>
-                    }
-                </td>
-            </tr>
-
-            <tr>
-                <td class="fw-bold text-secondary">SRC Belge No</td>
-                <td>@(Model.SrcCertificateNumber ?? "-")</td>
-                <td class="text-end">
-                    <span class="text-muted small fst-italic">-</span>
-                </td>
-            </tr>
-
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </div>

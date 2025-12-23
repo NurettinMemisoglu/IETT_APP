@@ -217,5 +217,15 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetVehicleJson(Guid id)
+        {
+            var vehicle = await _vehicleApiService.GetByIdAsync(id);
+            if (vehicle == null) return NotFound();
+
+            // JS tarafında kullanmak üzere ViewModel'e çevirip JSON dönüyoruz
+            return Json(vehicle.ToViewModel());
+        }
     }
 }

@@ -2,7 +2,11 @@
 {
     public interface IOperationJobService
     {
-        Task CheckDelayedTripsAsync(); // Gecikme Kontrolü
-        Task AutoCloseShiftAsync();    // Vardiya Kapanışı
+        Task CheckDelayedTripsAsync(); // Mevcut
+        Task AutoCloseShiftAsync();    // Mevcut
+
+        // --- YENİ EKLENENLER ---
+        Task CheckExpirationsAsync();  // Araç/Ehliyet Kontrolü
+        Task SendWeeklyReportAsync();  // Haftalık Rapor
     }
 }

@@ -3,15 +3,34 @@
     ViewData["Title"] = "Yeni Araç Ekle";
 }
 
-<div class="vehicle-header mt-4 mb-3">
-    <h2>Yeni Araç Ekle</h2>
+@section Styles {
+    <link rel="stylesheet" href="~/css/planner-vehicles.css" asp-append-version="true" />
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
+
+            <div class="card card-success card-outline shadow-sm border-top-0" style="border-top: 3px solid #198754 !important;">
+
+                <div class="card-header bg-white py-3">
+                    <h3 class="card-title fw-bold text-success m-0">
+                        <i class="bi bi-plus-circle me-2"></i> Yeni Araç Ekle
+                    </h3>
+                </div>
+
+                <div class="card-body bg-light">
+                    <form id="vehicleForm" asp-action="Create" method="post">
+                        @await Html.PartialAsync("_VehicleFormPartial", Model)
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </div>
-
-
-<form id="vehicleForm" asp-action="Create" method="post">
-    @await Html.PartialAsync("_VehicleFormPartial", Model)
-</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/vehicles.js"></script>
 }

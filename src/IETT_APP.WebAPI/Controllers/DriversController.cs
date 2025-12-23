@@ -253,5 +253,32 @@ namespace IETT_APP.WebAPI.Controllers
                 return BadRequest(new { Message = ex.Message });
             }
         }
+
+        // ============================================================
+        // 📱 MOBİL / DASHBOARD API
+        // ============================================================
+
+        // GET: api/drivers/dashboard
+        [HttpGet("dashboard")]
+        [Authorize(Roles = "Driver")]
+        public async Task<IActionResult> GetDashboard()
+        {
+            try
+            {
+                // Token'dan User ID'yi güvenli şekilde al
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                    return Unauthorized("Kullanıcı kimliği doğrulanamadı.");
+
+                var dashboardData = await _driverService.GetDriverDashboardAsync(userId);
+
+                return Ok(dashboardData);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = "Dashboard yüklenirken hata oluştu.", Detail = ex.Message });
+            }
+        }
     }
 }

@@ -23,14 +23,30 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
         // GET: Planner/Stops
         public async Task<IActionResult> Index(string? search)
         {
+            // EĞER BU SATIRI EKLEMEZSEN: Sayfa yenilendiğinde arama kutusu boş gelir.
+            ViewData["Search"] = search;
+
             var stopDtos = string.IsNullOrWhiteSpace(search)
                 ? await _stopApiService.GetAllAsync()
                 : await _stopApiService.SearchByNameAsync(search);
 
-            // StopDto -> StopViewModel dönüşümü
             var stopViewModels = stopDtos.Select(dto => dto.ToViewModel()).ToList();
 
             return View(stopViewModels);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Search(string term)
+        {
+            // Verileri çek (Servis yapına göre burayı uyarla)
+            var stopDtos = string.IsNullOrWhiteSpace(term)
+                ? await _stopApiService.GetAllAsync()
+                : await _stopApiService.SearchByNameAsync(term);
+
+            var stopViewModels = stopDtos.Select(dto => dto.ToViewModel()).ToList();
+
+            // Sadece Partial View döndür (Tüm sayfayı değil!)
+            return PartialView("_StopTablePartial", stopViewModels);
         }
 
         // GET: Planner/Stops/Create

@@ -29,6 +29,13 @@ namespace IETT_APP.WebMVC.Areas.Planner.Models
         [Display(Name = "Servis Durumu")]
         [Required]
         public ServiceStatus ServiceStatus { get; set; }
+        [Display(Name = "Toplam Kilometre")]
+        [Range(0, int.MaxValue, ErrorMessage = "Kilometre negatif olamaz.")]
+        public int TotalKm { get; set; }
+
+        [Display(Name = "Durum Nedeni")]
+        [StringLength(250, ErrorMessage = "{0} alanı en fazla {1} karakter olabilir.")]
+        public string StatusReason { get; set; }
 
         [Display(Name = "Operatör")]
         [Required]
@@ -41,10 +48,6 @@ namespace IETT_APP.WebMVC.Areas.Planner.Models
         [Display(Name = "Üretim Yılı")]
         [Range(1950, 2100, ErrorMessage = "Geçerli bir yıl giriniz.")]
         public int Year { get; set; }
-
-        [Display(Name = "Toplam Kilometre")]
-        [Range(0, int.MaxValue, ErrorMessage = "Kilometre negatif olamaz.")]
-        public int TotalKm { get; set; }
 
         [Display(Name = "Engelli Erişimi Var mı?")]
         public bool HasDisabilityAccess { get; set; } = true; // default true

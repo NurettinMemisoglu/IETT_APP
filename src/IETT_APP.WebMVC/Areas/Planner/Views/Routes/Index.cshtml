@@ -4,20 +4,40 @@
     ViewData["Title"] = "Rota Yönetimi";
 }
 
-<div class="container-fluid mt-4 px-5">
-    <h2 class="mb-3">Rota Listesi</h2>
+@section Styles {
+    <link rel="stylesheet" href="~/css/planner-routes.css" asp-append-version="true" />
+}
 
-    <div class="d-flex justify-content-between mb-3 flex-wrap">
-        <input type="text" id="searchInput" class="form-control w-auto flex-grow-1 me-2" placeholder="Rota ara..." />
-        <a asp-area="Planner" asp-controller="Routes" asp-action="Create" class="btn btn-success">Yeni Rota Ekle</a>
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="m-0 fw-bold text-dark">
+            <i class="bi bi-signpost-split text-primary me-2"></i> Rota Yönetimi
+        </h3>
+        <a asp-area="Planner" asp-controller="Routes" asp-action="Create" class="btn btn-success fw-bold px-4 py-2 shadow-sm">
+            <i class="bi bi-plus-lg me-1"></i> Yeni Rota Ekle
+        </a>
     </div>
 
-    <div id="routesTableContainer" class="table-responsive rounded shadow-sm p-2 bg-white">
-        @await Html.PartialAsync("_RoutesTablePartial", Model)
+    <div class="search-bar-container mb-4">
+        <div class="p-2 bg-white rounded border shadow-sm w-100">
+            <div class="input-group input-group-sm" style="max-width: 400px;">
+                <span class="input-group-text bg-white border-end-0 text-muted ps-3">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" id="searchInput" class="form-control border-start-0 shadow-none" placeholder="Rota adı, kodu veya hat ile ara..." autocomplete="off" />
+            </div>
+        </div>
+    </div>
+
+    <div class="table-card">
+        <div id="routesTableContainer">
+            @await Html.PartialAsync("_RoutesTablePartial", Model)
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-
+    <script src="~/js/routes.js"></script>
 }

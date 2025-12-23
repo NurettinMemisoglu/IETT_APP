@@ -14,6 +14,7 @@ namespace IETT_APP.Application.Dtos.Vehicle
 
 
         public ServiceStatus ServiceStatus { get; set; }
+        public string StatusReason { get; set; } = string.Empty;
         public VehicleType Driver { get; set; }
         public VehicleModel Model { get; set; }
 

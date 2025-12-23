@@ -9,5 +9,7 @@
         // Canlı Güncelleme Sinyali (Tabloyu yeniler)
         // JS tarafında: connection.on("TaskUpdated", (id) => { ... })
         Task TaskUpdated(Guid taskId);
+
+        Task ProfileImageUpdated(string newImageUrl);
     }
 }

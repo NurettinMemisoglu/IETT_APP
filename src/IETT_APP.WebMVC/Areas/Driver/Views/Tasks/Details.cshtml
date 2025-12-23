@@ -4,106 +4,341 @@
 @model DriverTripTaskViewModel
 
 @{
-    ViewData["Title"] = "Görev Detayı";
+    ViewData["Title"] = "Sefer Detayı";
+
+    // --- 1. RENK VE İKON AYARLARI ---
+    string statusColor = Model.Status switch
+    {
+        TaskState.Pending => "warning",
+        TaskState.Accepted => "info",
+        TaskState.InProgress => "primary",
+        TaskState.Completed => "success",
+        TaskState.Cancelled => "danger",
+        TaskState.Incomplete => "secondary",
+        _ => "secondary"
+    };
+
+    string statusIcon = Model.Status switch
+    {
+        TaskState.Pending => "bi-hourglass-split",
+        TaskState.Accepted => "bi-check2-circle",
+        TaskState.InProgress => "bi-broadcast",
+        TaskState.Completed => "bi-flag-fill",
+        TaskState.Cancelled => "bi-x-circle-fill",
+        TaskState.Incomplete => "bi-exclamation-octagon-fill",
+        _ => "bi-question-circle"
+    };
+
+    // Revize kontrolü
+    bool isRevised = Model.AdjustedDeparture.HasValue;
+
+    // Performans Metni
+    string performanceText = "";
+    if (Model.Status == TaskState.Completed && Model.ActualArrival.HasValue && Model.ScheduledArrival.HasValue)
+    {
+        var diff = Model.ActualArrival.Value - Model.ScheduledArrival.Value;
+        if (diff.TotalMinutes > 2) { performanceText = $"+{Math.Ceiling(diff.TotalMinutes)} dk Gecikme"; }
+        else if (diff.TotalMinutes < -2) { performanceText = $"{Math.Abs(Math.Ceiling(diff.TotalMinutes))} dk Erken"; }
+        else { performanceText = "Tam Zamanında"; }
+    }
+
+    //Gelinen sayfayı (Referer) yakala
+    var referer = ViewContext.HttpContext.Request.Headers["Referer"].ToString();
+
+    // Eğer referer boşsa (direkt link) varsayılan olarak Index'e dön, doluysa oraya dön
+    var backUrl = string.IsNullOrEmpty(referer) ? Url.Action("Index") : referer;
 }
 
-<div class="container-fluid mt-3">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="fw-bold m-0"><i class="bi bi-info-circle text-primary me-2"></i>Görev Detayı</h4>
-        <a asp-action="Index" class="btn btn-secondary shadow-sm">
-            <i class="bi bi-arrow-left"></i> Geri
+<style>
+    /* Gradient Arkaplanlar */
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #0043a8 100%);
+    }
+
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #198754 0%, #0a58ca 100%);
+    }
+
+    .bg-gradient-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    }
+
+    .bg-gradient-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+    }
+
+    .bg-gradient-info {
+        background: linear-gradient(135deg, #0dcaf0 0%, #0d6efd 100%);
+    }
+
+    .bg-gradient-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    }
+
+    .detail-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    /* Operasyonel Bilgi Kutucukları */
+    .info-box {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        height: 100%;
+        border: 1px solid #e9ecef;
+        transition: transform 0.2s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+        .info-box:hover {
+            transform: translateY(-3px);
+            border-color: #dee2e6;
+        }
+
+    .info-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        margin-bottom: 10px;
+    }
+
+    /* Timeline */
+    .timeline-container {
+        padding-left: 1rem;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-left: 35px;
+        margin-bottom: 30px;
+    }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+    .timeline-line {
+        position: absolute;
+        left: 7px;
+        top: 10px;
+        bottom: -35px;
+        width: 2px;
+        background-color: #e9ecef;
+    }
+
+    .timeline-item:last-child .timeline-line {
+        display: none;
+    }
+
+    .timeline-dot {
+        position: absolute;
+        left: 0;
+        top: 5px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        box-shadow: 0 0 0 1px #dee2e6;
+    }
+
+    /* Revize Saat Rengi (Amber/Turuncu) */
+    .text-revised {
+        color: #d97706 !important;
+    }
+
+    .bg-revised {
+        background-color: #d97706 !important;
+    }
+</style>
+
+<div class="container-fluid mt-4 mb-5" style="max-width: 1100px;">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold m-0 text-dark">Sefer Detayı</h4>
+            <span class="text-muted small">Görev ID: #@Model.Id.ToString().Substring(0, 8)</span>
+        </div>
+        <a href="@backUrl" onclick="if(history.length > 1){ history.back(); return false; }" class="btn btn-light border shadow-sm rounded-pill px-4">
+            <i class="bi bi-arrow-left me-1"></i> Geri
         </a>
     </div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3 border-bottom">
-            <div class="d-flex justify-content-between align-items-center">
-                <span class="text-muted small">Görev No: @Model.Id.ToString().Substring(0, 8)</span>
-                <span class="badge @GetStatusBadgeClass(Model.Status) px-3 py-2 fs-6">
-                    @Model.Status.ToDisplayName()
-                </span>
+    <div class="detail-card mb-4">
+        <div class="bg-gradient-@statusColor p-4 text-white">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="d-flex align-items-center">
+                    <div class="bg-white bg-opacity-25 rounded-circle p-3 d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                        <i class="bi @statusIcon fs-2"></i>
+                    </div>
+                    <div>
+                        <div class="text-uppercase opacity-75 small fw-bold ls-1">Görev Durumu</div>
+                        <h2 class="fw-bold mb-0">@Model.Status.ToDisplayName()</h2>
+                    </div>
+                </div>
+                <div class="text-end">
+                    @if (!string.IsNullOrEmpty(performanceText))
+                    {
+                        <div class="badge bg-white text-dark px-3 py-2 rounded-pill fs-6 shadow-sm">
+                            <i class="bi bi-speedometer2 me-1"></i> @performanceText
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="mt-4">
+                <h3 class="fw-bold m-0">@Model.Title</h3>
+                <p class="opacity-75 mb-0 small">@Model.Id</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-8">
+            <div class="card detail-card h-100">
+                <div class="card-header bg-white py-3 border-bottom-0">
+                    <h5 class="fw-bold m-0 text-dark"><i class="bi bi-sliders text-primary me-2"></i>Operasyonel Bilgiler</h5>
+                </div>
+                <div class="card-body pt-0 pb-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <div class="info-icon bg-primary bg-opacity-10 text-primary">
+                                    <i class="bi bi-signpost-2-fill"></i>
+                                </div>
+                                <div class="d-flex flex-column align-items-center">
+                                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Hat Kodu</small>
+                                    <span class="fs-3 fw-bold text-dark mt-1">@Model.LineName</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <div class="info-icon bg-success bg-opacity-10 text-success">
+                                    <i class="bi bi-bus-front-fill"></i>
+                                </div>
+                                <div class="d-flex flex-column align-items-center">
+                                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Atanan Araç</small>
+                                    <span class="fs-3 fw-bold text-dark mt-1">@Model.VehicleName</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <div class="info-icon bg-info bg-opacity-10 text-info">
+                                    <i class="bi bi-map-fill"></i>
+                                </div>
+                                <div class="d-flex flex-column align-items-center">
+                                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Güzergah Bilgisi</small>
+                                    <span class="fs-5 fw-600 text-dark mt-1">@Model.RouteName</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-box">
+                                <div class="info-icon bg-warning bg-opacity-10 text-warning">
+                                    <i class="bi bi-building-fill"></i>
+                                </div>
+                                <div class="d-flex flex-column align-items-center">
+                                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Başlangıç Garajı</small>
+                                    <span class="fs-5 fw-600 text-dark mt-1">@Model.GarageName</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Description))
+                    {
+                        <div class="mt-4 p-3 bg-light rounded border border-start-4 border-start-primary">
+                            <h6 class="fw-bold text-dark mb-2"><i class="bi bi-chat-quote-fill me-2 text-primary"></i>Açıklama / Notlar</h6>
+                            <p class="text-muted small mb-0 fst-italic">@Model.Description</p>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
 
-        <div class="card-body">
-            <h5 class="card-title fw-bold text-primary mb-3">@Model.Title</h5>
+        <div class="col-lg-4">
+            <div class="card detail-card h-100">
+                <div class="card-header bg-white py-3 border-bottom-0">
+                    <h5 class="fw-bold m-0 text-dark"><i class="bi bi-clock-history text-primary me-2"></i>Sefer Saatleri</h5>
+                </div>
+                <div class="card-body pt-2">
 
-            <div class="row g-3 mb-4">
-                <div class="col-6 col-md-3">
-                    <small class="text-muted d-block">Hat Kodu</small>
-                    <span class="fw-bold fs-5">@Model.LineName</span>
-                </div>
-                <div class="col-6 col-md-3">
-                    <small class="text-muted d-block">Güzergah</small>
-                    <span class="fw-bold">@Model.RouteName</span>
-                </div>
-                <div class="col-6 col-md-3">
-                    <small class="text-muted d-block">Araç</small>
-                    <span class="fw-bold"><i class="bi bi-bus-front"></i> @Model.VehicleName</span>
-                </div>
-                <div class="col-6 col-md-3">
-                    <small class="text-muted d-block">Başlangıç Garajı</small>
-                    <span class="fw-bold">@Model.GarageName</span>
-                </div>
-            </div>
+                    <div class="timeline-container ps-0">
 
-            <hr class="text-muted opacity-25">
-
-            <div class="row g-3 mb-4">
-                <div class="col-12 col-md-6">
-                    <div class="p-3 bg-light rounded border">
-                        <h6 class="text-secondary fw-bold mb-3"><i class="bi bi-calendar-event me-2"></i>Planlanan</h6>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Kalkış:</span>
-                            <span class="fw-bold">@Model.ScheduledDeparture?.ToString("dd.MM.yyyy HH:mm")</span>
+                        <div class="timeline-item">
+                            <div class="timeline-line"></div>
+                            <div class="timeline-dot bg-secondary"></div>
+                            <div class="ps-2">
+                                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Planlanan</small>
+                                <div class="row align-items-end mt-1 g-0">
+                                    <div class="col-6">
+                                        <div class="fw-bold fs-4 text-dark lh-1">@Model.ScheduledDeparture?.ToString("HH:mm")</div>
+                                        <small class="text-muted" style="font-size:0.8rem">Kalkış</small>
+                                    </div>
+                                    <div class="col-4 ps-2">
+                                        <div class="fw-bold fs-4 text-dark lh-1">@Model.ScheduledArrival?.ToString("HH:mm")</div>
+                                        <small class="text-muted" style="font-size:0.8rem">Varış</small>
+                                    </div>
+                                </div>
+                                <small class="text-muted mt-2 d-block border-top pt-1"><i class="bi bi-calendar2 me-1"></i> @Model.ScheduledDeparture?.ToString("dd.MM.yyyy")</small>
+                            </div>
                         </div>
-                        <div class="d-flex justify-content-between">
-                            <span>Varış:</span>
-                            <span class="fw-bold">@Model.ScheduledArrival?.ToString("dd.MM.yyyy HH:mm")</span>
+
+                        @if (isRevised)
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-line"></div>
+                                <div class="timeline-dot bg-revised"></div>
+                                <div class="ps-2">
+                                    <small class="text-revised text-uppercase fw-bold" style="font-size: 0.7rem;">Revize Saat <i class="bi bi-info-circle-fill"></i></small>
+                                    <div class="row align-items-end mt-1 g-0">
+                                        <div class="col-6">
+                                            <div class="fw-bold fs-4 text-revised lh-1">@(Model.AdjustedDeparture?.ToString("HH:mm") ?? "-")</div>
+                                            <small class="text-revised opacity-75" style="font-size:0.8rem">Kalkış</small>
+                                        </div>
+                                    </div>
+                                    <small class="text-revised mt-2 d-block border-top border-warning pt-1 opacity-75">Operasyonel Değişiklik</small>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="timeline-item">
+                            <div class="timeline-dot @(Model.ActualDeparture.HasValue ? "bg-success" : "bg-light border")"></div>
+                            <div class="ps-2">
+                                <small class="@(Model.ActualDeparture.HasValue ? "text-success" : "text-muted") text-uppercase fw-bold" style="font-size: 0.7rem;">Gerçekleşen</small>
+                                <div class="row align-items-end mt-1 g-0">
+                                    <div class="col-6">
+                                        <div class="fw-bold fs-4 @(Model.ActualDeparture.HasValue ? "text-success" : "text-muted opacity-50") lh-1">
+                                            @(Model.ActualDeparture?.ToString("HH:mm") ?? "--:--")
+                                        </div>
+                                        <small class="text-muted" style="font-size:0.8rem">Kalkış</small>
+                                    </div>
+                                    <div class="col-4 ps-2">
+                                        <div class="fw-bold fs-4 @(Model.ActualArrival.HasValue ? "text-success" : "text-muted opacity-50") lh-1">
+                                            @(Model.ActualArrival?.ToString("HH:mm") ?? "--:--")
+                                        </div>
+                                        <small class="text-muted" style="font-size:0.8rem">Varış</small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-12 col-md-6">
-                    <div class="p-3 border rounded @(Model.ActualDeparture.HasValue ? "bg-success-subtle border-success" : "bg-light")">
-                        <h6 class="text-secondary fw-bold mb-3"><i class="bi bi-stopwatch me-2"></i>Gerçekleşen</h6>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Kalkış:</span>
-                            <span class="@(Model.ActualDeparture.HasValue ? "fw-bold text-success" : "text-muted fst-italic")">
-                                @(Model.ActualDeparture?.ToString("HH:mm") ?? "--:--")
-                            </span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span>Varış:</span>
-                            <span class="@(Model.ActualArrival.HasValue ? "fw-bold text-success" : "text-muted fst-italic")">
-                                @(Model.ActualArrival?.ToString("HH:mm") ?? "--:--")
-                            </span>
-                        </div>
-                    </div>
                 </div>
             </div>
-
-            @if (!string.IsNullOrEmpty(Model.Description))
-            {
-                <div class="alert alert-secondary border-0">
-                    <h6 class="alert-heading fw-bold"><i class="bi bi-chat-left-text me-2"></i>Notlar & Açıklamalar</h6>
-                    <p class="mb-0 small">@Model.Description</p>
-                </div>
-            }
         </div>
 
     </div>
 </div>
-
-@functions {
-    string GetStatusBadgeClass(TaskState status) => status switch
-    {
-        TaskState.Pending => "bg-warning text-dark",
-        TaskState.Accepted => "bg-info text-dark",
-        TaskState.InProgress => "bg-primary",
-        TaskState.Completed => "bg-success",
-        TaskState.Cancelled => "bg-danger",
-        TaskState.Incomplete => "bg-secondary",
-        _ => "bg-light text-dark"
-    };
-}

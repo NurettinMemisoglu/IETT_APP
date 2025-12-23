@@ -17,6 +17,7 @@ namespace IETT_APP.WebMVC.Areas.Planner.Extensions
                 GarageId = dto.GarageId,
                 GarageName = string.Empty,
                 ServiceStatus = dto.ServiceStatus,
+                StatusReason = dto.StatusReason,
                 Driver = dto.Driver,
                 Model = dto.Model,
                 Year = dto.Year,

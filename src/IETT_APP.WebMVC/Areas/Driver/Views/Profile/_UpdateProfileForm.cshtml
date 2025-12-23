@@ -1,64 +1,151 @@
 ﻿@using IETT_APP.WebMVC.Areas.Driver.Models
+@using IETT_APP.Domain.Enums
 @model DriverProfileViewModel
 
-<h5 class="mb-3 text-primary">İletişim Bilgileri</h5>
-<div class="row mb-3">
-    <label class="col-sm-2 col-form-label">Telefon</label>
-    <div class="col-sm-10">
-        <input asp-for="PhoneNumber" class="form-control" placeholder="Telefon Numarası" />
-        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-    </div>
-</div>
-<div class="row mb-3">
-    <label class="col-sm-2 col-form-label">Adres</label>
-    <div class="col-sm-10">
-        <textarea asp-for="Address" class="form-control" rows="2"></textarea>
-    </div>
-</div>
+<style>
+    /* Bölüm Başlıkları: Renkli Arka Plan Yerine Sade Metin */
+    .section-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        align-items: center;
+    }
 
-<hr />
+        .section-title i {
+            font-size: 1.1rem;
+            margin-right: 8px;
+        }
 
-<h5 class="mb-3 text-primary">Acil Durum</h5>
-<div class="row mb-3">
-    <label class="col-sm-2 col-form-label">Kişi Adı</label>
-    <div class="col-sm-10">
-        <input asp-for="EmergencyContactName" class="form-control" />
-    </div>
-</div>
-<div class="row mb-3">
-    <label class="col-sm-2 col-form-label">Kişi Telefonu</label>
-    <div class="col-sm-10">
-        <input asp-for="EmergencyContactPhone" class="form-control" />
-    </div>
-</div>
+    /* Input Grubu İkonları */
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-right: none;
+        color: #6c757d;
+        min-width: 45px;
+        justify-content: center;
+    }
 
-<hr />
+    .form-control, .form-select {
+        border-left: none;
+        background-color: #fff;
+    }
 
-<h5 class="mb-3 text-primary">Sağlık Bilgileri</h5>
-<div class="row mb-3">
-    <label class="col-sm-2 col-form-label">Kan Grubu</label>
-    <div class="col-sm-4">
-        <select asp-for="BloodType" class="form-select">
-            <option value="A Rh+">A Rh+</option>
-            <option value="A Rh-">A Rh-</option>
-            <option value="B Rh+">B Rh+</option>
-            <option value="B Rh-">B Rh-</option>
-            <option value="AB Rh+">AB Rh+</option>
-            <option value="AB Rh-">AB Rh-</option>
-            <option value="0 Rh+">0 Rh+</option>
-            <option value="0 Rh-">0 Rh-</option>
-        </select>
+        .form-control:focus, .form-select:focus {
+            border-color: #dee2e6; /* Focus olduğunda standart renk */
+            box-shadow: none; /* Gölgeyi kaldır */
+            border-bottom: 2px solid #0d6efd; /* Sadece alt çizgi mavi olsun */
+        }
+</style>
+
+<div class="mb-4">
+    <div class="section-title text-primary">
+        <i class="bi bi-person-lines-fill"></i> İletişim Bilgileri
     </div>
-    <div class="col-sm-6">
-        <div class="form-check mt-2">
-            <input asp-for="HasChronicDisease" class="form-check-input" type="checkbox">
-            <label class="form-check-label">Kronik Rahatsızlık Var mı?</label>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label asp-for="PhoneNumber" class="form-label small fw-bold text-muted">Telefon</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-telephone text-primary"></i></span>
+                <input asp-for="PhoneNumber" class="form-control" placeholder="05XX..." />
+            </div>
+            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="Email" class="form-label small fw-bold text-muted">E-Posta</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope text-primary"></i></span>
+                <input asp-for="Email" class="form-control" placeholder="ornek@iett.gov.tr" />
+            </div>
+            <span asp-validation-for="Email" class="text-danger small"></span>
+        </div>
+
+        <div class="col-12">
+            <label asp-for="Address" class="form-label small fw-bold text-muted">Adres</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-geo-alt text-primary"></i></span>
+                <textarea asp-for="Address" class="form-control" rows="2" placeholder="Açık adresiniz..."></textarea>
+            </div>
+            <span asp-validation-for="Address" class="text-danger small"></span>
         </div>
     </div>
 </div>
-<div class="row mb-3">
-    <label class="col-sm-2 col-form-label">Sağlık Notları</label>
-    <div class="col-sm-10">
-        <textarea asp-for="HealthNotes" class="form-control" rows="2" placeholder="Varsa hastalık detayları..."></textarea>
+
+<div class="mb-4">
+    <div class="section-title text-danger">
+        <i class="bi bi-exclamation-triangle-fill"></i> Acil Durum
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label asp-for="EmergencyContactName" class="form-label small fw-bold text-muted">İlgili Kişi</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person-heart text-danger"></i></span>
+                <input asp-for="EmergencyContactName" class="form-control" placeholder="Ad Soyad" />
+            </div>
+            <span asp-validation-for="EmergencyContactName" class="text-danger small"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="EmergencyContactPhone" class="form-label small fw-bold text-muted">Yakın Telefonu</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-telephone-plus text-danger"></i></span>
+                <input asp-for="EmergencyContactPhone" class="form-control" placeholder="05XX..." />
+            </div>
+            <span asp-validation-for="EmergencyContactPhone" class="text-danger small"></span>
+        </div>
+    </div>
+</div>
+
+<div class="mb-3">
+    <div class="section-title text-success">
+        <i class="bi bi-heart-pulse-fill"></i> Sağlık Bilgileri
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label asp-for="BloodType" class="form-label small fw-bold text-muted">Kan Grubu</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-droplet-fill text-success"></i></span>
+                <select asp-for="BloodType" class="form-select" asp-items="Html.GetEnumSelectList<BloodType>()">
+                    <option value="">Seçiniz</option>
+                </select>
+            </div>
+            <span asp-validation-for="BloodType" class="text-danger small"></span>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label small fw-bold text-muted d-block">Kronik Rahatsızlık</label>
+
+            <div class="btn-group w-100" role="group">
+
+                <input type="radio" class="btn-check" name="HasChronicDisease" id="chronicNo" value="false"
+                       autocomplete="off" @(!Model.HasChronicDisease ? "checked" : "")>
+                <label class="btn btn-outline-secondary" for="chronicNo">
+                    YOK
+                </label>
+
+                <input type="radio" class="btn-check" name="HasChronicDisease" id="chronicYes" value="true"
+                       autocomplete="off" @(Model.HasChronicDisease ? "checked" : "")>
+                <label class="btn btn-outline-danger" for="chronicYes">
+                    VAR
+                </label>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <label asp-for="HealthNotes" class="form-label small fw-bold text-muted">Sağlık Notları</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-clipboard2-pulse text-success"></i></span>
+                <textarea asp-for="HealthNotes" class="form-control" rows="2" placeholder="Varsa belirtiniz..."></textarea>
+            </div>
+            <span asp-validation-for="HealthNotes" class="text-danger small"></span>
+        </div>
     </div>
 </div>

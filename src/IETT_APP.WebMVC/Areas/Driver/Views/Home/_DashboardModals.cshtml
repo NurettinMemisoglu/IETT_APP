@@ -1,0 +1,92 @@
+﻿<div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-gradient-danger text-white border-0 py-3">
+                <h5 class="modal-title fw-bold d-flex align-items-center">
+                    <div class="bg-white bg-opacity-25 rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="bi bi-x-lg"></i></div>
+                    <span>Görevi Reddet</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="rejectTaskId">
+                <div class="alert alert-light border-danger border-start border-3 text-danger small mb-3"><i class="bi bi-info-circle-fill me-1"></i> Görevi reddetmek üzeresiniz. Bu işlem geri alınamaz.</div>
+                <div class="mb-1">
+                    <label class="form-label fw-bold text-secondary small text-uppercase">Reddetme Nedeni</label>
+                    <textarea id="rejectReason" class="form-control bg-light border-0" rows="3" placeholder="Lütfen kısa bir açıklama yazınız..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light py-3 px-4">
+                <button type="button" class="btn btn-light border rounded-pill px-4" data-bs-dismiss="modal">Vazgeç</button>
+                <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" id="confirmRejectBtn"><i class="bi bi-trash3-fill me-1"></i> Reddet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="completeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-gradient-success text-white border-0 py-3">
+                <h5 class="modal-title fw-bold d-flex align-items-center">
+                    <div class="bg-white bg-opacity-25 rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="bi bi-flag-fill"></i></div>
+                    <span>Seferi Tamamla</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="completeTaskId">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <label class="form-label fw-bold text-secondary small text-uppercase">Yolcu Sayısı</label>
+                        <div class="input-group"><span class="input-group-text bg-light border-end-0 text-primary"><i class="bi bi-people-fill"></i></span><input type="number" id="passengerInput" class="form-control bg-light border-start-0" placeholder="0"></div>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label fw-bold text-secondary small text-uppercase">Yakıt %</label>
+                        <div class="input-group"><span class="input-group-text bg-light border-end-0 text-danger"><i class="bi bi-fuel-pump-fill"></i></span><input type="number" id="fuelInput" class="form-control bg-light border-start-0" placeholder="%" min="0" max="100"></div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold text-secondary small text-uppercase">Bitiş Kilometresi</label>
+                        <div class="input-group"><span class="input-group-text bg-light border-end-0 text-dark"><i class="bi bi-speedometer2"></i></span><input type="number" id="odometerInput" class="form-control bg-light border-start-0 fw-bold" placeholder="Son KM bilgisini giriniz"></div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold text-secondary small text-uppercase">Sürücü Notu</label>
+                        <textarea id="driverNoteInput" class="form-control bg-light" rows="2" placeholder="Varsa eklemek istedikleriniz..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light py-3 px-4">
+                <button type="button" class="btn btn-light border rounded-pill px-4" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm" id="confirmCompleteBtn"><i class="bi bi-check-lg me-1"></i> Kaydet ve Bitir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="failModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-gradient-warning text-dark border-0 py-3">
+                <h5 class="modal-title fw-bold d-flex align-items-center">
+                    <div class="bg-dark bg-opacity-10 rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                    <span>Sorun Bildir / İptal</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="failTaskId">
+                <div class="alert alert-warning border-0 bg-warning bg-opacity-10 text-dark mb-3 rounded-3">
+                    <div class="d-flex"><i class="bi bi-info-circle-fill fs-4 me-3"></i><div class="small align-self-center">Bu işlem sonrası görev <strong>Yarım Kaldı</strong> olarak işaretlenecek ve amirliğe bildirilecektir.</div></div>
+                </div>
+                <div class="mb-1">
+                    <label class="form-label fw-bold text-secondary small text-uppercase">Sorun Açıklaması</label>
+                    <div class="input-group"><span class="input-group-text bg-light border-end-0 text-warning"><i class="bi bi-chat-square-text-fill"></i></span><textarea id="failReason" class="form-control bg-light border-start-0" rows="3" placeholder="Arıza, kaza veya diğer nedenler..."></textarea></div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light py-3 px-4">
+                <button type="button" class="btn btn-light border rounded-pill px-4" data-bs-dismiss="modal">Vazgeç</button>
+                <button type="button" class="btn btn-warning rounded-pill px-4 fw-bold shadow-sm" id="confirmFailBtn"><i class="bi bi-send-fill me-1"></i> Bildirimi Gönder</button>
+            </div>
+        </div>
+    </div>
+</div>

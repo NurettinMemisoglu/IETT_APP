@@ -1,10 +1,14 @@
 ﻿using IETT_APP.Domain.Enums;
+using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 
 namespace IETT_APP.WebMVC.Extensions
 {
     public static class EnumExtensions
     {
+        // Okunan değerleri hafızada tutacak bir sözlük (Cache)
+        private static readonly ConcurrentDictionary<Enum, string> _cache = new();
+
         public static string ToDisplayName(this StopType type) => type switch
         {
             StopType.AcikDurak => "Açık Durak",
@@ -36,14 +40,20 @@ namespace IETT_APP.WebMVC.Extensions
         };
 
 
-        public static string ToDisplayName<TEnum>(this TEnum value) where TEnum : Enum
-        {
-            var displayAttr = value.GetType()
-                                   .GetField(value.ToString())
-                                   ?.GetCustomAttributes(typeof(DisplayAttribute), false)
-                                   .FirstOrDefault() as DisplayAttribute;
-            return displayAttr?.Name ?? value.ToString();
 
+
+        public static string ToDisplayName(this Enum value)
+        {
+            // Önce cache'e bakar, varsa oradan getirir. Yoksa hesaplayıp cache'e ekler.
+            return _cache.GetOrAdd(value, (enumValue) =>
+            {
+                var field = enumValue.GetType().GetField(enumValue.ToString());
+
+                var attribute = field?.GetCustomAttributes(typeof(DisplayAttribute), false)
+                                     .FirstOrDefault() as DisplayAttribute;
+
+                return attribute?.Name ?? enumValue.ToString();
+            });
         }
     }
 }

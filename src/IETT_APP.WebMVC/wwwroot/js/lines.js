@@ -1,21 +1,49 @@
 ﻿$(function () {
 
-    // === HAT EKLE ===
+    // === TEMA AYARLAYICI ===
+    function setModalTheme(mode) {
+        var $modalContent = $('#lineModalContent');
+        var $modalTitle = $('#modalTitle');
+
+        // 1. Önceki tüm tema sınıflarını temizle (Yeşil veya Sarı kalıntısı olmasın)
+        $modalContent.removeClass('modal-theme-create modal-theme-edit');
+        $modalTitle.removeClass('text-success text-warning');
+
+        if (mode === 'create') {
+            // YEŞİL SINIFI EKLE (CSS dosyasındaki border çalışacak)
+            $modalContent.addClass('modal-theme-create');
+            $modalTitle.addClass('text-success');
+            $modalTitle.html('<i class="bi bi-plus-lg me-2"></i>Yeni Hat Ekle');
+        }
+        else if (mode === 'edit') {
+            // SARI SINIFI EKLE
+            $modalContent.addClass('modal-theme-edit');
+            $modalTitle.addClass('text-warning');
+            $modalTitle.html('<i class="bi bi-pencil-square me-2"></i>Hattı Düzenle');
+        }
+    }
+
+    // === BUTTON CLICK EVENTLERİ ===
     $('#addLineBtn').click(function () {
+        setModalTheme('create'); // Yeşil yap
+
+        $('#modalFormContainer').html('<div class="text-center py-4"><div class="spinner-border text-success"></div></div>');
+        $('#lineModal').modal('show');
+
         $.get('/Planner/Lines/Create', function (formHtml) {
-            $('#modalTitle').text('Yeni Hat Ekle');
-            $('#modalBody').html(formHtml);
-            $('#lineModal').modal('show');
+            $('#modalFormContainer').html(formHtml);
         });
     });
 
-    // === HAT DÜZENLE ===
     $(document).on('click', '.edit-line', function () {
+        setModalTheme('edit'); // Sarı yap
+
+        $('#modalFormContainer').html('<div class="text-center py-4"><div class="spinner-border text-warning"></div></div>');
+        $('#lineModal').modal('show');
+
         const id = $(this).data('id');
         $.get('/Planner/Lines/Edit/' + id, function (formHtml) {
-            $('#modalTitle').text('Hattı Düzenle');
-            $('#modalBody').html(formHtml);
-            $('#lineModal').modal('show');
+            $('#modalFormContainer').html(formHtml);
         });
     });
 
@@ -27,11 +55,11 @@
             Id: $(this).find('[name="Id"]').val(),
             Code: $(this).find('[name="Code"]').val(),
             Name: $(this).find('[name="Name"]').val(),
-            LineType: parseInt($(this).find('[name="LineType"]').val()), 
-            VehicleCount: $(this).find('[name="VehicleCount"]').val(),
+            LineType: parseInt($(this).find('[name="LineType"]').val()),
+            VehicleCount: parseInt($(this).find('[name="VehicleCount"]').val()),
             IsActive: $(this).find('[name="IsActive"]').is(':checked')
         };
-        console.log(payload);
+
         $.ajax({
             url: '/Planner/Lines/Execute',
             type: 'POST',
@@ -39,9 +67,9 @@
             data: JSON.stringify(payload),
             success: function (res) {
                 $('#lineModal').modal('hide');
-                $('#lineModal').on('hidden.bs.modal', function () {
+                // Modal tamamen kapandıktan sonra tabloyu yenile
+                $('#lineModal').one('hidden.bs.modal', function () {
                     refreshTable();
-                    $(this).off('hidden.bs.modal');
                 });
             },
             error: function (xhr) {
@@ -83,66 +111,49 @@
         });
     }
 
-    // === AKTİF / PASİF TOGGLE ===
+    // === AKTİF / PASİF TOGGLE (DÜZELTİLDİ) ===
     $(document).on('click', '.toggle-line-active', function (e) {
-        e.preventDefault();  // form submit'ini engelle
-        e.stopPropagation(); // başka event zincirlerini kes
-        var $btn = $(this);
-        var $row = $btn.closest('tr');
-        if ($row.data('isDeleted') === true) return;
+        e.preventDefault();
+        e.stopPropagation();
 
-        var $badge = $btn.find('span');
+        var $btn = $(this);
+        var $row = $btn.closest('tr'); // Satırı bul
+
+        // Verileri TR üzerindeki data- attribute'lardan oku
         var currentActive = $btn.data('active') === true || $btn.data('active') === 'true';
         var newActive = !currentActive;
 
         var message = currentActive
-            ? "Bu hattı pasif yapmak istediğinize emin misiniz?"
-            : "Bu hattı aktif yapmak istediğinize emin misiniz?";
+            ? "Bu hattı PASİF yapmak istediğinize emin misiniz?"
+            : "Bu hattı AKTİF yapmak istediğinize emin misiniz?";
+
         if (!confirm(message)) return;
 
-        // Küçük basma efekti
-        $badge.css('transform', 'scale(0.95)');
-        setTimeout(function () {
-            $badge.css('transform', 'scale(1)');
-        }, 100);
-
-        // Satırdan değerleri al
+        // Payload oluştur - Artık veriler garanti dolu gelecek
         var payload = {
             Id: $row.data('id'),
-            Code: $row.find('.line-code').text(),
-            Name: $row.find('.line-name').text(),
-            LineType: parseInt($row.find('.line-type').data('value')), // enum int
-            VehicleCount: parseInt($row.find('.line-vehicleCount').text()),
+            Code: $row.data('code'),           // string
+            Name: $row.data('name'),           // string
+            LineType: parseInt($row.data('linetype')), // int
+            VehicleCount: parseInt($row.data('vehiclecount')), // int
             IsActive: newActive
         };
-        console.log(payload);
-        console.log("Satır:", $row[0]);
+
+        // Veri kontrolü (Debug için tarayıcı konsoluna basar)
+        console.log("Gönderilecek Payload:", payload);
+
         $.ajax({
             url: '/Planner/Lines/Execute',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(payload),
             success: function () {
-                refreshTable();
+                // Başarılı olursa tabloyu yenile
+                refreshTable($('#searchInput').val()); // Varsa arama terimini koru
             },
             error: function (xhr) {
-                alert('Durum güncellenemedi: ' + (xhr.responseText || ''));
+                alert('Durum güncellenemedi: ' + (xhr.responseText || 'Sunucu hatası'));
             }
         });
     });
-
-    // === Sayfa açılır açılmaz toggle buton durumunu ayarla ===
-    $('.toggle-line-active').each(function () {
-        var $btn = $(this);
-        var isActive = $btn.data('active') === true || $btn.data('active') === 'true';
-
-        if (isActive) {
-            $btn.removeClass('btn-secondary').addClass('btn-success')
-                .html('<span class="badge bg-success rounded-pill" style="transition: transform 0.1s;">Aktif</span>');
-        } else {
-            $btn.removeClass('btn-success').addClass('btn-secondary')
-                .html('<span class="badge bg-secondary rounded-pill" style="transition: transform 0.1s;">Pasif</span>');
-        }
-    });
-
 });

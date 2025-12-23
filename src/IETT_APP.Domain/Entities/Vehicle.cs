@@ -15,6 +15,8 @@ namespace IETT_APP.Domain.Entities
         public Garage<T> Garage { get; set; } = null!;
         public ServiceStatus ServiceStatus { get; set; } = ServiceStatus.InService;
         public string? StatusReason { get; set; } = null;
+        public DateTime? InspectionDate { get; set; } // Muayene Geçerlilik Tarihi
+        public DateTime? InsuranceDate { get; set; }  // Sigorta Geçerlilik Tarihi
         public VehicleType Driver { get; set; }
         public VehicleModel Model { get; set; }
         public int Year { get; set; }

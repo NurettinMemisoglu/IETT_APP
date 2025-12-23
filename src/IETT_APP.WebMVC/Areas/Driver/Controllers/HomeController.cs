@@ -1,10 +1,7 @@
 ﻿using IETT_APP.WebMVC.Areas.Driver.Models;
 using IETT_APP.WebMVC.Services.Interfaces;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace IETT_APP.WebMVC.Areas.Driver.Controllers
 {
@@ -19,32 +16,42 @@ namespace IETT_APP.WebMVC.Areas.Driver.Controllers
             _driverService = driverService;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            // 1. ID'yi almaya çalış
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            // 2. ID YOKSA (Ama giriş yapmış görünüyorsa)
-            if (string.IsNullOrEmpty(userId))
+            try
             {
-                // DÖNGÜYÜ KIRAN KOD:
-                // Bozuk oturumu temizle (Cookie'yi sil)
-                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                // 1. API'den Dashboard Verisini Çekmeye Çalış
+                var dashboardDto = await _driverService.GetDashboardAsync();
 
-                // Sonra Login'e at
-                return RedirectToAction("Login", "Auth", new { area = "" });
+                // 2. Eğer dashboardDto NULL geliyorsa, API'den veri alamadık demektir.
+                // Bu genellikle yeni kullanıcının profili olmadığı anlamına gelir.
+                if (dashboardDto == null)
+                {
+                    // HATAYI ÇÖZEN SATIR BURASI:
+                    // Login'e atmak yerine, Profil Oluşturma sayfasına yönlendiriyoruz.
+                    return RedirectToAction("Create", "Profile");
+                }
+
+                // 3. Veri geldiyse Dashboard'ı göster
+                var model = new DriverDashboardViewModel
+                {
+                    HasProfile = true,
+                    DashboardData = dashboardDto
+                };
+
+                return View(model);
             }
-
-            // 3. Her şey yolundaysa veriyi çek
-            var driverDto = await _driverService.GetByUserIdAsync(userId);
-
-            var model = new DriverDashboardViewModel
+            catch (Exception)
             {
-                HasProfile = driverDto != null,
-                Profile = driverDto
-            };
+                // API 400 veya 404 hatası fırlattıysa (Profil yoksa API hata fırlatıyor olabilir)
+                // Bu durumda da Create sayfasına yönlendirmeliyiz.
 
-            return View(model);
+                // NOT: Eğer API gerçekten çöktüyse kullanıcı Create sayfasına gider, 
+                // orası da hata verirse ExceptionMiddleware yakalar.
+                // Ancak "Döngüye girmemesi" için en güvenli yol budur.
+                return RedirectToAction("Create", "Profile");
+            }
         }
     }
 }

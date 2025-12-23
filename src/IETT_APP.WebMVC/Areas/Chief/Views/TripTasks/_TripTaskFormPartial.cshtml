@@ -51,6 +51,20 @@
             <span asp-validation-for="RouteId" class="text-danger"></span>
         </div>
 
+        <div class="col-md-6">
+            <div class="form-floating mb-3">
+                <input asp-for="ScheduledDeparture" type="text"
+                       class="form-control date-input-with-icon"
+                       value="@scheduledDepartureVal"
+                       readonly="@readonlyAttr"
+                       style="@inputStyle"
+                       placeholder="dd.MM.yyyy HH:mm"
+                       maxlength="16" />
+                <label asp-for="ScheduledDeparture">Planlanan Kalkış</label>
+                <span asp-validation-for="ScheduledDeparture" class="text-danger"></span>
+            </div>
+        </div>
+
         <div class="row g-2">
             <div class="col-md-6">
                 <div class="form-floating mb-3">
@@ -63,20 +77,6 @@
                            maxlength="16" />
                     <label asp-for="ScheduledArrival">Planlanan Varış</label>
                     <span asp-validation-for="ScheduledArrival" class="text-danger"></span>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="form-floating mb-3">
-                    <input asp-for="ScheduledDeparture" type="text"
-                           class="form-control date-input-with-icon"
-                           value="@scheduledDepartureVal"
-                           readonly="@readonlyAttr"
-                           style="@inputStyle"
-                           placeholder="dd.MM.yyyy HH:mm"
-                           maxlength="16" />
-                    <label asp-for="ScheduledDeparture">Planlanan Kalkış</label>
-                    <span asp-validation-for="ScheduledDeparture" class="text-danger"></span>
                 </div>
             </div>
         </div>

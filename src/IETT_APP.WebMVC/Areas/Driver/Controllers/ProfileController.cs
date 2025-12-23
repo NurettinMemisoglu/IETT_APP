@@ -14,6 +14,7 @@ namespace IETT_APP.WebMVC.Areas.Driver.Controllers
     {
         private readonly IDriverApiService _driverService;
         private readonly IUserSessionApiService _sessionService;
+
         public ProfileController(IDriverApiService driverService, IUserSessionApiService sessionService)
         {
             _driverService = driverService;
@@ -26,23 +27,32 @@ namespace IETT_APP.WebMVC.Areas.Driver.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Auth", new { area = "" });
-
-            var driver = await _driverService.GetByUserIdAsync(userId);
-
-            // Profil YOKSA -> Oluşturmaya Gönder
-            if (driver == null)
+            try
             {
-                return RedirectToAction("Create");
-            }
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId)) return RedirectToAction("Login", "Auth", new { area = "" });
 
-            var model = driver.ToViewModel();
-            return View(model);
+                var driver = await _driverService.GetByUserIdAsync(userId);
+
+                // Profil YOKSA -> Oluşturmaya Gönder
+                if (driver == null)
+                {
+                    return RedirectToAction("Create");
+                }
+
+                var model = driver.ToViewModel();
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                // Index'te hata olursa bembeyaz sayfa yerine Error sayfasına veya güvenli bir yere atabiliriz
+                TempData["ErrorMessage"] = "Profil yüklenirken bir sorun oluştu: " + ex.Message;
+                return RedirectToAction("Index", "Home", new { area = "" });
+            }
         }
 
         // ============================================================
-        // CREATE: Profil Oluşturma (Onboarding)
+        // CREATE: Profil Oluşturma (Form Görüntüleme)
         // ============================================================
         [HttpGet]
         public async Task<IActionResult> Create()
@@ -58,50 +68,54 @@ namespace IETT_APP.WebMVC.Areas.Driver.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Profil yoksa boş form göster
             return View(new CompleteProfileDto());
         }
 
-        // POST: Driver/Profile/Create
+        // ============================================================
+        // CREATE POST: (DÜZELTİLDİ - ARTIK SAYFAYI PATLATMIYOR)
+        // ============================================================
         [HttpPost]
         public async Task<IActionResult> Create(CompleteProfileDto model)
         {
-            // 1. Validasyon Hatası Varsa JSON Dön
+            // 1. Model Validasyon
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
                 return BadRequest(new { message = "Lütfen bilgileri kontrol ediniz.", errors = errors });
             }
 
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId)) return Unauthorized();
-
-            // 2. Servis Çağrısı
-            var result = await _driverService.CompleteProfileAsync(userId, model);
-
-            if (result.Succeeded)
+            try
             {
-                // HATAYI ÇÖZEN KISIM:
-                // RedirectToAction YAPMA! JSON dön, yönlendirmeyi JavaScript yapsın.
-                return Ok(new
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+                // 2. Servis Çağrısı
+                var result = await _driverService.CompleteProfileAsync(userId, model);
+
+                // 3. SONUÇ KONTROLÜ
+                if (result.Succeeded)
                 {
-                    message = "Profiliniz başarıyla oluşturuldu.",
-                    redirectUrl = Url.Action("Index", "Profile")
-                });
+                    return Ok(new
+                    {
+                        message = "Profiliniz başarıyla oluşturuldu. Yönlendiriliyorsunuz...",
+                        redirectUrl = Url.Action("Index", "Profile")
+                    });
+                }
+
+                // --- TEMİZ KOD ---
+                // Artık hata analiz etmiyoruz, servisin hazırladığı temiz mesajı basıyoruz.
+                return BadRequest(new { message = result.Message });
             }
-
-            // 3. Servis Hatası Varsa JSON Dön
-            var errorMsg = result.Errors != null && result.Errors.Any()
-                ? string.Join(", ", result.Errors)
-                : "Profil oluşturulurken hata oluştu.";
-
-            return BadRequest(new { message = errorMsg });
+            catch (Exception ex)
+            {
+                // Sadece bağlantı kopması vb. beklenmedik durumlarda burası çalışır
+                return BadRequest(new { message = "Beklenmedik bir hata oluştu: " + ex.Message });
+            }
         }
 
         // ============================================================
-        // UPDATE: Profil Güncelleme (AJAX)
+        // UPDATE: Profil Güncelleme (AJAX - JSON Döner)
         // ============================================================
-        // POST: Driver/Profile/Update (AJAX)
         [HttpPost]
         public async Task<IActionResult> Update([FromBody] DriverProfileViewModel model)
         {
@@ -110,10 +124,7 @@ namespace IETT_APP.WebMVC.Areas.Driver.Controllers
 
             try
             {
-                // Extension metodun ID ataması yapmıyor, bu doğru.
                 var updateDto = model.ToUpdateProfileDto();
-
-                // Servise sadece DTO gönderiyoruz. ID göndermiyoruz.
                 var result = await _driverService.UpdateProfileAsync(updateDto);
 
                 if (result.Succeeded)
@@ -128,24 +139,27 @@ namespace IETT_APP.WebMVC.Areas.Driver.Controllers
         }
 
         // ============================================================
-        // UPLOAD: Fotoğraf Yükleme (AJAX - Multipart)
+        // UPLOAD: Fotoğraf Yükleme (AJAX - JSON Döner)
         // ============================================================
         [HttpPost]
         public async Task<IActionResult> UploadPhoto(Guid id, IFormFile photo)
         {
-            // ... (Validasyonlar) ...
-
-            var result = await _driverService.UploadProfileImageAsync(id, photo);
-
-            if (result.Succeeded)
+            try
             {
-                // Kullanıcının cookie'sini yenile
-                await _sessionService.UpdateProfileImageClaimAsync(result.Data);
+                var result = await _driverService.UploadProfileImageAsync(id, photo);
 
-                return Ok(new { message = "Fotoğraf güncellendi.", newUrl = result.Data });
+                if (result.Succeeded)
+                {
+                    await _sessionService.UpdateProfileImageClaimAsync(result.Data);
+                    return Ok(new { message = "Fotoğraf güncellendi.", newUrl = result.Data });
+                }
+
+                return BadRequest(new { message = "Hata: " + string.Join(", ", result.Errors) });
             }
-
-            return BadRequest(new { message = "Hata: " + string.Join(", ", result.Errors) });
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Fotoğraf yüklenirken hata oluştu: " + ex.Message });
+            }
         }
     }
 }

@@ -1,25 +1,42 @@
 ﻿$(function () {
-    console.log("🚌 Driver Tasks Script Loaded (Hızlı Mod)");
+    console.log("🚌 Driver Tasks Script Loaded (Optimize Edilmiş)");
+
+    // Ortak Hata Gösterme Fonksiyonu
+    function handleError(xhr, $btn, defaultText) {
+        let msg = "İşlem sırasında bir hata oluştu.";
+
+        if (xhr.responseJSON && xhr.responseJSON.message) {
+            msg = xhr.responseJSON.message;
+        } else if (xhr.responseText) {
+            // Bazen sunucu JSON yerine düz text hata dönebilir
+            msg = xhr.responseText;
+        }
+
+        toastr.error(msg);
+
+        if ($btn && defaultText) {
+            $btn.prop('disabled', false).html(defaultText);
+        }
+    }
 
     // ===========================
-    // 1. KABUL ET (Accept) - DİREKT ÇALIŞIR
+    // 1. KABUL ET (Accept)
     // ===========================
     $('.btn-accept').click(function () {
         const id = $(this).data('id');
         const $btn = $(this);
-
-        // ONAY KODU SİLİNDİ: Direkt işlem başlıyor...
+        const originalText = $btn.html();
 
         $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
 
+        // URL: /Driver/Tasks/Accept?id=... (MVC Controller bunu anlar)
         $.post('/Driver/Tasks/Accept', { id: id })
             .done(function (res) {
-                toastr.success(res.message);
+                toastr.success(res.message || "Görev kabul edildi.");
                 setTimeout(() => window.location.reload(), 1000);
             })
             .fail(function (xhr) {
-                toastr.error(xhr.responseJSON?.message || "İşlem başarısız.");
-                $btn.prop('disabled', false).html('<i class="bi bi-check-lg"></i> Kabul Et');
+                handleError(xhr, $btn, originalText);
             });
     });
 
@@ -28,7 +45,7 @@
     // ===========================
     $('.btn-reject').click(function () {
         $('#rejectTaskId').val($(this).data('id'));
-        $('#rejectReason').val(''); // Temizle
+        $('#rejectReason').val('');
         new bootstrap.Modal(document.getElementById('rejectModal')).show();
     });
 
@@ -36,49 +53,49 @@
         const id = $('#rejectTaskId').val();
         const reason = $('#rejectReason').val();
 
-        if (!reason) {
-            toastr.warning("Lütfen bir neden belirtiniz.");
+        if (!reason || reason.trim().length < 5) {
+            toastr.warning("Lütfen en az 5 karakterlik bir neden belirtiniz.");
             return;
         }
 
         const $btn = $(this);
+        const originalText = $btn.text();
         $btn.prop('disabled', true).text('İşleniyor...');
 
+        // Controller: [FromBody] RejectTripRequestDto bekliyor
         $.ajax({
-            url: '/Driver/Tasks/Reject?id=' + id,
+            url: '/Driver/Tasks/Reject?id=' + id, // ID QueryString'den gider
             type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ Reason: reason }),
+            contentType: 'application/json', // JSON olarak gönderiyoruz
+            data: JSON.stringify({ Reason: reason }), // Body
             success: function (res) {
-                toastr.info("Görev reddedildi.");
+                toastr.info(res.message || "Görev reddedildi.");
+                $('#rejectModal').modal('hide');
                 setTimeout(() => window.location.reload(), 1000);
             },
             error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message || "Hata oluştu.");
-                $btn.prop('disabled', false).text('Görevi Reddet');
+                handleError(xhr, $btn, originalText);
             }
         });
     });
 
     // ===========================
-    // 3. BAŞLAT (Start) - DİREKT ÇALIŞIR
+    // 3. BAŞLAT (Start)
     // ===========================
     $('.btn-start').click(function () {
         const id = $(this).data('id');
         const $btn = $(this);
-
-        // ONAY KODU SİLİNDİ: Direkt işlem başlıyor...
+        const originalText = $btn.html();
 
         $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Başlatılıyor...');
 
         $.post('/Driver/Tasks/Start', { id: id })
             .done(function (res) {
-                toastr.success(res.message);
+                toastr.success(res.message || "Sefer başlatıldı.");
                 setTimeout(() => window.location.reload(), 1000);
             })
             .fail(function (xhr) {
-                toastr.error(xhr.responseJSON?.message || "Başlatılamadı.");
-                $btn.prop('disabled', false).html('<i class="bi bi-play-fill fs-5"></i> SEFERİ BAŞLAT');
+                handleError(xhr, $btn, originalText);
             });
     });
 
@@ -107,13 +124,15 @@
         }
 
         const $btn = $(this);
+        const originalText = $btn.text();
         $btn.prop('disabled', true).text('Kaydediliyor...');
 
+        // DTO ile birebir uyumlu payload
         const payload = {
             PassengerCount: parseInt(passengers),
-            EndOdometerInput: parseFloat(odometer),
+            EndOdometerInput: parseFloat(odometer), // Controller "EndOdometerInput" bekliyor
             FuelLevel: fuel ? parseInt(fuel) : null,
-            Note: note
+            DriverNotes: note // Controller "DriverNotes" bekliyor (eskiden Note idi, dikkat!)
         };
 
         $.ajax({
@@ -122,13 +141,12 @@
             contentType: 'application/json',
             data: JSON.stringify(payload),
             success: function (res) {
-                toastr.success(res.message);
+                toastr.success(res.message || "Sefer tamamlandı.");
                 $('#completeModal').modal('hide');
                 setTimeout(() => window.location.reload(), 1000);
             },
             error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message || "İşlem başarısız.");
-                $btn.prop('disabled', false).text('Kaydet ve Bitir');
+                handleError(xhr, $btn, originalText);
             }
         });
     });
@@ -146,12 +164,13 @@
         const id = $('#failTaskId').val();
         const reason = $('#failReason').val();
 
-        if (!reason) {
-            toastr.warning("Açıklama giriniz.");
+        if (!reason || reason.trim().length < 5) {
+            toastr.warning("Lütfen açıklama giriniz (min 5 karakter).");
             return;
         }
 
         const $btn = $(this);
+        const originalText = $btn.text();
         $btn.prop('disabled', true).text('Bildiriliyor...');
 
         $.ajax({
@@ -160,14 +179,13 @@
             contentType: 'application/json',
             data: JSON.stringify({ Reason: reason }),
             success: function (res) {
-                toastr.warning(res.message);
+                toastr.warning(res.message || "Durum bildirildi.");
+                $('#failModal').modal('hide');
                 setTimeout(() => window.location.reload(), 1000);
             },
             error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message || "Hata.");
-                $btn.prop('disabled', false).text('Bildir');
+                handleError(xhr, $btn, originalText);
             }
         });
     });
-
 });

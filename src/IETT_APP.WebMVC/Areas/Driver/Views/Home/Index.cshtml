@@ -1,5 +1,30 @@
-﻿
+﻿@using IETT_APP.WebMVC.Areas.Driver.Models
+@model DriverDashboardViewModel
+
 @{
-	ViewData["Title"] = "Driver Page";
+    ViewData["Title"] = "Sürücü Paneli";
+    // Ana DTO'yu kolay kullanım için değişkene alıyoruz
+    var dashboardDto = Model.DashboardData;
 }
-<h4 class="mb-2">This is Driver Page</h4>
+
+@section Styles {
+    @* Buraya CSS kodlarını (önceki cevaptaki style bloğunu) ekleyebilirsin veya harici css kullanabilirsin *@
+    <link rel="stylesheet" href="~/css/driver-dashboard.css" asp-append-version="true" />
+}
+
+<div class="container py-4 dashboard-container">
+
+    <partial name="_DashboardProfileHeader" model="dashboardDto" />
+
+    @* Eğer CurrentTask null ise partial içinde kontrol edilecek *@
+    <partial name="_DashboardCurrentTask" model="dashboardDto.CurrentTask" />
+
+    <partial name="_DashboardTimeline" model="dashboardDto.UpcomingTasks" />
+
+</div>
+
+<partial name="_DashboardModals" />
+
+@section Scripts {
+    <script src="~/js/driver-tasks.js" asp-append-version="true"></script>
+}

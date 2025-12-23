@@ -1,7 +1,7 @@
 ﻿using IETT_APP.Application.Dtos.TripTask;
 using IETT_APP.Application.Wrappers;
 using IETT_APP.Domain.Enums;
-using IETT_APP.WebMVC.Services.Infrastructure; // BaseApiService
+using IETT_APP.WebMVC.Services.Infrastructure;
 using IETT_APP.WebMVC.Services.Interfaces;
 
 namespace IETT_APP.WebMVC.Services.Implementations
@@ -15,7 +15,9 @@ namespace IETT_APP.WebMVC.Services.Implementations
             _httpClient = httpClient;
         }
 
-        // ... (Mevcut CRUD metotları AYNI kalacak - GetAll, Create vb.) ...
+        // ============================================================
+        // 1. TEMEL CRUD (MEVCUT)
+        // ============================================================
         public async Task<IEnumerable<TripTaskDto>> GetAllAsync()
             => await _httpClient.GetFromJsonAsync<IEnumerable<TripTaskDto>>("api/triptasks") ?? new List<TripTaskDto>();
 
@@ -23,6 +25,13 @@ namespace IETT_APP.WebMVC.Services.Implementations
         {
             var response = await _httpClient.GetAsync($"api/triptasks/{id}");
             return response.IsSuccessStatusCode ? await response.Content.ReadFromJsonAsync<TripTaskDto>() : null;
+        }
+
+        public async Task<IEnumerable<TripTaskDto>> SearchAsync(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query)) return new List<TripTaskDto>();
+            var encodedQuery = System.Net.WebUtility.UrlEncode(query);
+            return await _httpClient.GetFromJsonAsync<IEnumerable<TripTaskDto>>($"api/triptasks/search?query={encodedQuery}") ?? new List<TripTaskDto>();
         }
 
         public async Task<ServiceResult<TripTaskDto>> CreateAsync(TripTaskCreateDto dto)
@@ -43,56 +52,51 @@ namespace IETT_APP.WebMVC.Services.Implementations
             return await HandleResponse(response);
         }
 
-        public async Task<IEnumerable<TripTaskDto>> SearchAsync(string query)
-        {
-            if (string.IsNullOrWhiteSpace(query)) return new List<TripTaskDto>();
-            var encodedQuery = System.Net.WebUtility.UrlEncode(query);
-            return await _httpClient.GetFromJsonAsync<IEnumerable<TripTaskDto>>($"api/triptasks/search?query={encodedQuery}") ?? new List<TripTaskDto>();
-        }
-
         // ============================================================
-        // SÜRÜCÜ OPERASYON METOTLARI (YENİ EKLENENLER)
+        // 2. SÜRÜCÜ OPERASYONLARI (EKSİK OLAN KISIM EKLENDİ) ✅
         // ============================================================
 
+        // Interface hatasını çözen metod:
         public async Task<IEnumerable<TripTaskDto>> GetMyTasksAsync()
         {
-            var response = await _httpClient.GetAsync("api/triptasks/my-tasks");
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<IEnumerable<TripTaskDto>>() ?? new List<TripTaskDto>();
-            }
-            return new List<TripTaskDto>();
+            // API'de bu endpoint'in olması lazım (Aşağıda 2. adımda ekleyeceğiz)
+            return await _httpClient.GetFromJsonAsync<IEnumerable<TripTaskDto>>("api/driver-tasks/my-tasks")
+                   ?? new List<TripTaskDto>();
         }
 
         public async Task<ServiceResult> AcceptTripAsync(Guid id)
         {
-            var response = await _httpClient.PatchAsync($"api/triptasks/{id}/accept", null);
+            var response = await _httpClient.PostAsync($"api/driver-tasks/accept/{id}", null);
             return await HandleResponse(response);
         }
 
         public async Task<ServiceResult> RejectTripAsync(Guid id, RejectTripRequestDto dto)
         {
-            var response = await _httpClient.PatchAsJsonAsync($"api/triptasks/{id}/reject", dto);
+            var response = await _httpClient.PostAsJsonAsync($"api/driver-tasks/reject/{id}", dto);
             return await HandleResponse(response);
         }
 
         public async Task<ServiceResult> StartTripAsync(Guid id)
         {
-            var response = await _httpClient.PatchAsync($"api/triptasks/{id}/start", null);
+            var response = await _httpClient.PostAsync($"api/driver-tasks/start/{id}", null);
             return await HandleResponse(response);
         }
 
         public async Task<ServiceResult> CompleteTripAsync(Guid id, CompleteTripRequestDto dto)
         {
-            var response = await _httpClient.PatchAsJsonAsync($"api/triptasks/{id}/complete", dto);
+            var response = await _httpClient.PostAsJsonAsync($"api/driver-tasks/complete/{id}", dto);
             return await HandleResponse(response);
         }
 
         public async Task<ServiceResult> FailTripAsync(Guid id, FailTripRequestDto dto)
         {
-            var response = await _httpClient.PatchAsJsonAsync($"api/triptasks/{id}/fail", dto);
+            var response = await _httpClient.PostAsJsonAsync($"api/driver-tasks/fail/{id}", dto);
             return await HandleResponse(response);
         }
+
+        // ============================================================
+        // 3. YARDIMCI METOTLAR
+        // ============================================================
         public List<TaskState> GetAllowedStatesForRole(string role)
         {
             if (role == "Chief" || role == "Admin") return new List<TaskState> { TaskState.Pending, TaskState.Cancelled };

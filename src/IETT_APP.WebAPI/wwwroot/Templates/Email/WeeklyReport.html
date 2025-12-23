@@ -1,0 +1,198 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+
+        .header {
+            background-color: #ffc107; /* Rapor için Sarı/Gold */
+            color: #212529; /* Sarı üstüne koyu yazı */
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid #e0a800;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        /* Özet Kutuları (Dashboard) */
+        .summary-grid {
+            display: table;
+            width: 100%;
+            margin-bottom: 30px;
+            border-collapse: separate;
+            border-spacing: 5px;
+        }
+
+        .summary-item {
+            display: table-cell;
+            width: 25%;
+            text-align: center;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #eee;
+            border-radius: 5px;
+        }
+
+        .summary-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            display: block;
+        }
+
+        .summary-label {
+            font-size: 11px;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Tablolar */
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #495057;
+            border-bottom: 2px solid #ffc107;
+            padding-bottom: 5px;
+            margin-top: 20px;
+            margin-bottom: 15px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+            .data-table th {
+                text-align: left;
+                padding: 8px;
+                background-color: #e9ecef;
+                border-bottom: 2px solid #dee2e6;
+                color: #495057;
+            }
+
+            .data-table td {
+                padding: 8px;
+                border-bottom: 1px solid #eee;
+            }
+
+        /* Renkli Badge'ler */
+        .badge-success {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .badge-danger {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .badge-info {
+            color: #17a2b8;
+            font-weight: bold;
+        }
+
+        .footer {
+            background-color: #f1f1f1;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2 style="margin:0;">📊 Haftalık Operasyon Raporu</h2>
+            <p style="margin:5px 0 0 0; font-size:14px; opacity:0.8;">{{StartDate}} - {{EndDate}}</p>
+        </div>
+
+        <div class="content">
+            <p>Sayın Yönetici,</p>
+            <p>Geride bıraktığımız haftanın operasyonel performans verileri aşağıdadır.</p>
+
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <span class="summary-value">{{TotalTrips}}</span>
+                    <span class="summary-label">Toplam</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-value" style="color:#28a745;">{{CompletedTrips}}</span>
+                    <span class="summary-label">Biten</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-value" style="color:#dc3545;">{{CancelledTrips}}</span>
+                    <span class="summary-label">İptal</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-value">{{TotalDelay}}</span>
+                    <span class="summary-label">Gecikme (dk)</span>
+                </div>
+            </div>
+
+            <p style="text-align:center; background-color:#fff3cd; padding:10px; border-radius:5px; margin-bottom:20px;">
+                Genel Başarı Oranı: <strong>%{{SuccessRate}}</strong>
+            </p>
+
+            <div class="section-title">⚠️ En Çok Geciken 5 Sefer</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th width="20%">Hat</th>
+                        <th width="40%">Şoför</th>
+                        <th width="20%">Saat</th>
+                        <th width="20%">Süre</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{WorstTripsRows}}
+                </tbody>
+            </table>
+
+            <div class="section-title">🏆 Haftanın Yıldızları (En Çok Sefer)</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th width="15%">#</th>
+                        <th width="60%">Şoför Adı Soyadı</th>
+                        <th width="25%">Sefer</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{TopDriversRows}}
+                </tbody>
+            </table>
+
+            <div style="text-align:center; margin-top:30px;">
+                <a href="{{LinkUrl}}" style="background-color:#6c757d; color:white; padding:10px 20px; text-decoration:none; border-radius:5px; font-size:14px;">Tüm Raporları İncele</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            Bu e-posta otomatik olarak oluşturulmuştur.<br>
+            &copy; 2025 İETT Operasyon Yönetim Sistemi
+        </div>
+    </div>
+</body>
+</html>

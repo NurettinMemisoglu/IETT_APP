@@ -4,20 +4,42 @@
     ViewData["Title"] = "Araç Yönetimi";
 }
 
-<div class="container-fluid mt-4 px-5">
-    <h2 class="mb-3">Araç Listesi</h2>
+@section Styles {
+    <link rel="stylesheet" href="~/css/planner-vehicles.css" asp-append-version="true" />
+}
 
-    <div class="d-flex justify-content-between mb-3 flex-wrap">
-        <input type="text" id="searchInput" class="form-control w-auto flex-grow-1 me-2" placeholder="Araç ara..." />
-        <a asp-area="Planner" asp-controller="Vehicles" asp-action="Create" class="btn btn-success">Yeni Araç Ekle</a>
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="m-0 fw-bold text-dark">
+            <i class="bi bi-bus-front text-primary me-2"></i> Araç Listesi
+        </h3>
+
+        <a asp-area="Planner" asp-controller="Vehicles" asp-action="Create" class="btn btn-success fw-bold px-4 py-2">
+            <i class="bi bi-plus-lg me-1"></i> Yeni Araç Ekle
+        </a>
     </div>
 
-    <div id="vehiclesTableContainer" class="table-responsive rounded shadow-sm p-2 bg-white">
-        @await Html.PartialAsync("_VehiclesTablePartial", Model)
+    <div class="search-bar-container">
+        <div class="p-2 bg-white rounded shadow-sm border">
+            <div class="input-group input-group-sm" style="width: 300px;">
+                <span class="input-group-text bg-light border-end-0 text-muted">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Plaka veya kapı no ara..." autocomplete="off" />
+            </div>
+        </div>
     </div>
+
+    <div class="table-card mt-3">
+        <div id="vehiclesTableContainer">
+            <partial name="_VehiclesTablePartial" model="Model" />
+        </div>
+    </div>
+
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-
+    <script src="~/js/vehicles.js"></script>
 }

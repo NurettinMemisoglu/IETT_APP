@@ -4,8 +4,11 @@ using IETT_APP.Application.Interfaces;
 using IETT_APP.Domain.Entities;
 using IETT_APP.Domain.Enums;
 using IETT_APP.Domain.Interfaces;
+using IETT_APP.Infrastructure.Hubs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Caching.Memory;
 using System.Security.Claims;
 
 namespace IETT_APP.Infrastructure.Services
@@ -13,23 +16,34 @@ namespace IETT_APP.Infrastructure.Services
     public class DriverService : IDriverService
     {
         private readonly IDriverRepository _repository;
+        private readonly ITripTaskRepository _tripTaskRepository;
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
         private readonly IFileService _fileService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IHubContext<NotificationHub, INotificationClient> _hubContext;
+        private readonly IMemoryCache _cache;
 
         public DriverService(
             IDriverRepository repository,
+            ITripTaskRepository tripTaskRepository,
             UserManager<User> userManager,
             IMapper mapper,
             IFileService fileService,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IHubContext<NotificationHub, INotificationClient> hubContext,
+            IMemoryCache cache)
+
         {
             _repository = repository;
+            _tripTaskRepository = tripTaskRepository;
             _userManager = userManager;
             _mapper = mapper;
             _fileService = fileService;
             _httpContextAccessor = httpContextAccessor;
+            _hubContext = hubContext;
+            _cache = cache;
+
         }
 
         // Helper Metot: User ID'yi almak için
@@ -92,6 +106,32 @@ namespace IETT_APP.Infrastructure.Services
             return _mapper.Map<DriverDto>(entity);
         }
 
+        public async Task<bool> IsProfileCompleteAsync(string userId)
+        {
+            if (string.IsNullOrEmpty(userId)) return false;
+
+            string cacheKey = $"profile_complete_{userId}";
+
+            // Önce hafızaya bak, orada varsa direkt döndür (Veritabanına gitme)
+            if (_cache.TryGetValue(cacheKey, out bool isComplete))
+            {
+                return isComplete;
+            }
+
+            // Hafızada yoksa veritabanına sor
+            var driver = await _repository.GetByUserIdAsync(userId);
+            isComplete = (driver != null);
+
+            // Sonucu hafızaya yaz (Örneğin 30 dakika boyunca hatırla)
+            // Böylece 30 dk boyunca tekrar veritabanına sormaz.
+            var cacheOptions = new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromMinutes(30));
+
+            _cache.Set(cacheKey, isComplete, cacheOptions);
+
+            return isComplete;
+        }
+
         // 2. Şoför Kendi Profilini Tamamlarsa (ONBOARDING)
         public async Task<DriverDto> CompleteProfileAsync(
             string userId,
@@ -142,6 +182,7 @@ namespace IETT_APP.Infrastructure.Services
             {
                 // Kayıt işlemi
                 await _repository.AddAsync(entity);
+                _cache.Remove($"profile_complete_{userId}");
                 return _mapper.Map<DriverDto>(entity);
             }
             catch (Exception ex)
@@ -182,22 +223,29 @@ namespace IETT_APP.Infrastructure.Services
             string? oldFilePath = driverEntity.ProfileImagePath;
 
             // 2. Yeni Resmi Kaydet
-            string currentUserId = GetCurrentUserId();
+            string currentUserId = GetCurrentUserId(); // BaseService'den geliyorsa
             var savedFile = await _fileService.SaveFileAsync(dto.Photo, FileCategory.ProfileImage, currentUserId);
 
             // 3. Veritabanını Güncelle
             driverEntity.ProfileImagePath = savedFile.FilePath;
             await _repository.UpdateAsync(driverEntity);
 
-            // 4. Eski Resmi ve DB Kaydını Sil (GÜNCELLENDİ)
-            if (!string.IsNullOrEmpty(oldFilePath))
+            // 4. Eski Resmi Sil
+            if (!string.IsNullOrEmpty(oldFilePath) && oldFilePath != savedFile.FilePath)
             {
-                if (oldFilePath != savedFile.FilePath)
-                {
-                    // ARTIK AWAIT İLE ÇAĞIRIYORUZ
-                    await _fileService.DeleteFileAsync(oldFilePath);
-                }
+                await _fileService.DeleteFileAsync(oldFilePath);
             }
+
+            // ========================================================================
+            // 🚀 KRİTİK EKLEME: SIGNALR İLE BİLDİRİM GÖNDER
+            // ========================================================================
+            if (!string.IsNullOrEmpty(driverEntity.UserId))
+            {
+                // Kullanıcıya anlık haber ver: "Resmin değişti, hemen yenile!"
+                await _hubContext.Clients.User(driverEntity.UserId)
+                                 .ProfileImageUpdated(driverEntity.ProfileImagePath);
+            }
+            // ========================================================================
 
             return driverEntity.ProfileImagePath;
         }
@@ -250,6 +298,93 @@ namespace IETT_APP.Infrastructure.Services
             if (entity == null) throw new Exception("Sürücü bulunamadı.");
 
             await _repository.SoftDeleteAsync(entity);
+        }
+
+        // ============================================================
+        // 🚀 DRIVER DASHBOARD & UI LOGIC (GÜNCELLENDİ - V2)
+        // ============================================================
+        public async Task<DriverDashboardDto> GetDriverDashboardAsync(string userId)
+        {
+            // 1. Şoför Bilgisi
+            var driver = await _repository.GetByUserIdAsync(userId);
+            if (driver == null) throw new Exception("Sürücü profili bulunamadı.");
+
+            // 2. Tüm Görevleri Çek
+            var allTasks = await _tripTaskRepository.GetByDriverIdAsync(driver.Id);
+
+            // 3. FİLTRELEME VE SIRALAMA (REVİZE EDİLDİ)
+            var today = DateTime.Today;
+
+            var relevantTasks = allTasks.Where(t =>
+                t.Status == TaskState.InProgress ||
+                t.Status == TaskState.Accepted ||
+                (t.Status == TaskState.Pending && t.ScheduledDeparture >= today) || // Geçmişteki "Bekleyen"leri getirme
+                (t.Status == TaskState.Completed && t.ScheduledDeparture?.Date == today)
+            )
+            // KRİTİK NOKTA: Sıralamayı yaparken Revize Saat (Adjusted) varsa onu kullan, yoksa Normal Saati kullan.
+            .OrderBy(t => t.AdjustedDeparture ?? t.ScheduledDeparture)
+            .ToList();
+
+            // 4. Ana DTO'yu Oluştur
+            var dashboard = new DriverDashboardDto
+            {
+                FullName = $"{driver.User?.Name} {driver.User?.Surname}",
+                ProfileImageUrl = driver.ProfileImagePath ?? string.Empty,
+                WorkStatus = driver.WorkStatus,
+                CompletedTasksCount = relevantTasks.Count(t => t.Status == TaskState.Completed),
+
+                // Mesai Metni (Switch Expression)
+                ShiftStatusText = driver.WorkStatus switch
+                {
+                    WorkStatus.Working => "Direksiyon Başında",
+                    WorkStatus.Resting => "Mola",
+                    WorkStatus.Available => "Görev Bekleniyor",
+                    WorkStatus.OffDuty => "Mesai Dışı",
+                    _ => "Durum Bilinmiyor"
+                }
+            };
+
+            // =========================================================================
+            // 5. AKTİF GÖREVİ BELİRLE (BÜYÜK KART İÇİN YENİ MANTIK)
+            // =========================================================================
+
+            TripTask? activeTaskEntity = null;
+
+            // KURAL 1: Eğer şoför şu an sürüşteyse (InProgress), ekranda kesinlikle o görünmeli.
+            activeTaskEntity = relevantTasks.FirstOrDefault(t => t.Status == TaskState.InProgress);
+
+            // KURAL 2: Eğer sürüşte değilse, ZAMAN OLARAK EN YAKIN / İLK görevi getir.
+            // Statüsünün "Kabul Edildi" veya "Bekliyor" olması fark etmez.
+            // Listeyi zaten yukarıda .OrderBy ile zamana göre sıraladığımız için listenin başındaki eleman en yakındır.
+            if (activeTaskEntity == null)
+            {
+                activeTaskEntity = relevantTasks.FirstOrDefault(t =>
+                    t.Status == TaskState.Accepted ||
+                    t.Status == TaskState.Pending);
+            }
+
+            // Bulunan görevi DTO'ya map'le
+            if (activeTaskEntity != null)
+            {
+                dashboard.CurrentTask = _mapper.Map<DashboardTaskDto>(activeTaskEntity);
+            }
+
+            // 6. SIRADAKİ GÖREVLER (ALT LİSTE - 7 GÜNLÜK FİLTRE)
+            var oneWeekLater = DateTime.Today.AddDays(7); // 1 Hafta sonrası
+
+            var upcomingEntities = relevantTasks
+                .Where(t => t.Id != activeTaskEntity?.Id && // Aktif olan hariç
+                            t.Status != TaskState.Completed &&
+                            t.Status != TaskState.Cancelled &&
+                            t.Status != TaskState.Incomplete &&
+                            // YENİ: Sadece önümüzdeki 7 gün
+                            (t.AdjustedDeparture ?? t.ScheduledDeparture) < oneWeekLater)
+                .OrderBy(t => t.AdjustedDeparture ?? t.ScheduledDeparture)
+                .ToList();
+
+            dashboard.UpcomingTasks = _mapper.Map<List<DashboardTaskDto>>(upcomingEntities);
+
+            return dashboard;
         }
     }
 }

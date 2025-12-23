@@ -1,76 +1,106 @@
 ﻿@model IETT_APP.WebMVC.Areas.Planner.Models.RouteViewModel
 
-
-<form id="routeForm" method="post">
+<div class="routes-form-wrapper">
     <input type="hidden" id="Id" name="Id" value="@Model.Id" />
 
-    <div class="form-floating mb-3">
-        <input asp-for="Code" class="form-control" placeholder="Kod" />
-        <label asp-for="Code"></label>
+    <div class="row">
+        <div class="col-md-5 border-end pe-md-4">
+
+            <h5 class="routes-section-header">
+                <i class="bi bi-info-circle me-1"></i> Temel Bilgiler
+            </h5>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Code" class="form-control" placeholder="Kod" />
+                <label asp-for="Code">Güzergah Kodu</label>
+                <span asp-validation-for="Code" class="text-danger"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Name" class="form-control" placeholder="Ad" />
+                <label asp-for="Name">Güzergah Adı</label>
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <select asp-for="RoutesDirection" class="form-select" asp-items="ViewBag.RoutesTypeList">
+                    <option value="">-- Yön Seçin --</option>
+                </select>
+                <label asp-for="RoutesDirection">Yön</label>
+                <span asp-validation-for="RoutesDirection" class="text-danger"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <select asp-for="LineId" id="LineId" class="form-select"
+                        data-selected="@((Model.LineId == null || Model.LineId == Guid.Empty) ? string.Empty : Model.LineId.ToString())">
+                    <option value="" disabled selected>-- Hat Seçin --</option>
+                </select>
+                <label asp-for="LineId">Bağlı Olduğu Hat</label>
+                <span asp-validation-for="LineId" class="text-danger"></span>
+            </div>
+
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="form-floating mb-3">
+                        <input asp-for="LengthInM" id="LengthInM" class="form-control" type="number" />
+                        <label asp-for="LengthInM">Mesafe (m)</label>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="form-floating mb-3">
+                        <input asp-for="TimeInMinutes" id="TimeInMinutes" class="form-control" type="number" />
+                        <label asp-for="TimeInMinutes">Süre (dk)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-check form-switch mb-3 p-3 bg-light rounded border d-flex justify-content-end align-items-center">
+                <label asp-for="IsActive" class="form-check-label fw-bold me-3" style="cursor: pointer;">Güzergah Aktif</label>
+                <input asp-for="IsActive" class="form-check-input m-0" style="cursor: pointer; transform: scale(1.2);" />
+            </div>
+
+        </div>
+
+        <div class="col-md-7 ps-md-4">
+
+            <h5 class="routes-section-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-geo-alt me-1"></i> Durak ve Harita</span>
+                <button id="selectStopsBtn" type="button" class="btn btn-sm btn-outline-primary fw-bold">
+                    <i class="bi bi-list-check me-1"></i> Durak Seç / Düzenle
+                </button>
+            </h5>
+
+            <div class="mb-3">
+                <label class="form-label text-muted small fw-bold">SEÇİLEN DURAKLAR</label>
+                <div id="selectedStopsList" class="p-2 border rounded bg-light" style="min-height: 50px;">
+                    <span class="text-muted small fst-italic">Henüz durak seçilmedi.</span>
+                </div>
+                <input type="hidden" id="SelectedStopsOrder" name="SelectedStopsOrder" />
+            </div>
+
+            <div class="card map-card shadow-sm">
+                <div class="card-header bg-white py-2 border-bottom">
+                    <small class="fw-bold text-muted"><i class="bi bi-map-fill me-1"></i> Rota Önizleme</small>
+                </div>
+                <div class="card-body p-0">
+                    <div id="map" style="height: 400px; width: 100%;"></div>
+                </div>
+            </div>
+            <div class="form-text text-muted mt-2 small">
+                <i class="bi bi-info-circle"></i> Durakları seçtikten sonra rota haritada otomatik çizilecektir.
+            </div>
+
+        </div>
     </div>
 
-    <div class="form-floating mb-3">
-        <input asp-for="Name" class="form-control" placeholder="Ad" />
-        <label asp-for="Name"></label>
+    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+        <button type="button" class="btn btn-secondary px-4" onclick="history.back()">
+            <i class="bi bi-x-lg me-1"></i> İptal
+        </button>
+        <button type="submit" class="btn btn-success px-4 fw-bold">
+            <i class="bi bi-check-lg me-1"></i> Kaydet
+        </button>
     </div>
-
-    <div class="form-floating mb-3">
-        <select asp-for="RoutesDirection" class="form-select" asp-items="ViewBag.RoutesTypeList">
-            <option value="">-- Yön Seçin --</option>
-        </select>
-        <label asp-for="RoutesDirection"></label>
-    </div>
-
-    <div class="form-floating mb-3">
-        <input asp-for="LengthInM" id="LengthInM" class="form-control" type="number" />
-        <label asp-for="LengthInM"></label>
-    </div>
-
-    <div class="form-floating mb-3">
-        <input asp-for="TimeInMinutes" id="TimeInMinutes" class="form-control" type="number" />
-        <label asp-for="TimeInMinutes"></label>
-    </div>
-
-    <div class="form-floating mb-3">
-        <select asp-for="LineId" id="LineId" class="form-select"
-                data-selected="@((Model.LineId == null || Model.LineId == Guid.Empty) ? string.Empty : Model.LineId.ToString())">
-            <option value="" disabled selected>-- Hat Seçin --</option>
-        </select>
-    </div>
-
-
-    <div class="mb-3">
-        <label>Duraklar</label><br>
-        <button id="selectStopsBtn" type="button" class="btn btn-outline-primary">Durak Seç</button>
-        @await Html.PartialAsync("_FormModalPartial")
-    </div>
-
-    <div class="form-check form-switch mb-3">
-        <input asp-for="IsActive" class="form-check-input" />
-        <label asp-for="IsActive" class="form-check-label"></label>
-    </div>
-
-    <div class="text-end">
-        <button type="submit" class="btn btn-primary">Kaydet</button>
-        <button type="button" class="btn btn-secondary" id="cancelRouteBtn">İptal</button>
-    </div>
-</form>
-
-<!-- 🌍 Harita Bölümü -->
-<div class="route-header">
-    <h5 class="mt-4">Seçilen Durakların Haritadaki Konumu</h5>
 </div>
 
-<div class="map-container mb-4" style="height:400px;">
-    <div id="map"></div>
-</div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-    <script>
-        window.initialStops = @Html.Raw(Json.Serialize(Model.StopIds));
-        window.initialStopsDetailed = @Html.Raw(Json.Serialize(Model.StopNames));
-        window.initialStopsDetailed = @Html.Raw(ViewBag.InitialStops ?? "[]");
-    </script>
-}
-
+@await Html.PartialAsync("_FormModalPartial")

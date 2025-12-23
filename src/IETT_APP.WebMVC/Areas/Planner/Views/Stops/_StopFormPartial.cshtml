@@ -1,79 +1,107 @@
 ﻿@using System.Text.Json
 @model IETT_APP.WebMVC.Areas.Planner.Models.StopViewModel
 
-<div class="form-floating mb-3">
-    <input asp-for="Code" class="form-control" placeholder="Kod" />
-    <label asp-for="Code">Kod</label>
-    <span asp-validation-for="Code" class="text-danger"></span>
-</div>
+@{
+    bool isEditMode = Model != null && Model.Id != Guid.Empty;
+}
 
-<div class="form-floating mb-3">
-    <input asp-for="Name" class="form-control" placeholder="Adı" />
-    <label asp-for="Name">Adı</label>
-    <span asp-validation-for="Name" class="text-danger"></span>
-</div>
+<div class="stops-form-wrapper">
+    <input type="hidden" asp-for="Id" />
 
-<div class="form-floating mb-3 position-relative">
-    <input asp-for="District" id="DistrictInput"
-           class="form-control" placeholder="İlçe seçin veya yazın" autocomplete="off" />
-    <label for="DistrictInput">İlçe</label>
-    <span asp-validation-for="District" class="text-danger"></span>
+    <div class="row">
+        <div class="col-md-6 border-end pe-md-4">
 
-    <script type="application/json" id="districtData">
-        @Html.Raw(JsonSerializer.Serialize(((List<SelectListItem>)ViewBag.DistrictList).Select(d => d.Value)))
-    </script>
-</div>
+            <h5 class="stops-section-header">
+                <i class="bi bi-info-circle me-1"></i> Temel Bilgiler
+            </h5>
 
+            <div class="form-floating mb-3">
+                <input asp-for="Code" class="form-control" placeholder="Kod" />
+                <label asp-for="Code">Durak Kodu</label>
+                <span asp-validation-for="Code" class="text-danger"></span>
+            </div>
 
-<!-- StopType Dropdown -->
-<div class="form-floating mb-3">
-    <select asp-for="StopType" class="form-select" asp-items="ViewBag.StopTypeList">
-        <option value="">-- Durak Tipi Seçin --</option>
-    </select>
-    <label asp-for="StopType">Durak Tipi</label>
-    <span asp-validation-for="StopType" class="text-danger"></span>
-</div>
+            <div class="form-floating mb-3">
+                <input asp-for="Name" class="form-control" placeholder="Adı" />
+                <label asp-for="Name">Durak Adı</label>
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
 
-<!-- SmartStop Dropdown -->
-<div class="form-floating mb-3">
-    <select asp-for="SmartStop" class="form-select" asp-items="ViewBag.SmartStopList">
-        <option value="">-- Seçiniz --</option>
-    </select>
-    <label asp-for="SmartStop">Akıllı Durak</label>
-    <span asp-validation-for="SmartStop" class="text-danger"></span>
-</div>
+            <div class="form-floating mb-3 position-relative">
+                <input asp-for="District" id="DistrictInput" class="form-control" placeholder="İlçe seçin veya yazın" autocomplete="off" />
+                <label for="DistrictInput">İlçe</label>
+                <span asp-validation-for="District" class="text-danger"></span>
 
-<h5 class="mt-3">Konum</h5>
-<div class="row">
-    <div class="col-md-6 form-floating mb-3">
-        <input asp-for="Location.Latitude"
-               type="text"
-               class="form-control"
-               placeholder="Enlem (ör: 41,087074)"
-               inputmode="decimal"
-               pattern="[0-9\.,\-]+" />
-        <label asp-for="Location.Latitude">Enlem</label>
-        <span asp-validation-for="Location.Latitude" class="text-danger"></span>
+                <script type="application/json" id="districtData">
+                    @Html.Raw(JsonSerializer.Serialize(((List<SelectListItem>)ViewBag.DistrictList).Select(d => d.Value)))
+                </script>
+            </div>
+
+            <div class="form-floating mb-3">
+                <select asp-for="StopType" class="form-select" asp-items="ViewBag.StopTypeList">
+                    <option value="">-- Seçiniz --</option>
+                </select>
+                <label asp-for="StopType">Durak Tipi</label>
+                <span asp-validation-for="StopType" class="text-danger"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <select asp-for="SmartStop" class="form-select" asp-items="ViewBag.SmartStopList">
+                    <option value="">-- Seçiniz --</option>
+                </select>
+                <label asp-for="SmartStop">Akıllı Durak Özelliği</label>
+                <span asp-validation-for="SmartStop" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="col-md-6 ps-md-4">
+
+            <h5 class="stops-section-header">
+                <i class="bi bi-geo-alt me-1"></i> Konum Bilgileri
+            </h5>
+
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Location.Latitude"
+                               type="text"
+                               class="form-control"
+                               placeholder="41.000000"
+                               inputmode="decimal"
+                               pattern="[0-9\.,\-]+" />
+                        <label asp-for="Location.Latitude">Enlem</label>
+                        <span asp-validation-for="Location.Latitude" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-floating mb-3">
+                        <input asp-for="Location.Longitude"
+                               type="text"
+                               class="form-control"
+                               placeholder="29.000000"
+                               inputmode="decimal"
+                               pattern="[0-9\.,\-]+" />
+                        <label asp-for="Location.Longitude">Boylam</label>
+                        <span asp-validation-for="Location.Longitude" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mt-2" style="border: 1px solid #e9ecef !important;">
+                <div class="card-header bg-light py-2 border-bottom">
+                    <small class="text-muted fw-bold"><i class="bi bi-map-fill me-1"></i> Harita Seçimi</small>
+                </div>
+                <div class="card-body p-0">
+                    <div id="map" style="height: 300px; width: 100%; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px;"></div>
+                </div>
+            </div>
+            <div class="form-text text-muted mt-2 small">
+                <i class="bi bi-info-circle"></i> Harita üzerindeki işaretçiyi sürükleyerek konumu güncelleyebilirsiniz.
+            </div>
+        </div>
     </div>
-    <div class="col-md-6 form-floating mb-3">
-        <input asp-for="Location.Longitude"
-               type="text"
-               class="form-control"
-               placeholder="Boylam (ör: 29,007086)"
-               inputmode="decimal"
-               pattern="[0-9\.,\-]+" />
-        <label asp-for="Location.Longitude">Boylam</label>
-        <span asp-validation-for="Location.Longitude" class="text-danger"></span>
-    </div>
 </div>
-
-
-<!-- 🌍 Harita Bölümü -->
-<h5 class="mt-4">Harita Üzerinden Konum Seçimi</h5>
-<div class="map-container mb-4">
-    <div id="map"></div>
-</div>
-
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
@@ -83,17 +111,13 @@
             function normalizeDecimalString(s) {
                 if (!s) return "";
                 s = s.replace(',', '.').trim();
-
-                // Sadece sayı, nokta ve eksi izinli
                 s = s.replace(/[^0-9.\-]/g, "");
 
-                // Birden fazla nokta varsa yalnızca ilkini koru
                 const firstDot = s.indexOf(".");
                 if (firstDot !== -1) {
                     s = s.substring(0, firstDot + 1) + s.substring(firstDot + 1).replace(/\./g, "");
                 }
 
-                // 20,18 sınırı uygula (max 2 tam, 18 ondalık basamak)
                 const parts = s.split(".");
                 if (parts[0].length > 2) parts[0] = parts[0].substring(0, 2);
                 if (parts[1] && parts[1].length > 6) parts[1] = parts[1].substring(0,6);
@@ -108,7 +132,7 @@
 
                 forms.forEach(form => {
                     const lat = form.querySelector(latSelector);
-                    const lon = form.querySelector(lonSelector);
+                    const lon = form.querySelector(lonSelector);    
 
                     if (lat) {
                         lat.addEventListener('input', () => lat.value = normalizeDecimalString(lat.value));
@@ -119,7 +143,6 @@
                         lon.addEventListener('blur', () => lon.value = normalizeDecimalString(lon.value));
                     }
 
-                    // Form gönderilmeden önce değerleri normalize et
                     form.addEventListener('submit', () => {
                         if (lat) lat.value = normalizeDecimalString(lat.value);
                         if (lon) lon.value = normalizeDecimalString(lon.value);

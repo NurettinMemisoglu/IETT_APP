@@ -15,5 +15,12 @@ namespace IETT_APP.Infrastructure.Hubs
             // Kullanıcı bağlandığında UserID'si ile otomatik grup oluşur.
             await base.OnConnectedAsync();
         }
+
+        // Bu metodu NotificationHub sınıfına ekle
+        public async Task SendProfileImageUpdated(string userId, string newImageUrl)
+        {
+
+            await Clients.User(userId).ProfileImageUpdated(newImageUrl);
+        }
     }
 }

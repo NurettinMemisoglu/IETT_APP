@@ -1,19 +1,48 @@
-﻿<!-- Tablodaki modal -->
-<div class="modal fade" id="viewStopsModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Duraklar</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+﻿<div class="modal fade" id="viewStopsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow-lg" style="border-top: 4px solid #0d6efd !important;">
+
+            <div class="modal-header bg-white border-bottom">
+                <h5 class="modal-title fw-bold text-primary">
+                    <i class="bi bi-map-fill me-2"></i> Güzergah Detayları
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
             </div>
-            <div class="modal-body">
-                <!-- Mini harita -->
-                <div id="stopsMiniMap" style="width: 100%; height: 300px; margin-bottom: 15px;"></div>
-                <!-- Durak listesi -->
-                <div id="viewStopsModalBody" style="font-size: 0.9rem;"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+
+            <div class="modal-body bg-light">
+
+                <div class="card shadow-sm border mb-3">
+                    <div class="card-header bg-white py-2 border-bottom">
+                        <small class="fw-bold text-muted">
+                            <i class="bi bi-geo-alt-fill me-1 text-danger"></i> Harita Önizleme
+                        </small>
+                    </div>
+                    <div class="card-body p-0 position-relative">
+                        <div id="stopsMiniMap" style="width: 100%; height: 350px; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px;"></div>
+
+                        <div class="position-absolute bottom-0 start-0 m-2 px-2 py-1 bg-white rounded shadow-sm opacity-75 small">
+                            <i class="bi bi-info-circle"></i> Durak sırasını takip eder.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white py-2 border-bottom">
+                        <small class="fw-bold text-muted">
+                            <i class="bi bi-list-ol me-1 text-primary"></i> Durak Sırası ve İsimleri
+                        </small>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="viewStopsModalBody" class="p-3" style="max-height: 200px; overflow-y: auto; font-size: 0.95rem;">
+                            <div class="text-center text-muted py-3">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                <span class="ms-2">Yükleniyor...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>

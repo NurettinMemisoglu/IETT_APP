@@ -1,18 +1,33 @@
-﻿@model IEnumerable<IETT_APP.Application.Dtos.NotificationDto>
+﻿@using IETT_APP.Application.Dtos
+@using System.Globalization
+@model IEnumerable<NotificationDto>
 @{
     ViewData["Title"] = "Bildirimlerim";
-    var unreadCount = Model.Count(x => !x.IsRead);
-    var sortedList = Model.OrderBy(x => x.IsRead).ThenByDescending(x => x.CreatedAt).ToList();
+
+    // Controller'dan gelen veriler
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int unreadCount = ViewBag.UnreadCount ?? 0;
+    bool showUnread = ViewBag.ShowUnread ?? false;
+
+    // Türkçe Kültür Ayarı
+    var culture = new CultureInfo("tr-TR");
+
+    // Gruplama
+    var groupedNotifications = Model
+        .GroupBy(x => x.CreatedAt.ToLocalTime().Date)
+        .OrderByDescending(g => g.Key)
+        .ToList();
 }
 
 <style>
-    /* Modern Bildirim Kartı Stili */
+    /* ... (Stillerin aynen kalıyor) ... */
     .notification-card {
         border: none;
         border-radius: 12px;
         transition: all 0.2s ease-in-out;
         background-color: #fff;
-        border-left: 4px solid transparent; /* Varsayılan kenarlık */
+        border-left: 4px solid transparent;
         margin-bottom: 10px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.02);
     }
@@ -23,10 +38,9 @@
             z-index: 2;
         }
 
-    /* Okunmamış Bildirim Stili */
     .notification-unread {
-        border-left-color: #0d6efd; /* Mavi Çizgi */
-        background-color: #f8fbff; /* Çok hafif mavi arka plan */
+        border-left-color: #0d6efd;
+        background-color: #f8fbff;
     }
 
         .notification-unread .notify-title {
@@ -34,7 +48,6 @@
             color: #0d6efd;
         }
 
-    /* İkon Kutusu */
     .notify-icon-box {
         width: 45px;
         height: 45px;
@@ -46,7 +59,6 @@
         flex-shrink: 0;
     }
 
-    /* Renk Temaları */
     .theme-info {
         background-color: rgba(13, 110, 253, 0.1);
         color: #0d6efd;
@@ -67,7 +79,6 @@
         color: #198754;
     }
 
-    /* Metinler */
     .notify-title {
         font-size: 1rem;
         font-weight: 600;
@@ -86,7 +97,6 @@
         line-height: 1.5;
     }
 
-    /* Butonlar */
     .notify-actions {
         opacity: 0.6;
         transition: opacity 0.2s;
@@ -94,6 +104,41 @@
 
     .notification-card:hover .notify-actions {
         opacity: 1;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .date-separator {
+        display: flex;
+        align-items: center;
+        margin: 20px 0 15px 0;
+    }
+
+    .date-badge {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #6c757d;
+        background: #f8f9fa;
+        padding: 6px 16px;
+        border-radius: 20px;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .date-line {
+        flex-grow: 1;
+        height: 1px;
+        background-color: #e9ecef;
+        margin-left: 15px;
+    }
+
+    .filter-active-btn {
+        background-color: #dc3545 !important;
+        color: white !important;
+        border-color: #dc3545 !important;
     }
 </style>
 
@@ -105,18 +150,26 @@
             <p class="text-muted small m-0">Tüm operasyonel uyarılar ve görev atamaları burada listelenir.</p>
         </div>
         <div>
-            @if (unreadCount > 0)
-            {
-                <span class="badge bg-danger rounded-pill px-3 py-2 fs-6 shadow-sm">
-                    @unreadCount Okunmamış
-                </span>
-            }
-            else
-            {
-                <span class="badge bg-light text-muted border rounded-pill px-3 py-2 fs-6">
-                    Hepsi Okundu
-                </span>
-            }
+            <a href="@Url.Action("Index", new { page = 1, showUnread = !showUnread })"
+               class="filter-active-btn badge text-decoration-none rounded-pill px-3 py-2 fs-6 shadow-sm cursor-pointer position-relative @showUnread"
+               title="@(showUnread ? "Tümünü Göster" : "Sadece okunmamışları göster")">
+
+                @if (showUnread)
+                {
+                    <span><i class="bi bi-funnel-fill me-1"></i> Filtreyi Temizle</span>
+                }
+                else
+                {
+                    @if (unreadCount > 0)
+                    {
+                        <span>Okunmamış (@unreadCount)</span>
+                    }
+                    else
+                    {
+                        <span>Hepsi Okundu</span>
+                    }
+                }
+            </a>
         </div>
     </div>
 
@@ -125,87 +178,166 @@
 
             <div id="fullNotificationList">
 
-                @if (sortedList.Any())
+                @if (groupedNotifications.Any())
                 {
-                    foreach (var item in sortedList)
+                    foreach (var group in groupedNotifications)
                     {
-                        // İkon ve Renk Belirleme
-                        string iconClass = "bi-info-circle-fill";
-                        string themeClass = "theme-info";
+                        string dateHeader;
 
-                        if (item.Type == "TaskAssignment") { iconClass = "bi-bus-front-fill"; themeClass = "theme-success"; }
-                        else if (item.Type == "TaskUpdate") { iconClass = "bi-pencil-square"; themeClass = "theme-warning"; }
-                        else if (item.Type == "Critical" || item.Type == "Warning") { iconClass = "bi-exclamation-triangle-fill"; themeClass = "theme-danger"; }
+                        // 🛠️ DÜZELTME BURADA: Culture parametresi eklendi
+                        if (group.Key == DateTime.Today)
+                        {
+                            dateHeader = "Bugün";
+                        }
+                        else if (group.Key == DateTime.Today.AddDays(-1))
+                        {
+                            dateHeader = "Dün";
+                        }
+                        else
+                        {
+                            // culture değişkenini buraya ekledik
+                            dateHeader = group.Key.ToString("dd.MM.yyyy dddd", culture);
+                        }
 
-                        // Kart HTML (ID formatı notify-{guid} olacak)
-                        <div class="card notification-card p-3 @(item.IsRead ? "" : "notification-unread")" id="notify-@item.Id">
-                            <div class="d-flex align-items-start">
-
-                                <div class="notify-icon-box @themeClass me-3">
-                                    <i class="bi @iconClass"></i>
-                                </div>
-
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="notify-title">@item.Title</h6>
-                                        <span class="notify-time">
-                                            <i class="bi bi-clock me-1"></i> @item.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
-                                        </span>
-                                    </div>
-                                    <p class="notify-body m-0">@item.Message</p>
-                                </div>
-
-                                <div class="ms-3 d-flex flex-column align-items-end gap-2 notify-actions">
-
-                                    @if (!string.IsNullOrEmpty(item.LinkUrl))
-                                    {
-                                        <a href="@item.LinkUrl" class="btn btn-sm btn-outline-primary rounded-pill px-3 view-btn" data-id="@item.Id">
-                                            İncele <i class="bi bi-arrow-right-short"></i>
-                                        </a>
-                                    }
-
-                                    @if (!item.IsRead)
-                                    {
-                                        <button class="btn btn-sm btn-light text-muted border rounded-pill px-3 mark-read-btn" data-id="@item.Id" title="Okundu işaretle">
-                                            <i class="bi bi-check2"></i>
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-success small fw-bold"><i class="bi bi-check2-all"></i> Okundu</span>
-                                    }
-                                </div>
-
-                            </div>
+                        <div class="date-separator">
+                            <span class="date-badge"><i class="bi bi-calendar-day me-1"></i> @dateHeader</span>
+                            <div class="date-line"></div>
                         </div>
+
+                        foreach (var item in group)
+                        {
+                            // --- İKON VE RENK MANTIĞI (GÜNCELLENMİŞ) ---
+                            string iconClass = "bi-info-circle-fill";
+                            string themeClass = "theme-info"; // Varsayılan Mavi
+
+                            // 1. Yeni Görev Ataması
+                            if (item.Type == "TaskAssignment")
+                            {
+                                iconClass = "bi-bus-front-fill";
+                                themeClass = "theme-success"; // Yeşil
+                            }
+                            // 2. Görev Güncellemesi
+                            else if (item.Type == "TaskUpdate")
+                            {
+                                iconClass = "bi-pencil-square";
+                                themeClass = "theme-warning"; // Sarı
+                            }
+                            // 3. KRİTİK / GECİKME (Kırmızı Alarm)
+                            // Type 'Critical' ise VEYA Başlıkta 'Gecikme', 'Acil', 'İptal' geçiyorsa
+                            else if (item.Type == "Critical" ||
+                            (item.Title != null && (item.Title.Contains("Gecikme") || item.Title.Contains("Acil") || item.Title.Contains("İptal"))))
+                            {
+                                iconClass = "bi-alarm-fill"; // Yanıp sönen alarm hissi
+                                themeClass = "theme-danger"; // Kırmızı
+                            }
+                            // 4. YAKLAŞAN SEFER / HATIRLATMA (Mavi Kronometre)
+                            // Type 'Warning' ise VEYA Başlıkta 'Yaklaşıyor', 'Hatırlatma', 'Kaldı' geçiyorsa
+                            else if (item.Type == "Warning" ||
+                            (item.Title != null && (item.Title.Contains("Yaklaşıyor") || item.Title.Contains("Hatırlatma") || item.Title.Contains("Başlıyor"))))
+                            {
+                                iconClass = "bi-stopwatch-fill"; // Kronometre
+                                themeClass = "theme-info"; // Mavi
+                            }
+
+                            // Link Düzenleme (Sürücü için)
+                            string finalUrl = item.LinkUrl;
+                            if (User.IsInRole("Driver") && !string.IsNullOrEmpty(finalUrl))
+                            {
+                                finalUrl = finalUrl.Replace("/Chief/TripTasks", "/Driver/Tasks");
+                            }
+
+                            // ... (HTML Kart yapısı buradan devam eder) ...
+                            <div class="card notification-card p-3 @(item.IsRead ? "notification-read" : "notification-unread")" id="notify-@item.Id">
+                                <div class="d-flex align-items-start">
+                                    <div class="notify-icon-box @themeClass me-3">
+                                        <i class="bi @iconClass"></i>
+                                    </div>
+
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h6 class="notify-title">@item.Title</h6>
+                                            <span class="notify-time"><i class="bi bi-clock me-1"></i> @item.CreatedAt.ToLocalTime().ToString("HH:mm")</span>
+                                        </div>
+                                        <p class="notify-body m-0">@item.Message</p>
+                                    </div>
+                                    <div class="ms-3 d-flex flex-column align-items-end gap-2 notify-actions">
+                                        @if (!string.IsNullOrEmpty(finalUrl))
+                                        {
+                                            <a href="@finalUrl" class="btn btn-sm btn-outline-primary rounded-pill px-3 view-btn" data-id="@item.Id">İncele <i class="bi bi-arrow-right-short"></i></a>
+                                        }
+                                        @if (!item.IsRead)
+                                        {
+                                            <button class="btn btn-sm btn-light text-muted border rounded-pill px-3 mark-read-btn" data-id="@item.Id" title="Okundu işaretle"><i class="bi bi-check2"></i></button>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-success small fw-bold"><i class="bi bi-check2-all"></i> Okundu</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     }
                 }
                 else
                 {
                     <div id="emptyNotificationState" class="text-center py-5">
-                        <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
-                            <i class="bi bi-bell-slash text-secondary" style="font-size: 3rem;"></i>
-                        </div>
-                        <h5 class="text-muted">Hiç bildiriminiz yok.</h5>
-                        <p class="text-secondary small">Şu an için her şey yolunda görünüyor.</p>
+                        <div class="bg-light rounded-circle d-inline-flex p-4 mb-3"><i class="bi bi-bell-slash text-secondary" style="font-size: 3rem;"></i></div>
+                        <h5 class="text-muted">Gösterilecek bildirim yok.</h5>
+                        @if (showUnread)
+                        {
+                            <p class="text-secondary small">Filtreyi temizleyerek eski bildirimlere bakabilirsiniz.</p>
+                        }
                     </div>
                 }
+
             </div>
+
+            @if (totalPages > 1)
+            {
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <a class="page-link rounded-pill px-3 me-1" href="@Url.Action("Index", new { page = currentPage - 1, showUnread = showUnread })">
+                                <i class="bi bi-chevron-left"></i> Önceki
+                            </a>
+                        </li>
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            if (i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2))
+                            {
+                                <li class="page-item @(i == currentPage ? "active" : "")">
+                                    <a class="page-link rounded-circle mx-1 d-flex align-items-center justify-content-center"
+                                       style="width: 38px; height: 38px;"
+                                       href="@Url.Action("Index", new { page = i, showUnread = showUnread })">@i</a>
+                                </li>
+                            }
+                            else if (i == currentPage - 3 || i == currentPage + 3)
+                            {
+                                <li class="page-item disabled"><span class="page-link border-0">...</span></li>
+                            }
+                        }
+                        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                            <a class="page-link rounded-pill px-3 ms-1" href="@Url.Action("Index", new { page = currentPage + 1, showUnread = showUnread })">
+                                Sonraki <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="text-center text-muted small mt-2">
+                    Sayfa @currentPage / @totalPages
+                </div>
+            }
+
         </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        // Tarayıcının "Geri" tuşuyla gelindiğini algıla ve sayfayı yenile
         window.addEventListener("pageshow", function (event) {
-            var historyTraversal = event.persisted ||
-                                   (typeof window.performance != "undefined" &&
-                                    window.performance.navigation.type === 2);
-            if (historyTraversal) {
-                // Sayfa önbellekten geldiyse zorla yenile
-                window.location.reload();
-            }
+            var historyTraversal = event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2);
+            if (historyTraversal) { window.location.reload(); }
         });
     </script>
 }

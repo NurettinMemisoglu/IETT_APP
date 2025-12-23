@@ -15,16 +15,41 @@ namespace IETT_APP.WebMVC.Controllers
         }
 
         // GET: /MyNotifications/Index
-        // 🔥 EKLEME BURADA: Cache'i kapatıyoruz ki "Geri" tuşunda taze veri gelsin.
         [HttpGet]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1, bool showUnread = false)
         {
             try
             {
-                var notifications = await _notificationService.GetAllAsync();
-                var sortedList = notifications.OrderByDescending(x => x.CreatedAt).ToList();
-                return View(sortedList);
+                // 1. Tüm Veriyi Çek
+                var allNotifications = await _notificationService.GetAllAsync();
+
+                // 2. Sırala (En yeniden en eskiye)
+                var sortedList = allNotifications.OrderByDescending(x => x.CreatedAt).ToList();
+
+                // 3. FİLTRELEME (Server-Side)
+                if (showUnread)
+                {
+                    sortedList = sortedList.Where(x => !x.IsRead).ToList();
+                }
+
+                // 4. Sayfalama Ayarları
+                int pageSize = 20;
+                int totalItems = sortedList.Count;
+                int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+                page = Math.Max(1, Math.Min(page, totalPages > 0 ? totalPages : 1));
+
+                // 5. İlgili Sayfanın Verisini Al
+                var pagedData = sortedList.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+                // 6. View'a Bilgileri Gönder
+                ViewBag.CurrentPage = page;
+                ViewBag.TotalPages = totalPages;
+                ViewBag.ShowUnread = showUnread; // Filtre durumu
+                ViewBag.UnreadCount = allNotifications.Count(x => !x.IsRead); // Toplam okunmamış (Rozet için)
+
+                return View(pagedData);
             }
             catch
             {
@@ -32,19 +57,10 @@ namespace IETT_APP.WebMVC.Controllers
             }
         }
 
-        // POST: /MyNotifications/MarkRead
         [HttpPost]
         public async Task<IActionResult> MarkRead(Guid id)
         {
-            try
-            {
-                await _notificationService.MarkAsReadAsync(id);
-                return Ok();
-            }
-            catch
-            {
-                return BadRequest();
-            }
+            try { await _notificationService.MarkAsReadAsync(id); return Ok(); } catch { return BadRequest(); }
         }
     }
 }

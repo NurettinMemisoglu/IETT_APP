@@ -244,8 +244,6 @@ namespace IETT_APP.Infrastructure.Services
             }
         }
 
-
-
         public async Task DeleteAsync(Guid id, string? reason = null)
         {
             var entity = await _repository.GetByIdAsync(id);
@@ -710,25 +708,41 @@ namespace IETT_APP.Infrastructure.Services
         // 3. YENİ GÖREV ATAMA
         private async Task SendAssignmentNotificationAsync(TripTask entity, TripTaskCreateDto dto)
         {
+            // DİKKAT: GetByIdAsync metodunun Route ve Garage tablolarını Include ettiğinden emin ol!
             var fullTaskDetails = await _repository.GetByIdAsync(entity.Id);
             var driverUser = fullTaskDetails?.Driver?.User;
 
             if (fullTaskDetails != null && driverUser != null)
             {
                 var placeholders = new Dictionary<string, string>
-                {
-                    { "DriverName", $"{driverUser.Name} {driverUser.Surname}" },
-                    { "Date", dto.ScheduledDeparture.Value.ToString("dd.MM.yyyy") },
-                    { "TimeRange", $"{dto.ScheduledDeparture.Value:HH:mm} - {dto.ScheduledArrival.Value:HH:mm}" },
-                    { "LineCode", fullTaskDetails.Line?.Code ?? "X" },
-                    { "LineName", fullTaskDetails.Line?.Name ?? "-" },
-                    { "PlateNumber", fullTaskDetails.Vehicle?.PlateNumber ?? "Atanmadı" },
-                    { "LinkUrl", "https://localhost:7060/Driver/Tasks" }
-                };
+        {
+            { "DriverName", $"{driverUser.Name} {driverUser.Surname}" },
+            { "Date", dto.ScheduledDeparture.Value.ToString("dd.MM.yyyy") },
+            { "TimeRange", $"{dto.ScheduledDeparture.Value:HH:mm} - {dto.ScheduledArrival.Value:HH:mm}" },
+            
+            // Hat Bilgileri
+            { "LineCode", fullTaskDetails.Line?.Code ?? "X" },
+            { "LineName", fullTaskDetails.Line?.Name ?? "-" },
+            
+            // --- EKSİK OLAN KISIMLAR EKLENDİ ---
+            { "RouteName", fullTaskDetails.Route?.Name ?? "Standart Güzergah" },
+            { "GarageName", fullTaskDetails.Garage?.GarageName ?? "Belirtilmedi" },
+            // ------------------------------------
+
+            { "PlateNumber", fullTaskDetails.Vehicle?.PlateNumber ?? "Atanmadı" },
+            { "LinkUrl", "https://localhost:7060/Driver/Tasks" }
+        };
 
                 string emailBody = await _templateService.GenerateEmailBodyAsync("NewTaskAssignment.html", placeholders);
 
-                _ = Task.Run(async () => { try { await _emailService.SendEmailAsync(driverUser.Email!, "Yeni Görev Ataması", emailBody, isHtml: true); } catch { } });
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _emailService.SendEmailAsync(driverUser.Email!, "Yeni Görev Ataması", emailBody, isHtml: true);
+                    }
+                    catch { }
+                });
 
                 await NotifyDriverAsync(entity, "Yeni Görev Ataması", $"Size {fullTaskDetails.Line?.Code} hattında görev atandı.", "TaskAssignment");
             }

@@ -1,71 +1,99 @@
-﻿@* Planner rolü için sidebar partial *@
-<ul class="nav sidebar-menu flex-column"
-    data-lte-toggle="treeview"
-    role="navigation"
-    aria-label="Main navigation"
-    data-accordion="false"
-    id="navigation">
+﻿@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    // 1. Aktif Link Kontrolü
+    var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
 
-    <li class="nav-item menu-open">
-        <a href="#" class="nav-link active">
-            <i class="nav-icon bi bi-speedometer"></i>
-            <p>
-                PLANLAMA
-                <i class="nav-arrow bi bi-chevron-right"></i>
-            </p>
-        </a>
-        <ul class="nav nav-treeview" role="navigation" aria-label="Navigation 4">
+    string IsActive(string controller, string action = "Index")
+    {
+        if (string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase))
+        {
+            return "active";
+        }
+        return "";
+    }
+}
+
+<div class="d-flex flex-column h-100 w-100" style="min-height: 0;">
+
+    <div class="flex-grow-1 overflow-y-auto overflow-x-hidden p-2">
+
+        <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
+
+            <li class="nav-header text-uppercase text-secondary fw-bold" style="font-size: 0.75rem; letter-spacing: 1px;">
+                Planlama İşlemleri
+            </li>
+
             <li class="nav-item">
-                <a asp-area="Planner" asp-action="Index" asp-controller="Stops" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
+                <a asp-area="Planner" asp-controller="Stops" asp-action="Index"
+                   class="nav-link @IsActive("Stops")">
+                    <i class="nav-icon bi bi-sign-stop text-danger"></i>
                     <p>Duraklar</p>
                 </a>
             </li>
+
             <li class="nav-item">
-                <a asp-area="Planner" asp-action="Index" asp-controller="Routes" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
+                <a asp-area="Planner" asp-controller="Routes" asp-action="Index"
+                   class="nav-link @IsActive("Routes")">
+                    <i class="nav-icon bi bi-map text-primary"></i>
                     <p>Güzergahlar</p>
                 </a>
             </li>
+
             <li class="nav-item">
-                <a asp-area="Planner" asp-action="Index" asp-controller="Lines" class="nav-link ">
-                    <i class="nav-icon bi bi-circle"></i>
+                <a asp-area="Planner" asp-controller="Lines" asp-action="Index"
+                   class="nav-link @IsActive("Lines")">
+                    <i class="nav-icon bi bi-bezier2 text-success"></i>
                     <p>Hatlar</p>
                 </a>
+            </li>
+
             <li class="nav-item">
-                <a asp-area="Planner" asp-action="Index" asp-controller="Vehicles" class="nav-link ">
-                    <i class="nav-icon bi bi-circle"></i>
+                <a asp-area="Planner" asp-controller="Vehicles" asp-action="Index"
+                   class="nav-link @IsActive("Vehicles")">
+                    <i class="nav-icon bi bi-bus-front text-info"></i>
                     <p>Araçlar</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a asp-area="Driver" asp-controller="Profile" asp-action="Index"
+                   class="nav-link @IsActive("Profile", "Index")">
+                    <i class="nav-icon bi bi-person-vcard text-warning"></i>
+                    <p>Profil Bilgilerim</p>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a asp-area="" asp-controller="MyNotifications" asp-action="Index"
+                   class="nav-link @IsActive("MyNotifications", "Index")">
+                    <i class="nav-icon bi bi-bell text-white"></i>
+                    <p>Bildirimler</p>
+                </a>
+            </li>
+
         </ul>
-    </li>
-</ul>
+    </div>
 
-<ul class="nav flex-column" style="position: absolute; bottom: 10px; left: 0; width: 100%;">
-    @if (!User.Identity.IsAuthenticated)
-    {
-        <li class="nav-item">
-            <a asp-area="" asp-controller="Auth" asp-action="Register" class="nav-link">
-                <i class="nav-icon bi bi-person-plus"></i>
-                <p>Register</p>
+    <div class="mt-auto p-3 border-top border-secondary border-opacity-25 bg-dark bg-opacity-10">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <a asp-area="" asp-controller="Auth" asp-action="Logout"
+               class="btn btn-danger w-100 d-flex align-items-center justify-content-center"
+               style="gap: 10px;">
+                <i class="bi bi-box-arrow-right" style="font-size: 1.1rem; line-height: 1;"></i>
+                <span class="fw-semibold">Güvenli Çıkış</span>
             </a>
-        </li>
+        }
+        else
+        {
+            <a asp-area="" asp-controller="Auth" asp-action="Login"
+               class="btn btn-primary w-100 d-flex align-items-center justify-content-center"
+               style="gap: 10px;">
+                <i class="bi bi-box-arrow-in-right" style="font-size: 1.1rem; line-height: 1;"></i>
+                <span class="fw-semibold">Giriş Yap</span>
+            </a>
+        }
+    </div>
 
-        <li class="nav-item">
-            <a asp-area="" asp-controller="Auth" asp-action="Login" class="nav-link">
-                <i class="nav-icon bi bi-box-arrow-in-right"></i>
-                <p>Login</p>
-            </a>
-        </li>
-    }
-    else
-    {
-        <li class="nav-item">
-            <a asp-area="" asp-controller="Auth" asp-action="Logout" class="nav-link">
-                <i class="nav-icon bi bi-box-arrow-right"></i>
-                <p>Logout</p>
-            </a>
-        </li>
-    }
-</ul>
+</div>

@@ -13,6 +13,7 @@ namespace IETT_APP.Application.Interfaces
 
         // İşlemler
         Task<DriverDto> CreateAsync(CreateDriverDto dto); // Admin oluşturursa
+        Task<bool> IsProfileCompleteAsync(string userId);
         Task<DriverDto> CompleteProfileAsync(
             string userId,
             CompleteProfileDto dto,
@@ -24,5 +25,6 @@ namespace IETT_APP.Application.Interfaces
         // Güncelleme & Silme
         Task UpdateAsync(UpdateDriverDto dto);
         Task DeleteAsync(Guid id);
+        Task<DriverDashboardDto> GetDriverDashboardAsync(string userId);
     }
 }

@@ -4,90 +4,125 @@
 
 @{
     ViewData["Title"] = "Profilim";
+
+    // --- PROFİL RESMİ MANTIĞI ---
+    var apiRoot = "https://localhost:7254";
+    string profileImgSrc;
+
+    if (string.IsNullOrEmpty(Model.ProfileImagePath))
+    {
+        profileImgSrc = "/assets/img/user2-160x160.jpg";
+    }
+    else
+    {
+        if (Model.ProfileImagePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            profileImgSrc = Model.ProfileImagePath.Contains(":7060")
+               ? Model.ProfileImagePath.Replace(":7060", ":7254")
+               : Model.ProfileImagePath;
+        }
+        else
+        {
+            var cleanPath = Model.ProfileImagePath.StartsWith("/") ? Model.ProfileImagePath : "/" + Model.ProfileImagePath;
+            profileImgSrc = $"{apiRoot}{cleanPath}";
+        }
+    }
+
+    // Durum Rengi
+    string statusBadgeClass = Model.WorkStatus == WorkStatus.Working ? "bg-success" : "bg-warning text-dark";
 }
 
-<section class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6"><h1>Sürücü Profili</h1></div>
+@section Styles {
+    @* Buraya CSS kodlarını (önceki cevaptaki style bloğunu) ekleyebilirsin veya harici css kullanabilirsin *@
+    <link rel="stylesheet" href="~/css/driver-profile.css" asp-append-version="true" />
+}
+
+
+<div class="container-fluid mb-5" style="max-width: 1000px;">
+
+    <div class="profile-hero text-center mb-4 p-4 shadow-sm">
+        <i class="bi bi-person-badge position-absolute" style="font-size: 15rem; opacity: 0.05; right: -20px; bottom: -50px;"></i>
+
+        <div class="d-flex flex-column align-items-center position-relative" style="z-index: 2;">
+            <div class="profile-img-container mb-3">
+                <img src="@profileImgSrc" id="profileImagePreview" class="profile-img-main shadow"
+                     onerror="this.src='/assets/img/user2-160x160.jpg';" alt="Profil Resmi" />
+
+                <div class="profile-upload-btn" onclick="$('#imageInput').click();" title="Fotoğrafı Değiştir">
+                    <i class="bi bi-camera-fill small"></i>
+                </div>
+                <input type="file" id="imageInput" accept="image/*" style="display: none;" />
+            </div>
+
+            <h2 class="fw-bold mb-1">@Model.FullName</h2>
+            <p class="opacity-75 mb-2 ls-1 small">@Model.EmployeeNumber</p>
+
+            <div class="d-flex gap-2 justify-content-center mt-1">
+                <span class="badge bg-white bg-opacity-25 border border-white border-opacity-25 px-3 py-2 rounded-pill fw-normal">
+                    <i class="bi bi-building me-1"></i> @Model.GarageName
+                </span>
+                <span class="badge @statusBadgeClass px-3 py-2 rounded-pill text-uppercase" style="letter-spacing: 0.5px;">
+                    @Model.WorkStatus
+                </span>
+            </div>
         </div>
     </div>
-</section>
 
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
+    <div class="row" style="margin-top: -10px;">
+        <div class="col-12">
 
-            <div class="col-md-3">
-                <div class="card card-primary card-outline">
-                    <div class="card-body box-profile">
-                        <div class="text-center position-relative group-image-upload">
-                            @{
-                                var imgPath = !string.IsNullOrEmpty(Model.ProfileImagePath)
-                                ? $"https://localhost:7254{Model.ProfileImagePath}"
-                                : "/assets/img/user2-160x160.jpg";
-                            }
-                            <img class="profile-user-img img-fluid img-circle" src="@imgPath" id="profileImagePreview" alt="Profil" style="width:120px;height:120px;object-fit:cover;cursor:pointer;">
-                            <div class="image-upload-overlay" onclick="$('#imageInput').click();"><i class="bi bi-camera-fill"></i></div>
-                            <input type="file" id="imageInput" accept="image/*" style="display: none;" />
-                        </div>
-                        <h3 class="profile-username text-center mt-3">@Model.FullName</h3>
-                        <p class="text-muted text-center">@Model.EmployeeNumber</p>
-                        <ul class="list-group list-group-unbordered mb-3">
-                            <li class="list-group-item"><b>Garaj</b> <a class="float-end">@Model.GarageName</a></li>
-                            <li class="list-group-item"><b>Durum</b> <a class="float-end"><span class="badge bg-success">@Model.WorkStatus</span></a></li>
-                        </ul>
+            <ul class="nav nav-pills nav-pills-custom justify-content-center mb-3 position-relative" style="z-index: 5;">
+                <li class="nav-item">
+                    <a class="nav-link active shadow-sm" href="#details" data-bs-toggle="tab">
+                        <i class="bi bi-person-lines-fill"></i> Bilgilerim
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link shadow-sm" href="#documents" data-bs-toggle="tab">
+                        <i class="bi bi-file-earmark-text"></i> Belgeler
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link shadow-sm" href="#password" data-bs-toggle="tab">
+                        <i class="bi bi-shield-lock"></i> Güvenlik
+                    </a>
+                </li>
+            </ul>
+
+            <div class="content-card p-5">
+                <div class="tab-content">
+                    <div class="active tab-pane" id="details">
+                        @await Html.PartialAsync("_ProfileDetails", Model)
+                    </div>
+                    <div class="tab-pane" id="documents">
+                        @await Html.PartialAsync("_DocumentsInfo", Model)
+                    </div>
+                    <div class="tab-pane" id="password">
+                        @await Html.PartialAsync("_ChangePassword", new IETT_APP.WebMVC.Models.ChangePasswordViewModel())
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-9">
-                <div class="card">
-                    <div class="card-header p-2">
-                        <ul class="nav nav-pills">
-                            <li class="nav-item"><a class="nav-link active" href="#details" data-bs-toggle="tab">Profil Bilgilerim</a></li>
-                            <li class="nav-item"><a class="nav-link" href="#documents" data-bs-toggle="tab">Belgeler & Lisanslar</a></li>
-                            <li class="nav-item"><a class="nav-link" href="#password" data-bs-toggle="tab">Şifre Değiştir</a></li>
-                        </ul>
-                    </div>
-                    <div class="card-body">
-                        <div class="tab-content">
-
-                            <div class="active tab-pane" id="details">
-                                @await Html.PartialAsync("_ProfileDetails", Model)
-                            </div>
-
-                            <div class="tab-pane" id="documents">
-                                @await Html.PartialAsync("_DocumentsInfo", Model)
-                            </div>
-
-                            <div class="tab-pane" id="password">
-                                @await Html.PartialAsync("_ChangePassword", new ChangePasswordViewModel())
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
-</section>
+</div>
 
 <div class="modal fade" id="updateProfileModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Bilgilerimi Güncelle</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i> Bilgilerimi Güncelle</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-4">
                 <form id="profileForm">
                     <input type="hidden" asp-for="Id" />
                     @await Html.PartialAsync("_UpdateProfileForm", Model)
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
-                <button type="button" id="saveProfileBtn" class="btn btn-primary">Kaydet</button>
+            <div class="modal-footer border-0 bg-light rounded-bottom-4">
+                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">İptal</button>
+                <button type="button" id="saveProfileBtn" class="btn btn-primary px-4 fw-bold shadow-sm">Değişiklikleri Kaydet</button>
             </div>
         </div>
     </div>
@@ -95,33 +130,4 @@
 
 @section Scripts {
     <script src="~/js/driver-profile.js"></script>
-    <style>
-        .group-image-upload {
-            position: relative;
-            display: inline-block;
-        }
-
-        .image-upload-overlay {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 120px;
-            width: 120px;
-            margin: auto;
-            border-radius: 50%;
-            background-color: rgba(0,0,0,0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-        .group-image-upload:hover .image-upload-overlay {
-            display: flex;
-        }
-    </style>
 }

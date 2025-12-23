@@ -11,6 +11,7 @@ using IETT_APP.Infrastructure.Persistence.Interceptors;
 using IETT_APP.Infrastructure.Persistence.Repositories;
 using IETT_APP.Infrastructure.Persistence.Seed;
 using IETT_APP.Infrastructure.Services;
+using IETT_APP.WebAPI.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
@@ -83,14 +84,21 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["Jwt:Audience"]
     };
 
+    // ====================================================================
+    // 🛠️ SİGNALR İÇİN EKLENMESİ GEREKEN KISIM (TOKEN'I QUERY'DEN OKUMA)
+    // ====================================================================
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
         {
+            // İstemciden gelen token'ı al
             var accessToken = context.Request.Query["access_token"];
+
+            // Eğer istek SignalR Hub'ına gidiyorsa ve token varsa
             var path = context.HttpContext.Request.Path;
-            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/hubs")))
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
             {
+                // Token'ı context'e ata (Böylece Authorize attribute'u çalışır)
                 context.Token = accessToken;
             }
             return Task.CompletedTask;
@@ -166,6 +174,8 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
+
+builder.Services.AddMemoryCache();
 
 // 🔥 GÜNCELLENMİŞ VE BİRLEŞTİRİLMİŞ OPENAPI AYARI 🔥
 builder.Services.AddOpenApi(options =>
@@ -312,7 +322,16 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
-app.UseHangfireDashboard("/hangfire");
+// HANGFIRE DASHBOARD (GÜVENLİ)
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    DashboardTitle = "İETT Operasyon Paneli", // Tarayıcı sekmesinde görünen isim
+    Authorization = new[] { new HangfireAuthorizationFilter() }, // <-- FİLTREYİ BURAYA EKLİYORUZ
+
+    // (Opsiyonel) ReadOnly modu: True yaparsan panelden iş tetiklenemez, sadece izlenir.
+    // Şimdilik False (kapalı) bırakıyorum ki işleri yönetebilesin.
+    IsReadOnlyFunc = context => false
+});
 app.UseRequestLocalization(localizationOptions);
 app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -348,21 +367,39 @@ using (var scope = app.Services.CreateScope())
 {
     var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
 
-    // A) GECİKME KONTROLÜ
-    // ÖNEMLİ: Cron.Minutely (veya "*/1 * * * *") kullanarak her dakika kontrol etmesini sağlıyoruz.
-    // Böylece 10:00 seferini 10:01'de hemen yakalayabiliriz.
+    // Ortak TimeZone ayarı (Her seferinde new'lememek için)
+    var trTimeZone = new RecurringJobOptions { TimeZone = TimeZoneInfo.Local };
+
+    // A) GECİKME KONTROLÜ (Her Dakika)
     recurringJobManager.AddOrUpdate<IOperationJobService>(
         "check-delayed-trips",
         service => service.CheckDelayedTripsAsync(),
-        Cron.Minutely // Her 1 dakikada bir çalışır
+        Cron.Minutely,
+        trTimeZone // YENİ KULLANIM
     );
 
-    // B) VARDİYA KAPANIŞI
-    // Her gece 03:00'da çalışır
+    // B) VARDİYA KAPANIŞI (Her gece 03:00)
     recurringJobManager.AddOrUpdate<IOperationJobService>(
         "auto-close-shift",
         service => service.AutoCloseShiftAsync(),
-        Cron.Daily(3, 0) // Saat 03:00
+        Cron.Daily(3, 0),
+        trTimeZone // YENİ KULLANIM
+    );
+
+    // C) MUAYENE VE EHLİYET KONTROLÜ (Her sabah 08:30)
+    recurringJobManager.AddOrUpdate<IOperationJobService>(
+        "check-vehicle-expirations",
+        service => service.CheckExpirationsAsync(),
+        Cron.Daily(8, 30),
+        trTimeZone // YENİ KULLANIM
+    );
+
+    // D) HAFTALIK PERFORMANS RAPORU (Her Pazartesi 09:00)
+    recurringJobManager.AddOrUpdate<IOperationJobService>(
+        "weekly-performance-report",
+        service => service.SendWeeklyReportAsync(),
+        Cron.Weekly(DayOfWeek.Monday, 9, 0),
+        trTimeZone // YENİ KULLANIM
     );
 }
 

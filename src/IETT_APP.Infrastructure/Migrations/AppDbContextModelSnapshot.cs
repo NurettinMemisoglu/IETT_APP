@@ -797,6 +797,12 @@ namespace IETT_APP.Infrastructure.Migrations
                     b.Property<bool>("HasWiFi")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("InspectionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("InsuranceDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 

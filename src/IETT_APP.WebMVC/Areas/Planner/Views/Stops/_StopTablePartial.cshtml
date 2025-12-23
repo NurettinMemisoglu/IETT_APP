@@ -1,0 +1,84 @@
+﻿@using IETT_APP.WebMVC.Extensions
+@model IEnumerable<IETT_APP.WebMVC.Areas.Planner.Models.StopViewModel>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0 custom-table">
+        <thead>
+            <tr>
+                <th style="padding-left: 20px;">DURAK BİLGİSİ</th>
+                <th>DURUM / TÜR</th>
+                <th>İLÇE / KONUM</th>
+                <th>AKILLI DURAK</th>
+                <th>KOORDİNATLAR</th>
+                <th class="text-end" style="padding-right: 20px;">İŞLEMLER</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var stop in Model)
+                {
+                    <tr>
+                        <td style="padding-left: 20px;">
+                            <div class="d-flex flex-column">
+                                <a asp-action="Details" asp-route-id="@stop.Id" class="fw-bold text-primary text-decoration-none mb-1">
+                                    @stop.Name
+                                </a>
+                                <div class="text-muted small">
+                                    <i class="bi bi-hash me-1"></i> @stop.Code
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="custom-badge badge-yellow">
+                                @stop.StopType.ToDisplayName()
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center text-dark">
+                                <i class="bi bi-geo-alt-fill text-secondary me-2"></i>
+                                <span class="fw-medium">@stop.District</span>
+                            </div>
+                        </td>
+                        <td>
+                            @{
+                                var smartStopStr = stop.SmartStop.ToString();
+                                bool isSmart = smartStopStr == "Var" || smartStopStr == "Yes" || smartStopStr == "True" || smartStopStr == "Available";
+                            }
+                            @if (isSmart)
+                            {
+                                <span class="text-success fw-bold small"><i class="bi bi-check-circle-fill me-1"></i> Var</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted small opacity-50"><i class="bi bi-dash-circle me-1"></i> Yok</span>
+                            }
+                        </td>
+                        <td>
+                            <span class="text-muted small font-monospace">
+                                @stop.Location.Latitude, @stop.Location.Longitude
+                            </span>
+                        </td>
+                        <td class="text-end" style="padding-right: 20px;">
+                            <div class="btn-group shadow-sm" role="group" aria-label="İşlemler">
+                                <a asp-action="Details" asp-route-id="@stop.Id" class="btn btn-sm btn-outline-info" title="Görüntüle"><i class="bi bi-eye"></i></a>
+                                <a asp-action="Edit" asp-route-id="@stop.Id" class="btn btn-sm btn-outline-warning" title="Düzenle"><i class="bi bi-pencil-square"></i></a>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="if(confirm('Silmek istediğinize emin misiniz?')) { document.getElementById('delete-form-@stop.Id').submit(); }" title="Sil"><i class="bi bi-trash"></i></button>
+                            </div>
+                            <form id="delete-form-@stop.Id" asp-action="Delete" asp-route-id="@stop.Id" method="post" class="d-none"></form>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-3 opacity-25"></i>
+                        <span>Kayıtlı durak bulunamadı.</span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

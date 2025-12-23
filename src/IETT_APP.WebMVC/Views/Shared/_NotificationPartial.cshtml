@@ -1,0 +1,49 @@
+﻿<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // Mobil uyumlu, sağ üst köşe bildirimi
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+            <text>
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Başarılı!',
+                    text: '@TempData["SuccessMessage"]'
+                });
+            </text>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+            <text>
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Hata!',
+                    text: '@TempData["ErrorMessage"]'
+                });
+            </text>
+    }
+
+    @if (TempData["InfoMessage"] != null)
+    {
+            <text>
+                Toast.fire({
+                    icon: 'info',
+                    title: 'Bilgi',
+                    text: '@TempData["InfoMessage"]'
+                });
+            </text>
+    }
+</script>

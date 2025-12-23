@@ -1,68 +1,106 @@
 ﻿@using IETT_APP.WebMVC.Extensions
 @model IEnumerable<IETT_APP.WebMVC.Areas.Planner.Models.LineViewModel>
 
-<div class="card">
-    <div class="card-body table-responsive p-0">
-        <table class="table table-hover table-striped text-nowrap">
-            <thead class="table-dark">
-                <tr>
-                    <th>Kod</th>
-                    <th>Ad</th>
-                    <th>Tip</th>
-                    <th>Araç Sayısı</th>
-                    <th>Durum</th>
-                    <th>Oluşturulma Tarihi</th>
-                    <th>Son Düzenlenme Tarihi</th>
-                    <th>İşlemler</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model != null && Model.Any())
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0 custom-table">
+        <thead>
+            <tr>
+                <th style="padding-left: 20px;">HAT BİLGİSİ</th>
+                <th class="text-center">TİP / TÜR</th>
+                <th class="text-center">ARAÇ SAYISI</th>
+                <th class="text-center">DURUM</th>
+                <th class="text-center">TARİHLER</th>
+                <th style="padding-right: 20px;" class="text-end">İŞLEMLER</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
                 {
-                    @foreach (var item in Model)
-                    {
-                        <tr data-id="@item.Id">
-                            <td class="line-code">@item.Code</td>
-                            <td class="line-name">@item.Name</td>
-                            <td class="line-type" data-value="@((int)item.LineType)">
+                    <tr data-id="@item.Id"
+                        data-code="@item.Code"
+                        data-name="@item.Name"
+                        data-linetype="@((int)item.LineType)"
+                        data-vehiclecount="@item.VehicleCount">
+
+                        <td style="padding-left: 20px;">
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold text-primary mb-1" style="font-size:1rem;">
+                                    @item.Name
+                                </span>
+                                <div class="text-muted small font-monospace">
+                                    <i class="bi bi-hash me-1"></i>@item.Code
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="text-center">
+                            <span class="custom-badge badge-yellow shadow-sm">
                                 @item.LineType.ToDisplayName()
-                            </td>
-                            <td class="line-vehicleCount">@item.VehicleCount</td>
-                            <td>
-                                <button class="toggle-line-active"
-                                        data-toggle-id="@item.Id"
-                                        data-active="@item.IsActive.ToString().ToLower()"
-                                        style="min-width: 50px; padding: 0; border: none; background: transparent; cursor: pointer;">
-                                    @if (item.IsActive)
-                                    {
-                                        <span class="badge bg-success rounded-pill" style="font-size: 0.8rem; padding: 0.35rem 0.75rem; transition: transform 0.1s;">Aktif</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary rounded-pill" style="font-size: 0.8rem; padding: 0.35rem 0.75rem; transition: transform 0.1s;">Pasif</span>
-                                    }
+                            </span>
+                        </td>
+
+                        <td class="text-center">
+                            <span class="fw-bold text-dark bg-light border rounded px-3 py-1">
+                                @item.VehicleCount
+                            </span>
+                        </td>
+
+                        <td class="text-center">
+                            <button class="toggle-line-active bg-transparent border-0 p-0"
+                                    data-active="@item.IsActive.ToString().ToLower()"
+                                    title="Durumu Değiştir">
+                                @if (item.IsActive)
+                                {
+                                    <span class="status-pill status-active">Aktif</span>
+                                }
+                                else
+                                {
+                                    <span class="status-pill status-passive">Pasif</span>
+                                }
+                            </button>
+                        </td>
+
+                        <td class="text-center">
+                            <div class="d-flex flex-column small text-muted align-items-center">
+                                <span class="mb-1" title="Oluşturulma Tarihi">
+                                    <i class="bi bi-calendar-check me-1 text-success"></i>
+                                    @item.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                                </span>
+
+                                @if (item.UpdatedAt.HasValue)
+                                {
+                                    <span title="Son Güncelleme Tarihi">
+                                        <i class="bi bi-pencil-square me-1 text-warning"></i>
+                                        @item.UpdatedAt.Value.ToString("dd.MM.yyyy HH:mm")
+                                    </span>
+                                }
+                            </div>
+                        </td>
+
+                        <td class="text-end" style="padding-right: 20px;">
+                            <div class="btn-group shadow-sm" role="group">
+                                <button class="btn btn-sm btn-outline-warning edit-line" data-id="@item.Id" title="Düzenle">
+                                    <i class="bi bi-pencil-square"></i>
                                 </button>
-                            </td>
-                            <td>@item.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                            <td>@item.UpdatedAt?.ToString("yyyy-MM-dd HH:mm")</td>
-                            <td>
-                                <button class="btn btn-sm btn-warning edit-line" data-id="@item.Id" title="Düzenle">
-                                    <i class="fas fa-edit"></i>
+                                <button class="btn btn-sm btn-outline-danger delete-line" data-id="@item.Id" title="Sil">
+                                    <i class="bi bi-trash"></i>
                                 </button>
-                                <button class="btn btn-sm btn-danger delete-line" data-id="@item.Id" title="Sil">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="8" class="text-center text-muted">Kayıtlı hat bulunamadı.</td>
+                            </div>
+                        </td>
                     </tr>
                 }
-            </tbody>
-        </table>
-    </div>
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-3 opacity-25"></i>
+                        <span>Kayıtlı hat bulunamadı.</span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>

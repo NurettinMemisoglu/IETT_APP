@@ -20,7 +20,7 @@ namespace IETT_APP.WebMVC.Services.Implementations
         public async Task<IEnumerable<DriverDto>> GetAllAsync()
         {
             return await _httpClient.GetFromJsonAsync<IEnumerable<DriverDto>>("api/drivers")
-                   ?? new List<DriverDto>();
+                    ?? new List<DriverDto>();
         }
 
         public async Task<DriverDto?> GetByIdAsync(Guid id)
@@ -42,7 +42,7 @@ namespace IETT_APP.WebMVC.Services.Implementations
         public async Task<IEnumerable<DriverDto>> GetUnassignedDriversAsync()
         {
             return await _httpClient.GetFromJsonAsync<IEnumerable<DriverDto>>("api/drivers/unassigned")
-                   ?? new List<DriverDto>();
+                    ?? new List<DriverDto>();
         }
 
         // --- CREATE / UPDATE / DELETE ---
@@ -66,10 +66,7 @@ namespace IETT_APP.WebMVC.Services.Implementations
 
         public async Task<ServiceResult> UpdateProfileAsync(UpdateDriverProfileDto dto)
         {
-            // ID'yi URL'e veya Body'ye eklememize gerek yok.
-            // Token (Header) zaten kim olduğunu söyleyecek.
             var response = await _httpClient.PatchAsJsonAsync("api/drivers/profile", dto);
-
             return await HandleResponse(response);
         }
 
@@ -80,20 +77,15 @@ namespace IETT_APP.WebMVC.Services.Implementations
             return await HandleResponse(response);
         }
 
+        // --- DÜZENLEME YAPILAN METOT ---
         public async Task<ServiceResult<DriverDto>> CompleteProfileAsync(string userId, CompleteProfileDto dto)
         {
             using var content = new MultipartFormDataContent();
 
-            // 1. DTO'yu JSON String'e Çevir (JsonIgnore sayesinde dosyalar hariç tutulur)
+            // 1. Veri Hazırlama (JSON + Dosyalar)
             var jsonString = JsonSerializer.Serialize(dto);
-
-            // API "data" isminde bir form alanı bekliyor
             content.Add(new StringContent(jsonString), "data");
 
-
-            // 2. Dosyaları Manuel Ekle
-
-            // Ehliyet
             if (dto.LicenseDocument != null)
             {
                 var fileContent = new StreamContent(dto.LicenseDocument.OpenReadStream());
@@ -101,7 +93,6 @@ namespace IETT_APP.WebMVC.Services.Implementations
                 content.Add(fileContent, "licenseDocument", dto.LicenseDocument.FileName);
             }
 
-            // Psikoteknik
             if (dto.PsychotechnicDocument != null)
             {
                 var fileContent = new StreamContent(dto.PsychotechnicDocument.OpenReadStream());
@@ -109,10 +100,47 @@ namespace IETT_APP.WebMVC.Services.Implementations
                 content.Add(fileContent, "psychotechnicDocument", dto.PsychotechnicDocument.FileName);
             }
 
-            // 3. İsteği Gönder
+            // 2. API İsteği
             var response = await _httpClient.PostAsync("api/drivers/complete-profile", content);
 
-            return await HandleResponse<DriverDto>(response);
+            // 3. BAŞARILI DURUM
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<ServiceResult<DriverDto>>();
+            }
+
+            // 4. HATALI DURUM (Mesajı Burada Güzelleştiriyoruz)
+            var errorDetails = await ExtractErrorDetails(response);
+
+            // API'den gelen ham hata mesajlarını birleştir
+            string rawError = (errorDetails.Message ?? "") + " " + (errorDetails.Errors != null ? string.Join(" ", errorDetails.Errors) : "");
+            string userFriendlyMessage = "İşlem gerçekleştirilemedi.";
+
+            // --- KİRLİ İŞİ BURADA YAPIYORUZ (Controller Temiz Kalsın) ---
+            if (rawError.Contains("IX_Drivers_EmployeeNumber") || rawError.Contains("EmployeeNumber"))
+            {
+                userFriendlyMessage = $"Girdiğiniz Sicil Numarası ({dto.EmployeeNumber}) sistemde zaten kayıtlı.";
+            }
+            else if (rawError.Contains("IX_Drivers_TCKN") || rawError.Contains("TCIdentityNumber"))
+            {
+                userFriendlyMessage = $"Girdiğiniz TC Kimlik No ({dto.TCIdentityNumber}) sistemde zaten kayıtlı.";
+            }
+            else if (rawError.ToLower().Contains("duplicate"))
+            {
+                userFriendlyMessage = "Bu bilgilerle daha önce kayıt yapılmış.";
+            }
+            else
+            {
+                // Eğer özel bir SQL hatası değilse, API'nin kendi mesajını kullan
+                userFriendlyMessage = !string.IsNullOrEmpty(errorDetails.Message) ? errorDetails.Message : "Sunucu tarafında bir hata oluştu.";
+            }
+
+            // Controller'a tertemiz bir hata mesajı dönüyoruz
+            return new ServiceResult<DriverDto>
+            {
+                Succeeded = false,
+                Message = userFriendlyMessage // <-- ARTIK BU MESAJ TEMİZ
+            };
         }
 
         // --- DOSYA YÜKLEME ---
@@ -134,6 +162,10 @@ namespace IETT_APP.WebMVC.Services.Implementations
                     if (resultJson.TryGetProperty("path", out var pathEl))
                         return ServiceResult<string>.Success(pathEl.GetString()!);
 
+                    // API bazen direkt string, bazen obje dönebilir, yapına göre:
+                    if (resultJson.TryGetProperty("data", out var dataEl))
+                        return ServiceResult<string>.Success(dataEl.GetString()!);
+
                     return ServiceResult<string>.Success("");
                 }
                 catch
@@ -142,13 +174,21 @@ namespace IETT_APP.WebMVC.Services.Implementations
                 }
             }
 
-            // --- HATA YÖNETİMİ (DÜZELTİLDİ) ---
             var errorDetails = await ExtractErrorDetails(response);
-
             var result = ServiceResult<string>.Failure(errorDetails.Errors);
             result.Message = errorDetails.Message;
 
             return result;
+        }
+
+        public async Task<DriverDashboardDto?> GetDashboardAsync()
+        {
+            var response = await _httpClient.GetAsync("api/drivers/dashboard");
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<DriverDashboardDto>();
+            }
+            return null;
         }
     }
 }

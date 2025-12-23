@@ -1,23 +1,38 @@
 ﻿@model IETT_APP.WebMVC.Areas.Planner.Models.StopViewModel
+
 @{
     ViewData["Title"] = "Yeni Durak Ekle";
 }
 
-<div class="container mt-4">
-    <h2 class="mb-3">Yeni Durak Ekle</h2>
-
-    <form asp-action="Create" method="post">
-        @await Html.PartialAsync("_StopFormPartial", Model)
-
-        <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-success">
-                Kaydet
-            </button>
-            <button type="button"
-                    onclick="window.location='@Url.Action("Index", "Stops", new { area = "Planner" })';"
-                    class="btn btn-secondary">
-                İptal
-            </button>
+<div class="container-fluid mt-4">
+    <div class="card card-success card-outline shadow-sm">
+        <div class="card-header">
+            <h3 class="card-title fw-bold">
+                <i class="bi bi-plus-circle me-2"></i> Yeni Durak Ekle
+            </h3>
         </div>
-    </form>
+        <div class="card-body">
+
+            <form asp-action="Create" method="post">
+                @await Html.PartialAsync("_StopFormPartial", Model)
+
+                <div class="row mt-4">
+                    <div class="col-12 text-end">
+                        <a asp-action="Index" asp-controller="Stops" asp-area="Planner" class="btn btn-secondary me-2">
+                            <i class="bi bi-x-lg"></i> İptal
+                        </a>
+
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="bi bi-check-lg"></i> Kaydet
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

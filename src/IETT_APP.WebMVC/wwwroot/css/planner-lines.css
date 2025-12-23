@@ -1,0 +1,243 @@
+﻿/* ===============================================
+   PLANNER LINES - STRICT ADMIN STYLE (FINAL)
+   =============================================== */
+
+body {
+    background-color: #f4f6f9;
+}
+
+/* --- ARAMA ALANI --- */
+.search-bar-container {
+    margin-bottom: 1rem;
+}
+
+/* --- TABLO KARTI --- */
+.table-card {
+    background: #fff;
+    box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
+    border-radius: 0.25rem;
+    border: none;
+    padding: 0;
+}
+
+/* --- TABLO GENEL --- */
+.custom-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+    /* --- TABLO BAŞLIĞI --- */
+    .custom-table thead th {
+        background-color: #212529 !important;
+        color: #ffffff !important;
+        border-bottom: 0;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        font-weight: bold;
+        padding: 12px 10px;
+        vertical-align: middle;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+
+    /* --- TABLO GÖVDESİ --- */
+    .custom-table tbody td {
+        vertical-align: middle;
+        padding: 10px 10px;
+        font-size: 0.95rem;
+        color: #333;
+        border-bottom: 1px solid #dee2e6;
+        word-wrap: break-word;
+    }
+
+    .custom-table tbody tr:hover {
+        background-color: rgba(0,0,0,.05);
+    }
+
+/* --- SARI BADGE (TİP İÇİN) --- */
+.custom-badge {
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: inline-block;
+    min-width: 80px;
+    text-align: center;
+    color: #fff;
+}
+
+.badge-yellow {
+    background-color: #ffc107;
+    color: #212529 !important;
+}
+
+/* --- AKTİF/PASİF BUTONU (HAP ŞEKLİNDE) --- */
+.status-pill {
+    display: inline-block;
+    padding: 6px 20px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff !important;
+    text-align: center;
+    min-width: 90px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    border: none;
+    line-height: 1.5;
+    transition: transform 0.2s;
+    text-decoration: none;
+}
+
+    .status-pill:hover {
+        transform: translateY(-1px);
+        color: #fff !important;
+    }
+
+/* YEŞİL ARKA PLAN */
+.status-active {
+    background-color: #198754 !important;
+}
+
+/* PASİF - GRİ ARKA PLAN */
+.status-passive {
+    background-color: #6c757d !important;
+}
+
+/* --- BUTON GRUBU --- */
+.btn-group .btn {
+    border-radius: 0;
+    padding: 0.35rem 0.6rem;
+}
+
+    .btn-group .btn:first-child {
+        border-top-left-radius: 0.2rem;
+        border-bottom-left-radius: 0.2rem;
+    }
+
+    .btn-group .btn:last-child {
+        border-top-right-radius: 0.2rem;
+        border-bottom-right-radius: 0.2rem;
+    }
+
+/* ===============================================
+   MODAL VE FORM STİLLERİ (PLANNER-ROUTES STİLİ)
+   =============================================== */
+
+/* Modal İçindeki Form Alanı */
+.modal-body .form-floating {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+/* Input ve Select Kutuları (Yumuşak Geçişli) */
+.modal-body .form-control,
+.modal-body .form-select {
+    font-size: 0.95rem;
+    color: #495057;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 1rem 0.75rem 0.65rem 0.75rem; /* Floating label için padding */
+    box-shadow: none;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+    /* Input Focus Efekti (Mavi Glow) */
+    .modal-body .form-control:focus,
+    .modal-body .form-select:focus {
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+/* Floating Label (Hareketli Etiket) Animasyonu */
+.modal-body .form-floating > label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 1rem 0.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    pointer-events: none;
+    border: 1px solid transparent;
+    transform-origin: 0 0;
+    transition: opacity .1s ease-in-out, transform .1s ease-in-out;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.modal-body .form-floating > .form-control:focus ~ label,
+.modal-body .form-floating > .form-control:not(:placeholder-shown) ~ label,
+.modal-body .form-floating > .form-select ~ label {
+    opacity: 0.85;
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+    background-color: #fff; /* Çizgi üstüne binen etiketin arkasını temizler */
+    padding: 0 0.4rem;
+    height: auto;
+    width: auto;
+    z-index: 2;
+    color: #0d6efd; /* Aktif olduğunda mavi renk */
+}
+
+/* ===============================================
+   MODAL VE FORM STİLLERİ (GÜNCEL)
+   =============================================== */
+
+/* 1. Modal Çerçevesi */
+#lineModalContent {
+    border-radius: 0.5rem;
+    /* Varsayılan Mavi Çizgi (Route Modalı Gibi) */
+    border-top: 5px solid #0d6efd;
+}
+
+    /* 2. Modal Başlığı */
+    #lineModalContent .modal-title {
+        font-size: 1.25rem;
+        color: #333;
+    }
+
+/* 3. Form Elemanları (Görseldeki gibi geniş ve ferah) */
+.modal-body .form-control,
+.modal-body .form-select {
+    border: 1px solid #dee2e6;
+    padding: 0.75rem 1rem; /* Daha yüksek padding */
+    border-radius: 6px;
+    font-size: 0.95rem;
+    box-shadow: none;
+    transition: all 0.2s;
+}
+
+    .modal-body .form-control:focus,
+    .modal-body .form-select:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+    }
+
+.modal-body label {
+    font-weight: 500;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* ===============================================
+   MODAL TEMA SINIFLARI (Kesin Çözüm)
+   =============================================== */
+
+/* Önce modalın kenarlarının keskin durmaması için bunu ekleyelim */
+#lineModalContent {
+    overflow: hidden; /* Çizgi ile border-radius uyumu için */
+}
+
+/* YEŞİL TEMA (Create) */
+.modal-theme-create {
+    border-top: 6px solid #198754 !important; /* Kalınlık ve Renk */
+}
+
+/* SARI TEMA (Edit) */
+.modal-theme-edit {
+    border-top: 6px solid #ffc107 !important; /* Kalınlık ve Renk */
+}
