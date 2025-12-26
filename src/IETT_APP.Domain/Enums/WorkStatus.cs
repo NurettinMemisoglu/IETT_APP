@@ -1,33 +1,34 @@
-﻿namespace IETT_APP.Domain.Enums
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace IETT_APP.Domain.Enums
 {
-    /// <summary>
-    /// Personelin anlık çalışma ve mevcudiyet durumunu belirtir.
-    /// </summary>
     public enum WorkStatus
     {
-        // 0: Göreve Hazır / Müsait (İş bekliyor)
+        [Display(Name = "Görev Bekleniyor")]
         Available = 0,
 
-        // 1: Şu an Çalışıyor / Görevde (Seferde veya Mesai Başında)
-        // 'OnDuty' yerine 'Working' yaptık ki ofis personeline de uysun.
+        [Display(Name = "Direksiyon Başında")]
         Working = 1,
 
-        // 2: Yıllık İzinli
+        [Display(Name = "Yıllık İzin")]
         OnVacation = 2,
 
-        // 3: Raporlu / Hasta (Sağlık İzni)
+        [Display(Name = "Raporlu")]
         MedicalLeave = 3,
 
-        // 4: İdari veya Mazeret İzni (Düğün, Cenaze vb.)
+        [Display(Name = "İdari İzin")]
         AdministrativeLeave = 4,
 
-        // 5: İstirahatte / Mola (Vardiya arası veya günlük mola)
+        [Display(Name = "Mola")]
         Resting = 5,
 
-        // 6: Açığa Alınmış / Pasif (Disiplin süreci vb.)
+        [Display(Name = "Açığa Alındı")]
         Suspended = 6,
 
-        // 7: Görev Dışı (Mesai saati bitti, eve gitti)
-        OffDuty = 7
+        [Display(Name = "Mesai Dışı")]
+        OffDuty = 7,
+
+        [Display(Name = "Kayıt Tamamlanmadı")]
+        RegistrationIncomplete = 8
     }
 }

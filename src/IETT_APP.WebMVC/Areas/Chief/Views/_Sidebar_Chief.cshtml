@@ -1,54 +1,38 @@
-﻿@* Planner rolü için sidebar partial *@
-<ul class="nav sidebar-menu flex-column"
-    data-lte-toggle="treeview"
-    role="navigation"
-    aria-label="Main navigation"
-    data-accordion="false"
-    id="navigation">
+﻿@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    // 1. O anki Area, Controller ve Action bilgilerini alıyoruz
+    var currentArea = ViewContext.RouteData.Values["Area"]?.ToString();
+    var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
 
-    <li class="nav-item menu-open">
-        <a href="#" class="nav-link active">
-            <i class="nav-icon bi bi-speedometer"></i>
-            <p>
-                ŞEF
-                <i class="nav-arrow bi bi-chevron-right"></i>
-            </p>
-        </a>
-        <ul class="nav nav-treeview" role="navigation" aria-label="Navigation 4">
-            <li class="nav-item">
-                <a asp-area="Chief" asp-action="Index" asp-controller="TripTasks" class="nav-link">
-                    <i class="nav-icon bi bi-circle"></i>
-                    <p>Sefer Görevleri</p>
-                </a>
-            </li>
-        </ul>
+    // 2. Area + Controller + Action kontrolü yapan fonksiyon
+    // Sadece Area "Chief" ise aktif sınıfı döndürür.
+    string IsActive(string controller, string action = "Index") =>
+        (string.Equals(currentArea, "Chief", StringComparison.OrdinalIgnoreCase) &&
+         string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) &&
+         string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase)) ? "active" : "";
+}
+
+<ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
+
+    <li class="nav-header text-uppercase text-secondary fw-bold mt-2" style="font-size: 0.75rem; letter-spacing: 1px;">
+        ŞEF İŞLEMLERİ
     </li>
-</ul>
 
-<ul class="nav flex-column" style="position: absolute; bottom: 10px; left: 0; width: 100%;">
-    @if (!User.Identity.IsAuthenticated)
-    {
-        <li class="nav-item">
-            <a asp-area="" asp-controller="Auth" asp-action="Register" class="nav-link">
-                <i class="nav-icon bi bi-person-plus"></i>
-                <p>Register</p>
-            </a>
-        </li>
+    <li class="nav-item">
+        <a asp-area="Chief" asp-controller="Home" asp-action="Index"
+           class="nav-link @IsActive("Home", "Index")">
+            <i class="nav-icon bi bi-speedometer2 text-info"></i>
+            <p>Genel Bakış</p>
+        </a>
+    </li>
 
-        <li class="nav-item">
-            <a asp-area="" asp-controller="Auth" asp-action="Login" class="nav-link">
-                <i class="nav-icon bi bi-box-arrow-in-right"></i>
-                <p>Login</p>
-            </a>
-        </li>
-    }
-    else
-    {
-        <li class="nav-item">
-            <a asp-area="" asp-controller="Auth" asp-action="Logout" class="nav-link">
-                <i class="nav-icon bi bi-box-arrow-right"></i>
-                <p>Logout</p>
-            </a>
-        </li>
-    }
+    <li class="nav-item">
+        <a asp-area="Chief" asp-controller="TripTasks" asp-action="Index"
+           class="nav-link @IsActive("TripTasks", "Index")">
+            <i class="nav-icon bi bi-clipboard-data text-primary"></i>
+            <p>Sefer Görevleri</p>
+        </a>
+    </li>
+
 </ul>

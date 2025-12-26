@@ -122,24 +122,18 @@
 
         <div class="col-md-6">
             <label class="form-label small fw-bold text-muted d-block">Kronik Rahatsızlık</label>
-
             <div class="btn-group w-100" role="group">
-
                 <input type="radio" class="btn-check" name="HasChronicDisease" id="chronicNo" value="false"
                        autocomplete="off" @(!Model.HasChronicDisease ? "checked" : "")>
-                <label class="btn btn-outline-secondary" for="chronicNo">
-                    YOK
-                </label>
+                <label class="btn btn-outline-secondary" for="chronicNo">YOK</label>
 
                 <input type="radio" class="btn-check" name="HasChronicDisease" id="chronicYes" value="true"
                        autocomplete="off" @(Model.HasChronicDisease ? "checked" : "")>
-                <label class="btn btn-outline-danger" for="chronicYes">
-                    VAR
-                </label>
+                <label class="btn btn-outline-danger" for="chronicYes">VAR</label>
             </div>
         </div>
 
-        <div class="col-12">
+        <div class="col-12" id="chronicDetailsContainer" style="display:none;">
             <label asp-for="HealthNotes" class="form-label small fw-bold text-muted">Sağlık Notları</label>
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-clipboard2-pulse text-success"></i></span>

@@ -45,6 +45,12 @@
                 <span asp-validation-for="ServiceStatus" class="text-danger"></span>
             </div>
 
+            <div class="form-floating mb-3" id="statusReasonContainer" style="display:none;">
+                <textarea asp-for="StatusReason" class="form-control" placeholder="Durum Nedeni" style="height: 100px"></textarea>
+                <label asp-for="StatusReason">Durum Nedeni (Arıza/Bakım Açıklaması)</label>
+                <span asp-validation-for="StatusReason" class="text-danger"></span>
+            </div>
+
             <div class="form-check form-switch p-3 bg-light rounded border d-flex justify-content-end align-items-center mb-3">
                 <label asp-for="IsActive" class="form-check-label fw-bold me-3" style="cursor: pointer;">Araç Aktif</label>
                 <input asp-for="IsActive" class="form-check-input m-0" style="cursor: pointer; transform: scale(1.2);" />

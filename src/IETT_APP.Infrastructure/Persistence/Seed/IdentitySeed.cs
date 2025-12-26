@@ -36,6 +36,7 @@ namespace IETT_APP.Infrastructure.Persistence.Seed
             string surname,
             string email,
             string password,
+            string phoneNumber = "5550000000",
             bool isDriver = false) // Driver parametresi eklendi
         {
             // 1. Rol Kontrolü
@@ -61,6 +62,7 @@ namespace IETT_APP.Infrastructure.Persistence.Seed
                     Name = name,
                     Surname = surname,
                     Email = email.ToLowerInvariant(),
+                    PhoneNumber = phoneNumber,
                     EmailConfirmed = true,
                     IsActive = true,
                     IsDeleted = false

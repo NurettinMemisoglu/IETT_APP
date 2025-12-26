@@ -1,0 +1,135 @@
+﻿@using Microsoft.AspNetCore.Identity
+@{
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+
+    // 1. Rol Kontrolleri
+    var isAdmin = User.IsInRole("Admin");
+    var isChief = User.IsInRole("Chief");
+    var isPlanner = User.IsInRole("Planner");
+    var isDriver = User.IsInRole("Driver");
+
+    // 2. Dosya Yolları
+    const string PathAdmin = "~/Areas/Admin/Views/_Sidebar_Admin.cshtml";
+    const string PathChief = "~/Areas/Chief/Views/_Sidebar_Chief.cshtml";
+    const string PathPlanner = "~/Areas/Planner/Views/_Sidebar_Planner.cshtml";
+    const string PathDriver = "~/Areas/Driver/Views/_Sidebar_Driver.cshtml";
+
+    // 3. Ortak Linkler İçin Active Kontrolü (MainSidebar içinde lazım olacak)
+    var currentArea = ViewContext.RouteData.Values["Area"]?.ToString();
+    var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
+
+    string IsActive(string area, string controller, string action = "Index") =>
+        (string.Equals(currentArea ?? "", area ?? "", StringComparison.OrdinalIgnoreCase) &&
+         string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) &&
+         string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase)) ? "active" : "";
+}
+
+<div class="d-flex flex-column" style="height: 92vh; width: 100%; overflow: hidden;">
+
+    <div class="flex-grow-1 custom-scroll p-2" style="overflow-y: auto; overflow-x: hidden;">
+
+        <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
+
+            @if (isAuthenticated)
+            {
+                /* 1. ADMIN */
+                @if (isAdmin)
+                {
+                    <partial name="@PathAdmin" />
+                }
+
+                /* 2. CHIEF */
+                @if (isChief)
+                {
+                    @if (isAdmin)
+                    {
+                        <hr class="sidebar-divider my-2 border-secondary opacity-25">
+                    }
+                    <partial name="@PathChief" />
+                }
+
+                /* 3. PLANNER */
+                @if (isPlanner)
+                {
+                    @if (isAdmin || isChief)
+                    {
+                        <hr class="sidebar-divider my-2 border-secondary opacity-25">
+                    }
+                    <partial name="@PathPlanner" />
+                }
+
+                /* 4. DRIVER */
+                @if (isDriver)
+                {
+                    @if (isAdmin || isPlanner || isChief)
+                    {
+                        <hr class="sidebar-divider my-2 border-secondary opacity-25">
+                    }
+                    <partial name="@PathDriver" />
+                }
+
+                <li class="nav-header text-uppercase text-secondary fw-bold mt-4 mb-1" style="font-size: 0.75rem; letter-spacing: 1px;">
+                    HESABIM
+                </li>
+
+                <li class="nav-item">
+                    <a asp-area="Driver" asp-controller="Profile" asp-action="Index"
+                       class="nav-link @IsActive("Driver", "Profile", "Index")">
+                        <i class="nav-icon bi bi-person-vcard text-warning"></i>
+                        <p>Profil Bilgilerim</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a asp-area="" asp-controller="MyNotifications" asp-action="Index"
+                       class="nav-link @IsActive("", "MyNotifications", "Index")">
+                        <i class="nav-icon bi bi-bell text-white"></i>
+                        <p>Bildirimler</p>
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <div class="mt-auto p-3 border-top border-secondary border-opacity-25 bg-dark bg-opacity-10" style="flex-shrink: 0; z-index: 10;">
+        @if (isAuthenticated)
+        {
+            <a asp-area="" asp-controller="Auth" asp-action="Logout"
+               class="btn btn-danger w-100 d-flex align-items-center justify-content-center shadow-sm"
+               style="gap: 10px;">
+                <i class="bi bi-box-arrow-right" style="font-size: 1.1rem; line-height: 1;"></i>
+                <span class="fw-semibold">Güvenli Çıkış</span>
+            </a>
+        }
+        else
+        {
+            <a asp-area="" asp-controller="Auth" asp-action="Login"
+               class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center shadow-sm"
+               style="gap: 10px;">
+                <i class="bi bi-box-arrow-in-right"></i>
+                <span class="fw-semibold">Giriş Yap</span>
+            </a>
+        }
+    </div>
+
+</div>
+
+<style>
+    .custom-scroll::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .custom-scroll::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .custom-scroll::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+    }
+
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+</style>

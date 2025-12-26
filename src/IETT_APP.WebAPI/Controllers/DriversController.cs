@@ -32,7 +32,7 @@ namespace IETT_APP.WebAPI.Controllers
         }
 
         [HttpGet("unassigned")]
-        [Authorize(Roles = "Admin,Chief")]
+        [Authorize(Roles = "Admin,Chief,Planner")]
         public async Task<ActionResult<IEnumerable<DriverDto>>> GetUnassigned()
         {
             return Ok(await _driverService.GetUnassignedDriversAsync());
@@ -107,7 +107,7 @@ namespace IETT_APP.WebAPI.Controllers
         }
 
         [HttpPatch("assign-garage")]
-        [Authorize(Roles = "Admin,Chief")]
+        [Authorize(Roles = "Admin,Chief,Planner")]
         public async Task<IActionResult> AssignGarage([FromBody] AssignGarageDto dto)
         {
             try

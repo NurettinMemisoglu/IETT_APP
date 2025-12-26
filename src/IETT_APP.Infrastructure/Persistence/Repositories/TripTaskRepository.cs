@@ -19,18 +19,30 @@ namespace IETT_APP.Infrastructure.Persistence.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<TripTask>> GetAllAsync()
+        public async Task<IEnumerable<TripTask>> GetAllAsync(string? creatorName = null)
         {
-            return await _context.TripTasks
-                .Where(t => !t.IsDeleted)
+            // 1. Sorguyu başlat (Henüz DB'ye gitmedi)
+            var query = _context.TripTasks.AsQueryable();
+
+            // 2. Temel Filtre (Silinmemişler)
+            query = query.Where(t => !t.IsDeleted);
+
+            // 3. EĞER YARATICI İSMİ GELDİYSE FİLTRELE (Kritik Nokta)
+            if (!string.IsNullOrEmpty(creatorName))
+            {
+                query = query.Where(t => t.CreatedBy == creatorName);
+            }
+
+            // 4. Include işlemleri ve Sıralama
+            return await query
                 .Include(t => t.Vehicle)
                 .Include(t => t.Driver)
                     .ThenInclude(d => d.User)
                 .Include(t => t.Line)
                 .Include(t => t.Route)
                 .Include(t => t.Garage)
-                .OrderByDescending(t => t.CreatedAt) // Yeni görevler üstte olsun
-                .ToListAsync();
+                .OrderByDescending(t => t.CreatedAt)
+                .ToListAsync(); // 5. Sorguyu çalıştır ve sonucu dön
         }
 
         public async Task<IEnumerable<TripTask>> GetByDriverIdAsync(Guid driverId)

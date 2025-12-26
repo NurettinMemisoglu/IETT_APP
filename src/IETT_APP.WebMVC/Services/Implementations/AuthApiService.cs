@@ -22,24 +22,21 @@ namespace IETT_APP.WebMVC.Services.Implementations
 
             if (response.IsSuccessStatusCode)
             {
-                // Helper metoda gerek yok, standart extension metot yeterli
                 return await response.Content.ReadFromJsonAsync<AuthResponseDto>();
             }
 
             return null;
         }
 
-        // --- REGISTER ---
-        public async Task<AuthResponseDto?> RegisterAsync(RegisterUserDto registerDto)
+        // --- REGISTER (GÜNCELLENDİ) ---
+        // Dönüş tipini ServiceResult yaptık. Böylece hata mesajlarını yakalayabileceğiz.
+        public async Task<ServiceResult<AuthResponseDto>> RegisterAsync(RegisterUserDto registerDto)
         {
             var response = await _httpClient.PostAsJsonAsync("api/auth/register", registerDto);
 
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<AuthResponseDto>();
-            }
-
-            return null;
+            // BaseApiService içindeki HandleResponse metodunu kullanıyoruz.
+            // Bu metot API'den dönen 400 Bad Request hatalarını okuyup ServiceResult içine doldurur.
+            return await HandleResponse<AuthResponseDto>(response);
         }
 
         // --- CHANGE PASSWORD ---
@@ -47,7 +44,7 @@ namespace IETT_APP.WebMVC.Services.Implementations
         {
             var response = await _httpClient.PostAsJsonAsync("api/auth/change-password", dto);
 
-            // BaseApiService içindeki HandleResponse'u kullanıyoruz (Kod tekrarı bitti)
+            // BaseApiService içindeki HandleResponse'u kullanıyoruz
             return await HandleResponse(response);
         }
 

@@ -31,21 +31,25 @@ namespace IETT_APP.Infrastructure.Services
                 UserName = dto.Email,
                 Name = dto.Name,
                 Surname = dto.Surname,
-                IsActive = true // Varsayılan aktif
+                PhoneNumber = dto.PhoneNumber,
+                IsActive = true
             };
 
             var result = await _userManager.CreateAsync(user, dto.Password);
-            if (!result.Succeeded) return null;
 
-            // HATA DÜZELTME: Rol oluşturma kodu silindi. Seed zaten yapıyor.
-            // Sadece atama yapıyoruz. Hata almamak için try-catch eklenebilir.
+            if (!result.Succeeded)
+            {
+                // Hataları (PasswordTooShort, DuplicateEmail vb.) birleştirip fırlatıyoruz
+                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                throw new Exception(errors);
+            }
+
             await _userManager.AddToRoleAsync(user, "User");
 
             var roles = await _userManager.GetRolesAsync(user);
             var accessToken = _tokenService.GenerateToken(user, roles);
             var refreshToken = _tokenService.GenerateRefreshToken();
 
-            // Repository Kullanımı
             await _refreshTokenRepository.AddAsync(new UserRefreshToken
             {
                 UserId = user.Id,

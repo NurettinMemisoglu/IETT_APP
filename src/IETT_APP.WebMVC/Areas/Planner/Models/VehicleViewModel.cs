@@ -35,7 +35,7 @@ namespace IETT_APP.WebMVC.Areas.Planner.Models
 
         [Display(Name = "Durum Nedeni")]
         [StringLength(250, ErrorMessage = "{0} alanı en fazla {1} karakter olabilir.")]
-        public string StatusReason { get; set; }
+        public string? StatusReason { get; set; }
 
         [Display(Name = "Operatör")]
         [Required]
@@ -48,6 +48,9 @@ namespace IETT_APP.WebMVC.Areas.Planner.Models
         [Display(Name = "Üretim Yılı")]
         [Range(1950, 2100, ErrorMessage = "Geçerli bir yıl giriniz.")]
         public int Year { get; set; }
+
+        [Display(Name = "Yakıt Düzeyi")]
+        public int FuelLevel { get; set; }
 
         [Display(Name = "Engelli Erişimi Var mı?")]
         public bool HasDisabilityAccess { get; set; } = true; // default true

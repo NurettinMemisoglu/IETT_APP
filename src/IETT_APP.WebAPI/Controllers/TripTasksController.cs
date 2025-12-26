@@ -20,13 +20,11 @@ namespace IETT_APP.WebAPI.Controllers
             _driverService = driverService;
         }
 
-        // ... (GetAll, GetById, Create, Update, Delete, Search metodları AYNI KALACAK) ...
-        // (Buraya kadar olan kodların doğru, aynen kalsın)
-
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] string? creator = null)
         {
-            var list = await _service.GetAllAsync();
+            var list = await _service.GetAllAsync(creator);
+
             return Ok(list);
         }
 
@@ -189,6 +187,23 @@ namespace IETT_APP.WebAPI.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        // IETT_APP.WebAPI.Controllers.TripTasksController.cs içine ekle
+
+        [HttpGet("dashboard-metrics")]
+        public async Task<IActionResult> GetDashboardMetrics([FromQuery] string? username = null)
+        {
+            try
+            {
+                // Servisteki yeni metodu çağırıyoruz
+                var dashboardData = await _service.GetDashboardMetricsAsync(username);
+                return Ok(dashboardData);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = "Dashboard verisi alınırken hata oluştu.", Detail = ex.Message });
             }
         }
     }

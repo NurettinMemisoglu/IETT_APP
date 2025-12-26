@@ -1,99 +1,57 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Rendering
 @{
-    // 1. Aktif Link Kontrolü
+    // 1. O anki Area, Controller ve Action bilgilerini alıyoruz
+    var currentArea = ViewContext.RouteData.Values["Area"]?.ToString();
     var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
 
-    string IsActive(string controller, string action = "Index")
-    {
-        if (string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) &&
-            string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase))
-        {
-            return "active";
-        }
-        return "";
-    }
+    // 2. Area + Controller + Action kontrolü yapan fonksiyon
+    // Sadece Area "Planner" ise aktif sınıfı döndürür.
+    string IsActive(string controller, string action = "Index") =>
+        (string.Equals(currentArea, "Planner", StringComparison.OrdinalIgnoreCase) &&
+         string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) &&
+         string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase)) ? "active" : "";
 }
 
-<div class="d-flex flex-column h-100 w-100" style="min-height: 0;">
+<ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
 
-    <div class="flex-grow-1 overflow-y-auto overflow-x-hidden p-2">
+    <li class="nav-header text-uppercase text-secondary fw-bold mt-3" style="font-size: 0.75rem; letter-spacing: 1px;">
+        PLANLAMA İŞLEMLERİ
+    </li>
 
-        <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
+    <li class="nav-item">
+        <a asp-area="Planner" asp-controller="Stops" asp-action="Index" class="nav-link @IsActive("Stops")">
+            <i class="nav-icon bi bi-sign-stop text-danger"></i>
+            <p>Duraklar</p>
+        </a>
+    </li>
 
-            <li class="nav-header text-uppercase text-secondary fw-bold" style="font-size: 0.75rem; letter-spacing: 1px;">
-                Planlama İşlemleri
-            </li>
+    <li class="nav-item">
+        <a asp-area="Planner" asp-controller="Routes" asp-action="Index" class="nav-link @IsActive("Routes")">
+            <i class="nav-icon bi bi-map text-primary"></i>
+            <p>Güzergahlar</p>
+        </a>
+    </li>
 
-            <li class="nav-item">
-                <a asp-area="Planner" asp-controller="Stops" asp-action="Index"
-                   class="nav-link @IsActive("Stops")">
-                    <i class="nav-icon bi bi-sign-stop text-danger"></i>
-                    <p>Duraklar</p>
-                </a>
-            </li>
+    <li class="nav-item">
+        <a asp-area="Planner" asp-controller="Lines" asp-action="Index" class="nav-link @IsActive("Lines")">
+            <i class="nav-icon bi bi-bezier2 text-success"></i>
+            <p>Hatlar</p>
+        </a>
+    </li>
 
-            <li class="nav-item">
-                <a asp-area="Planner" asp-controller="Routes" asp-action="Index"
-                   class="nav-link @IsActive("Routes")">
-                    <i class="nav-icon bi bi-map text-primary"></i>
-                    <p>Güzergahlar</p>
-                </a>
-            </li>
+    <li class="nav-item">
+        <a asp-area="Planner" asp-controller="Vehicles" asp-action="Index" class="nav-link @IsActive("Vehicles")">
+            <i class="nav-icon bi bi-bus-front text-info"></i>
+            <p>Araçlar</p>
+        </a>
+    </li>
 
-            <li class="nav-item">
-                <a asp-area="Planner" asp-controller="Lines" asp-action="Index"
-                   class="nav-link @IsActive("Lines")">
-                    <i class="nav-icon bi bi-bezier2 text-success"></i>
-                    <p>Hatlar</p>
-                </a>
-            </li>
+    <li class="nav-item">
+        <a asp-area="Planner" asp-controller="Drivers" asp-action="Index" class="nav-link @IsActive("Drivers")">
+            <i class="nav-icon bi bi-person-badge text-light"></i>
+            <p>Sürücüler & Atama</p>
+        </a>
+    </li>
 
-            <li class="nav-item">
-                <a asp-area="Planner" asp-controller="Vehicles" asp-action="Index"
-                   class="nav-link @IsActive("Vehicles")">
-                    <i class="nav-icon bi bi-bus-front text-info"></i>
-                    <p>Araçlar</p>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a asp-area="Driver" asp-controller="Profile" asp-action="Index"
-                   class="nav-link @IsActive("Profile", "Index")">
-                    <i class="nav-icon bi bi-person-vcard text-warning"></i>
-                    <p>Profil Bilgilerim</p>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a asp-area="" asp-controller="MyNotifications" asp-action="Index"
-                   class="nav-link @IsActive("MyNotifications", "Index")">
-                    <i class="nav-icon bi bi-bell text-white"></i>
-                    <p>Bildirimler</p>
-                </a>
-            </li>
-
-        </ul>
-    </div>
-
-    <div class="mt-auto p-3 border-top border-secondary border-opacity-25 bg-dark bg-opacity-10">
-        @if (User.Identity.IsAuthenticated)
-        {
-            <a asp-area="" asp-controller="Auth" asp-action="Logout"
-               class="btn btn-danger w-100 d-flex align-items-center justify-content-center"
-               style="gap: 10px;">
-                <i class="bi bi-box-arrow-right" style="font-size: 1.1rem; line-height: 1;"></i>
-                <span class="fw-semibold">Güvenli Çıkış</span>
-            </a>
-        }
-        else
-        {
-            <a asp-area="" asp-controller="Auth" asp-action="Login"
-               class="btn btn-primary w-100 d-flex align-items-center justify-content-center"
-               style="gap: 10px;">
-                <i class="bi bi-box-arrow-in-right" style="font-size: 1.1rem; line-height: 1;"></i>
-                <span class="fw-semibold">Giriş Yap</span>
-            </a>
-        }
-    </div>
-
-</div>
+</ul>

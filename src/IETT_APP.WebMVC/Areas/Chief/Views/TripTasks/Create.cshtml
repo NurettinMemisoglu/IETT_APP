@@ -3,6 +3,12 @@
 
 @{
     ViewData["Title"] = "Yeni Görev Atama";
+
+    //Gelinen sayfayı (Referer) yakala
+    var referer = ViewContext.HttpContext.Request.Headers["Referer"].ToString();
+
+    // Eğer referer boşsa (direkt link) varsayılan olarak Index'e dön, doluysa oraya dön
+    var backUrl = string.IsNullOrEmpty(referer) ? Url.Action("Index") : referer;
 }
 
 <div class="container-fluid mt-4">
@@ -17,7 +23,7 @@
 
                 <div class="row mt-4">
                     <div class="col-12 text-end">
-                        <a asp-action="Index" asp-controller="TripTasks" asp-area="Chief" class="btn btn-secondary me-2">İptal</a>
+                        <a href="@backUrl" onclick="if(history.length > 1){ history.back(); return false; }" class="btn btn-secondary me-2">İptal</a>
 
                         <button type="button" id="btnSaveTask" class="btn btn-success px-4">
                             <i class="bi bi-check-lg"></i> Görevi Oluştur ve Ata

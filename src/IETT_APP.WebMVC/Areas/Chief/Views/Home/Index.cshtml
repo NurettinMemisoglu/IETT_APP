@@ -1,5 +1,150 @@
-﻿
+﻿@using IETT_APP.WebMVC.Areas.Chief.Models
+@model ChiefDashboardViewModel
+
 @{
-	ViewData["Title"] = "Chief Page";
+    ViewData["Title"] = "Operasyon Merkezi";
 }
-<h4 class="mb-2">This is Chief Page</h4>
+
+@section Styles {
+    <style>
+        /* KPI Kartları - AdminLTE Modernize Edilmiş */
+        .info-box-modern {
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+            transition: transform 0.2s;
+            border: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            padding: 1.25rem;
+            height: 100%;
+        }
+
+            .info-box-modern:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 15px rgba(0,0,0,0.08);
+            }
+
+        .info-box-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin-right: 1rem;
+        }
+
+        /* Timeline Tasarımı */
+        .timeline-modern {
+            position: relative;
+            padding-left: 2rem;
+            border-left: 2px solid #e9ecef;
+        }
+
+        .timeline-item-modern {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -2.6rem;
+            top: 0.25rem;
+            width: 1.2rem;
+            height: 1.2rem;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            box-shadow: 0 0 0 2px #e9ecef;
+            background: #6c757d;
+        }
+
+        .timeline-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            background: #fff;
+            transition: all 0.2s;
+        }
+
+            .timeline-card:hover {
+                box-shadow: 0 5px 15px rgba(0,0,0,0.06);
+            }
+
+        /* Renk Sınıfları */
+        .bg-gradient-primary-light {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            color: #0d47a1;
+        }
+
+        .bg-gradient-info-light {
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+            color: #006064;
+        }
+
+        .bg-gradient-success-light {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            color: #1b5e20;
+        }
+
+        .bg-gradient-danger-light {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            color: #b71c1c;
+        }
+
+        /* Kritik Uyarı Kartı */
+        .alert-card {
+            border-left: 5px solid #dc3545;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Pulse Animasyonu */
+        .pulse-red {
+            animation: pulse-red 2s infinite;
+        }
+
+        @@keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+            }
+        }
+    </style>
+}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-dark fw-bold">Operasyon Merkezi</h1>
+            <span class="text-muted small"><i class="bi bi-calendar-event me-1"></i> @DateTime.Now.ToString("dd MMMM yyyy, dddd")</span>
+        </div>
+
+        <a asp-controller="TripTasks" asp-action="Create" class="btn btn-primary btn-lg shadow-sm rounded-pill px-4">
+            <i class="bi bi-plus-lg me-2"></i> Yeni Görev Ata
+        </a>
+    </div>
+
+    <partial name="_DashboardKPI" model="Model" />
+
+    <div class="row">
+
+        <div class="col-lg-8 mb-4">
+            <partial name="_DashboardTimeline" model="Model.DailyTimeline" />
+        </div>
+
+        <div class="col-lg-4">
+            <partial name="_DashboardSidebar" model="Model" />
+        </div>
+    </div>
+</div>

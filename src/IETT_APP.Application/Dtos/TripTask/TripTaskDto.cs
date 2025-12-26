@@ -44,6 +44,7 @@ namespace IETT_APP.Application.Dtos.TripTask
 
         // Opsiyonel: Read-only alanlar (UI veya log amaçlı)
         public DateTime? CreatedAt { get; set; }
+        public string? CreatedBy { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public bool IsDeleted { get; set; } = false;
     }

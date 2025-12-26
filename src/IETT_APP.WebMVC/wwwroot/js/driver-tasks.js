@@ -8,11 +8,14 @@
         if (xhr.responseJSON && xhr.responseJSON.message) {
             msg = xhr.responseJSON.message;
         } else if (xhr.responseText) {
-            // Bazen sunucu JSON yerine düz text hata dönebilir
             msg = xhr.responseText;
         }
 
-        toastr.error(msg);
+        if (typeof toastr !== 'undefined') {
+            toastr.error(msg);
+        } else {
+            alert(msg);
+        }
 
         if ($btn && defaultText) {
             $btn.prop('disabled', false).html(defaultText);
@@ -22,17 +25,16 @@
     // ===========================
     // 1. KABUL ET (Accept)
     // ===========================
-    $('.btn-accept').click(function () {
+    $(document).on('click', '.btn-accept', function () {
         const id = $(this).data('id');
         const $btn = $(this);
         const originalText = $btn.html();
 
         $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
 
-        // URL: /Driver/Tasks/Accept?id=... (MVC Controller bunu anlar)
         $.post('/Driver/Tasks/Accept', { id: id })
             .done(function (res) {
-                toastr.success(res.message || "Görev kabul edildi.");
+                if (typeof toastr !== 'undefined') toastr.success(res.message || "Görev kabul edildi.");
                 setTimeout(() => window.location.reload(), 1000);
             })
             .fail(function (xhr) {
@@ -43,7 +45,7 @@
     // ===========================
     // 2. REDDET (Reject - Modal)
     // ===========================
-    $('.btn-reject').click(function () {
+    $(document).on('click', '.btn-reject', function () {
         $('#rejectTaskId').val($(this).data('id'));
         $('#rejectReason').val('');
         new bootstrap.Modal(document.getElementById('rejectModal')).show();
@@ -54,7 +56,8 @@
         const reason = $('#rejectReason').val();
 
         if (!reason || reason.trim().length < 5) {
-            toastr.warning("Lütfen en az 5 karakterlik bir neden belirtiniz.");
+            if (typeof toastr !== 'undefined') toastr.warning("Lütfen en az 5 karakterlik bir neden belirtiniz.");
+            else alert("Lütfen en az 5 karakterlik bir neden belirtiniz.");
             return;
         }
 
@@ -62,14 +65,13 @@
         const originalText = $btn.text();
         $btn.prop('disabled', true).text('İşleniyor...');
 
-        // Controller: [FromBody] RejectTripRequestDto bekliyor
         $.ajax({
-            url: '/Driver/Tasks/Reject?id=' + id, // ID QueryString'den gider
+            url: '/Driver/Tasks/Reject?id=' + id,
             type: 'POST',
-            contentType: 'application/json', // JSON olarak gönderiyoruz
-            data: JSON.stringify({ Reason: reason }), // Body
+            contentType: 'application/json',
+            data: JSON.stringify({ Reason: reason }),
             success: function (res) {
-                toastr.info(res.message || "Görev reddedildi.");
+                if (typeof toastr !== 'undefined') toastr.info(res.message || "Görev reddedildi.");
                 $('#rejectModal').modal('hide');
                 setTimeout(() => window.location.reload(), 1000);
             },
@@ -82,7 +84,7 @@
     // ===========================
     // 3. BAŞLAT (Start)
     // ===========================
-    $('.btn-start').click(function () {
+    $(document).on('click', '.btn-start', function () {
         const id = $(this).data('id');
         const $btn = $(this);
         const originalText = $btn.html();
@@ -91,7 +93,7 @@
 
         $.post('/Driver/Tasks/Start', { id: id })
             .done(function (res) {
-                toastr.success(res.message || "Sefer başlatıldı.");
+                if (typeof toastr !== 'undefined') toastr.success(res.message || "Sefer başlatıldı.");
                 setTimeout(() => window.location.reload(), 1000);
             })
             .fail(function (xhr) {
@@ -102,13 +104,50 @@
     // ===========================
     // 4. BİTİR (Complete - Modal)
     // ===========================
-    $('.btn-complete').click(function () {
-        $('#completeTaskId').val($(this).data('id'));
+    $(document).on('click', '.btn-complete', function () {
+        const taskId = $(this).data('id');
+
+        // 1. ID'yi ve inputları sıfırla
+        $('#completeTaskId').val(taskId);
         $('#passengerInput').val('');
         $('#odometerInput').val('');
         $('#fuelInput').val('');
         $('#driverNoteInput').val('');
-        new bootstrap.Modal(document.getElementById('completeModal')).show();
+
+        // 2. Yükleniyor bilgisi göster (Eğer elementler varsa)
+        if ($('#lastFuelInfo').length) $('#lastFuelInfo').html('<span class="spinner-border spinner-border-sm"></span> Yükleniyor...');
+        if ($('#lastKmInfo').length) $('#lastKmInfo').html('<span class="spinner-border spinner-border-sm"></span> Yükleniyor...');
+
+        // 3. Modalı aç
+        const modal = new bootstrap.Modal(document.getElementById('completeModal'));
+        modal.show();
+
+        // 4. Araç verilerini çek (HOME Controller'dan)
+        $.ajax({
+            url: '/Driver/Home/GetVehicleInfoForTask?taskId=' + taskId,
+            type: 'GET',
+            success: function (data) {
+                // Yakıt Bilgisi
+                if (data.lastFuel !== null && data.lastFuel !== undefined) {
+                    $('#lastFuelInfo').html(`<i class="bi bi-clock-history"></i> Mevcut Depo: <strong>%${data.lastFuel}</strong>`);
+                } else {
+                    $('#lastFuelInfo').text('Veri yok.');
+                }
+
+                // Kilometre Bilgisi
+                if (data.lastKm !== null && data.lastKm !== undefined) {
+                    $('#lastKmInfo').html(`<i class="bi bi-arrow-counterclockwise"></i> Başlangıç: <strong>${data.lastKm} km</strong>`);
+                    // Hatalı girişi engellemek için min değerini ayarla
+                    $('#odometerInput').attr('min', data.lastKm);
+                } else {
+                    $('#lastKmInfo').text('Veri yok.');
+                }
+            },
+            error: function () {
+                $('#lastFuelInfo').text('Veri çekilemedi.');
+                $('#lastKmInfo').text('Veri çekilemedi.');
+            }
+        });
     });
 
     $('#confirmCompleteBtn').click(function () {
@@ -119,7 +158,8 @@
         const note = $('#driverNoteInput').val();
 
         if (!passengers || !odometer) {
-            toastr.warning("Yolcu sayısı ve KM bilgisi zorunludur.");
+            if (typeof toastr !== 'undefined') toastr.warning("Yolcu sayısı ve KM bilgisi zorunludur.");
+            else alert("Yolcu sayısı ve KM bilgisi zorunludur.");
             return;
         }
 
@@ -127,12 +167,12 @@
         const originalText = $btn.text();
         $btn.prop('disabled', true).text('Kaydediliyor...');
 
-        // DTO ile birebir uyumlu payload
+        // DTO ile uyumlu payload
         const payload = {
             PassengerCount: parseInt(passengers),
-            EndOdometerInput: parseFloat(odometer), // Controller "EndOdometerInput" bekliyor
+            EndOdometerInput: parseFloat(odometer),
             FuelLevel: fuel ? parseInt(fuel) : null,
-            DriverNotes: note // Controller "DriverNotes" bekliyor (eskiden Note idi, dikkat!)
+            DriverNotes: note
         };
 
         $.ajax({
@@ -141,7 +181,7 @@
             contentType: 'application/json',
             data: JSON.stringify(payload),
             success: function (res) {
-                toastr.success(res.message || "Sefer tamamlandı.");
+                if (typeof toastr !== 'undefined') toastr.success(res.message || "Sefer tamamlandı.");
                 $('#completeModal').modal('hide');
                 setTimeout(() => window.location.reload(), 1000);
             },
@@ -154,7 +194,7 @@
     // ===========================
     // 5. SORUN BİLDİR (Fail - Modal)
     // ===========================
-    $('.btn-fail').click(function () {
+    $(document).on('click', '.btn-fail', function () {
         $('#failTaskId').val($(this).data('id'));
         $('#failReason').val('');
         new bootstrap.Modal(document.getElementById('failModal')).show();
@@ -165,7 +205,8 @@
         const reason = $('#failReason').val();
 
         if (!reason || reason.trim().length < 5) {
-            toastr.warning("Lütfen açıklama giriniz (min 5 karakter).");
+            if (typeof toastr !== 'undefined') toastr.warning("Lütfen açıklama giriniz (min 5 karakter).");
+            else alert("Lütfen açıklama giriniz (min 5 karakter).");
             return;
         }
 
@@ -179,7 +220,7 @@
             contentType: 'application/json',
             data: JSON.stringify({ Reason: reason }),
             success: function (res) {
-                toastr.warning(res.message || "Durum bildirildi.");
+                if (typeof toastr !== 'undefined') toastr.warning(res.message || "Durum bildirildi.");
                 $('#failModal').modal('hide');
                 setTimeout(() => window.location.reload(), 1000);
             },

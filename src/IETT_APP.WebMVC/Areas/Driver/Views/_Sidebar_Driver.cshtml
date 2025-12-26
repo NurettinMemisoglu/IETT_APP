@@ -1,72 +1,33 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Rendering
 @{
-    // 1. O anki Controller ve Action bilgisini alıyoruz
+    var currentArea = ViewContext.RouteData.Values["Area"]?.ToString();
     var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
 
-    // 2. Linkin aktif olup olmadığını kontrol eden basit bir fonksiyon
-    string IsActive(string controller, string action)
-    {
-        if (string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) &&
-            string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase))
-        {
-            return "active"; // Eşleşirse "active" sınıfını döndür
-        }
-        return "";
-    }
+    // Sadece Area "Driver" ise aktif olur
+    string IsActive(string controller, string action = "Index") =>
+        (string.Equals(currentArea, "Driver", StringComparison.OrdinalIgnoreCase) &&
+         string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) &&
+         string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase)) ? "active" : "";
 }
 
-<div class="d-flex flex-column h-100 w-100" style="min-height: 0;">
+<ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
 
-    <div class="flex-grow-1 overflow-y-auto overflow-x-hidden p-2">
+    <li class="nav-header text-uppercase text-secondary fw-bold mt-3" style="font-size: 0.75rem; letter-spacing: 1px;">
+        SÜRÜCÜ İŞLEMLERİ
+    </li>
 
-        <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
-
-            <li class="nav-header text-uppercase text-secondary fw-bold" style="font-size: 0.75rem; letter-spacing: 1px;">
-                Sürücü İşlemleri
-            </li>
-
-            <li class="nav-item">
-                <a asp-area="Driver" asp-controller="Home" asp-action="Index"
-                   class="nav-link @IsActive("Home", "Index")">
-                    <i class="nav-icon bi bi-speedometer2 text-info"></i>
-                    <p>Panel (Dashboard)</p>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a asp-area="Driver" asp-controller="Tasks" asp-action="Index"
-                   class="nav-link @IsActive("Tasks", "Index")">
-                    <i class="nav-icon bi bi-signpost-split text-primary"></i>
-                    <p>Seferlerim</p>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a asp-area="Driver" asp-controller="Profile" asp-action="Index"
-                   class="nav-link @IsActive("Profile", "Index")">
-                    <i class="nav-icon bi bi-person-vcard text-warning"></i>
-                    <p>Profil Bilgilerim</p>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a asp-area="" asp-controller="MyNotifications" asp-action="Index"
-                   class="nav-link @IsActive("MyNotifications", "Index")">
-                    <i class="nav-icon bi bi-bell text-white"></i>
-                    <p>Bildirimler</p>
-                </a>
-            </li>
-        </ul>
-    </div>
-
-    <div class="mt-auto p-3 border-top border-secondary border-opacity-25 bg-dark bg-opacity-10">
-        <a asp-area="" asp-controller="Auth" asp-action="Logout"
-           class="btn btn-danger w-100 d-flex align-items-center justify-content-center"
-           style="gap: 10px;">
-            <i class="bi bi-box-arrow-right" style="font-size: 1.1rem; line-height: 1;"></i>
-            <span class="fw-semibold">Güvenli Çıkış</span>
+    <li class="nav-item">
+        <a asp-area="Driver" asp-controller="Home" asp-action="Index" class="nav-link @IsActive("Home", "Index")">
+            <i class="nav-icon bi bi-speedometer2 text-info"></i>
+            <p>Panel (Dashboard)</p>
         </a>
-    </div>
+    </li>
 
-</div>
+    <li class="nav-item">
+        <a asp-area="Driver" asp-controller="Tasks" asp-action="Index" class="nav-link @IsActive("Tasks", "Index")">
+            <i class="nav-icon bi bi-signpost-split text-primary"></i>
+            <p>Seferlerim</p>
+        </a>
+    </li>
+</ul>

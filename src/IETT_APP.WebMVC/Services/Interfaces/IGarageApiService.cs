@@ -6,6 +6,6 @@ namespace IETT_APP.WebMVC.Services.Interfaces
     public interface IGarageApiService
     {
         Task<IEnumerable<GarageViewModel>> GetAllAsync();
-        Task<GarageDto<Guid>?> GetByIdAsync(Guid id);
+        Task<GarageDto?> GetByIdAsync(Guid id);
     }
 }

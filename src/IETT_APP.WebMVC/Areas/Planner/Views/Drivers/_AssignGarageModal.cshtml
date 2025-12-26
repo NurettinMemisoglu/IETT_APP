@@ -1,0 +1,60 @@
+﻿@model IETT_APP.WebMVC.Areas.Planner.Models.AssignGarageViewModel
+
+<form asp-action="AssignGarage" method="post" id="assignGarageForm">
+
+    <div class="modal-header">
+        <h5 class="modal-title text-primary fw-bold">
+            <i class="bi bi-warehouse-fill me-2"></i> Garaj Atama
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+    </div>
+
+    <div class="modal-body">
+
+        <input type="hidden" asp-for="DriverId" />
+        <input type="hidden" asp-for="DriverFullName" />
+
+        <div class="d-flex align-items-center bg-light p-3 rounded border mb-4">
+            <div class="driver-avatar-placeholder shadow-sm bg-white text-primary me-3" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                @Model.DriverFullName.Substring(0, 1)
+            </div>
+            <div>
+                <h6 class="fw-bold mb-0 text-dark">@Model.DriverFullName</h6>
+                <small class="text-muted">Seçili Sürücü</small>
+            </div>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="GarageId" class="form-label fw-bold text-secondary small text-uppercase">
+                Atanacak Garaj
+            </label>
+
+            <div class="input-group">
+                <span class="input-group-text bg-white text-muted"><i class="bi bi-building"></i></span>
+                <select asp-for="GarageId" asp-items="Model.GarageList" class="form-select shadow-none">
+                    <option value="">-- Garaj Seçiniz --</option>
+                </select>
+            </div>
+            <span asp-validation-for="GarageId" class="text-danger small mt-1 d-block"></span>
+        </div>
+
+        <div class="alert alert-info border-0 bg-info-subtle text-info-emphasis small d-flex align-items-start gap-2 mb-0">
+            <i class="bi bi-info-circle-fill mt-1"></i>
+            <div>
+                Sürücüye garaj atadığınızda, vardiya planlamaları bu garaj üzerinden yapılacaktır.
+            </div>
+        </div>
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mt-3 small text-center fw-bold"></div>
+    </div>
+
+    <div class="modal-footer bg-light border-top-0">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">İptal</button>
+        <button type="submit" class="btn btn-success btn-sm px-4 fw-bold shadow-sm">
+            <i class="bi bi-check-lg me-1"></i> Kaydet
+        </button>
+    </div>
+
+</form>
+
+<partial name="_ValidationScriptsPartial" />

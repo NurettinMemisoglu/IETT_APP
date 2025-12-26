@@ -1,0 +1,121 @@
+﻿@using IETT_APP.Application.Dtos.Driver
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@model IEnumerable<DriverDto>
+
+@{
+    // API Adresini appsettings.json'dan alıyoruz (Sonunda / varsa siliyoruz)
+    var apiBaseUrl = Configuration["ApiSettings:BaseUrl"]?.TrimEnd('/');
+}
+
+<div class="table-responsive">
+    <table id="driversTable" class="table table-hover align-middle mb-0 custom-table">
+        <thead>
+            <tr>
+                <th style="padding-left: 20px;">SÜRÜCÜ KİMLİĞİ</th>
+                <th class="text-center">SİCİL & TC</th>
+                <th class="text-center">GARAJ / KONUM</th>
+                <th class="text-center">İLETİŞİM</th>
+                <th style="padding-right: 20px;" class="text-end">İŞLEMLER</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr data-id="@item.Id">
+
+                        <td style="padding-left: 20px;">
+                            <div class="d-flex align-items-center">
+
+                                <div class="me-3">
+                                    @if (!string.IsNullOrEmpty(item.ProfileImagePath))
+                                    {
+                                        // Veritabanındaki "uploads\profile_images\resim.jpg" yolundaki ters slahları düzeltiyoruz
+                                        var fullImageUrl = $"{apiBaseUrl}/{item.ProfileImagePath.Replace("\\", "/")}";
+
+                                        <img src="@fullImageUrl"
+                                             alt="@item.Name"
+                                             class="rounded-circle shadow-sm border border-white"
+                                             style="width: 40px; height: 40px; object-fit: cover;"
+                                             onerror="this.onerror=null; this.src=''; this.parentElement.innerHTML=
+                                                '<div class=\'driver-avatar-placeholder shadow-sm\'><span class=\'fw-bold\'>
+                                                @item.Name.Substring(0, 1)@item.Surname.Substring(0, 1)</span></div>';"
+                                        />
+                                    }
+                                    else
+                                    {
+                                        // Resim yoksa Baş Harfler
+                                        <div class="driver-avatar-placeholder shadow-sm">
+                                            <span class="fw-bold">@item.Name.Substring(0, 1)@item.Surname.Substring(0, 1)</span>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold text-dark" style="font-size: 0.95rem;">@item.Name @item.Surname</span>
+                                    <span class="text-muted small">
+                                        <i class="bi bi-steering-wheel me-1"></i> Şoför
+                                    </span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="text-center">
+                            <div class="d-flex flex-column">
+                                <span class="fw-semibold text-primary">@item.EmployeeNumber</span>
+                                <span class="text-muted small font-monospace">
+                                    <i class="bi bi-person-vcard me-1"></i>@item.TCIdentityNumber
+                                </span>
+                            </div>
+                        </td>
+
+                        <td class="text-center">
+                            @if (!string.IsNullOrEmpty(item.GarageName))
+                            {
+                                <div class="d-flex align-items-center text-dark justify-content-center">
+                                    <span class="custom-badge badge-info-soft">
+                                        <i class="bi bi-building me-1"></i> @item.GarageName
+                                    </span>
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="text-muted small fst-italic">
+                                    <i class="bi bi-exclamation-circle me-1"></i> Atanmamış
+                                </span>
+                            }
+                        </td>
+
+                        <td class="text-center">
+                            <div class="d-flex flex-column">
+                                <span class="text-dark small">
+                                    <i class="bi bi-telephone me-1 text-success"></i> @item.PhoneNumber
+                                </span>
+                            </div>
+                        </td>
+
+                        <td class="text-end" style="padding-right: 20px;">
+                            <div class="btn-group shadow-sm" role="group">
+                                <a asp-action="AssignGarage" asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-outline-warning btn-modal-trigger"
+                                   title="Garaj Ata">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center py-5 text-muted">
+                        <i class="bi bi-person-badge fs-1 d-block mb-3 opacity-25"></i>
+                        <span>Kayıtlı sürücü bulunamadı.</span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

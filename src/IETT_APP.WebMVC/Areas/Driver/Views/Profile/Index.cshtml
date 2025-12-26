@@ -1,5 +1,7 @@
 ﻿@using IETT_APP.WebMVC.Areas.Driver.Models
 @using IETT_APP.Domain.Enums
+@using IETT_APP.WebMVC.Extensions
+
 @model DriverProfileViewModel
 
 @{
@@ -18,8 +20,8 @@
         if (Model.ProfileImagePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
         {
             profileImgSrc = Model.ProfileImagePath.Contains(":7060")
-               ? Model.ProfileImagePath.Replace(":7060", ":7254")
-               : Model.ProfileImagePath;
+                ? Model.ProfileImagePath.Replace(":7060", ":7254")
+                : Model.ProfileImagePath;
         }
         else
         {
@@ -28,15 +30,21 @@
         }
     }
 
-    // Durum Rengi
-    string statusBadgeClass = Model.WorkStatus == WorkStatus.Working ? "bg-success" : "bg-warning text-dark";
+    // --- 2. DURUM RENGİ MANTIĞI (GÜNCELLENDİ) ---
+    string statusBadgeClass = Model.WorkStatus switch
+    {
+        WorkStatus.Working => "bg-success",           // Yeşil
+        WorkStatus.Available => "bg-info text-dark",  // Mavi
+        WorkStatus.Resting => "bg-warning text-dark", // Sarı
+        WorkStatus.OffDuty => "bg-secondary",         // Gri
+        WorkStatus.RegistrationIncomplete => "bg-danger", // Kırmızı (Yeni)
+        _ => "bg-secondary"
+    };
 }
 
 @section Styles {
-    @* Buraya CSS kodlarını (önceki cevaptaki style bloğunu) ekleyebilirsin veya harici css kullanabilirsin *@
     <link rel="stylesheet" href="~/css/driver-profile.css" asp-append-version="true" />
 }
-
 
 <div class="container-fluid mb-5" style="max-width: 1000px;">
 
@@ -61,9 +69,12 @@
                 <span class="badge bg-white bg-opacity-25 border border-white border-opacity-25 px-3 py-2 rounded-pill fw-normal">
                     <i class="bi bi-building me-1"></i> @Model.GarageName
                 </span>
+
+                @* --- 3. HTML KISMI GÜNCELLENDİ (.ToDisplayName eklendi) --- *@
                 <span class="badge @statusBadgeClass px-3 py-2 rounded-pill text-uppercase" style="letter-spacing: 0.5px;">
-                    @Model.WorkStatus
+                    @Model.WorkStatus.ToDisplayName()
                 </span>
+
             </div>
         </div>
     </div>

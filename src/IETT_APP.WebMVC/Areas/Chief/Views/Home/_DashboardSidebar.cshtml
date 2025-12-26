@@ -1,0 +1,121 @@
+﻿@using IETT_APP.Domain.Enums
+@using IETT_APP.WebMVC.Areas.Chief.Models
+@model ChiefDashboardViewModel
+
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-header border-0 py-3 px-4 rounded-top-4 bg-danger bg-gradient text-white d-flex align-items-center">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-bell-fill me-2 fs-5"></i>
+            <h6 class="mb-0 fw-bold">Acil Bildirimler</h6>
+        </div>
+        <span class="badge bg-white text-danger rounded-pill ms-3">@Model.PendingIssues</span>
+    </div>
+
+    <div class="card-body p-3 bg-light bg-opacity-10">
+        @if (Model.CriticalAlerts != null && Model.CriticalAlerts.Any())
+        {
+            @foreach (var alert in Model.CriticalAlerts)
+            {
+                // --- DİNAMİK RENKLENDİRME ---
+                string borderClass = alert.AlertType switch
+                {
+                    AlertType.Warning => "border-warning", // Sarı
+                    AlertType.Danger => "border-danger",   // Kırmızı
+                    _ => "border-secondary"
+                };
+
+                string textClass = alert.AlertType switch
+                {
+                    AlertType.Warning => "text-warning",
+                    AlertType.Danger => "text-danger",
+                    _ => "text-secondary"
+                };
+
+                string icon = alert.AlertType switch
+                {
+                    AlertType.Warning => "bi-hourglass-bottom", // Kum saati
+                    AlertType.Danger => "bi-x-circle-fill",     // Çarpı
+                    _ => "bi-info-circle"
+                };
+
+                string btnClass = alert.AlertType == AlertType.Warning ? "btn-outline-warning" : "btn-outline-danger";
+
+                string borderStyle = alert.AlertType == AlertType.Warning ? "#ffc107" : "#dc3545";
+
+                <div class="alert-card p-3 mb-3 position-relative shadow-sm bg-white rounded-3"
+                     style="border-left: 5px solid @borderStyle;">
+
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="fw-bold @textClass mb-0 d-flex align-items-center">
+                            <i class="bi @icon me-2"></i> @alert.Title
+                        </h6>
+                        <small class="text-muted bg-light px-2 py-1 rounded fw-bold" style="font-size: 0.75rem;">
+                            @alert.Time.ToString("HH:mm")
+                        </small>
+                    </div>
+
+                    <p class="mb-3 text-dark small">@alert.Reason</p>
+
+                    <a asp-controller="TripTasks" asp-action="Details" asp-route-id="@alert.Id"
+                       class="btn btn-sm @btnClass w-100 rounded-pill fw-bold">
+                        <i class="bi bi-search me-1"></i> İncele
+                    </a>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-shield-check text-success" style="font-size: 3rem; opacity: 0.5;"></i>
+                <p class="mb-0 mt-3 fw-bold text-success">Her Şey Yolunda</p>
+                <small class="text-muted">Şu an müdahale gereken bir durum yok.</small>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-header bg-white border-0 py-3 px-4">
+        <h6 class="fw-bold mb-0 text-dark">Canlı Kaynak Durumu</h6>
+    </div>
+    <div class="card-body px-4 pb-4">
+        <div class="mb-4">
+            <div class="d-flex justify-content-between mb-1">
+                <span class="fw-bold small text-info"><i class="bi bi-broadcast me-1"></i> Seferde</span>
+                <span class="fw-bold small">@Model.DriverStats.Active / @Model.DriverStats.TotalDrivers</span>
+            </div>
+            <div class="progress rounded-pill" style="height: 10px; background-color: #e0f7fa;">
+                @{
+                    var activePct = (Model.DriverStats.Active * 100) / Math.Max(Model.DriverStats.TotalDrivers, 1);
+                }
+                <div class="progress-bar bg-info rounded-pill" role="progressbar" style="width: @activePct%"></div>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <div class="d-flex justify-content-between mb-1">
+                <span class="fw-bold small text-success"><i class="bi bi-check-circle me-1"></i> Hazır (Müsait)</span>
+                <span class="fw-bold small">@Model.DriverStats.Available</span>
+            </div>
+            <div class="progress rounded-pill" style="height: 10px; background-color: #e8f5e9;">
+                @{
+                    var availPct = (Model.DriverStats.Available * 100) / Math.Max(Model.DriverStats.TotalDrivers, 1);
+                }
+                <div class="progress-bar bg-success rounded-pill" role="progressbar" style="width: @availPct%"></div>
+            </div>
+        </div>
+
+        <div>
+            <div class="d-flex justify-content-between mb-1">
+                <span class="fw-bold small text-muted"><i class="bi bi-house-door me-1"></i> İzinli / Raporlu</span>
+                <span class="fw-bold small">@Model.DriverStats.OnLeave</span>
+            </div>
+            <div class="progress rounded-pill" style="height: 10px; background-color: #f1f3f5;">
+                @{
+                    var leavePct = (Model.DriverStats.OnLeave * 100) / Math.Max(Model.DriverStats.TotalDrivers, 1);
+                }
+                <div class="progress-bar bg-secondary rounded-pill" role="progressbar" style="width: @leavePct%"></div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,49 @@
+﻿@using IETT_APP.WebMVC.Areas.Chief.Models
+@model ChiefDashboardViewModel
+
+<div class="row g-3 mb-5">
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="info-box-modern">
+            <div class="info-box-icon bg-gradient-primary-light">
+                <i class="bi bi-clipboard-data"></i>
+            </div>
+            <div>
+                <span class="d-block text-muted small text-uppercase fw-bold ls-1">Günlük Plan</span>
+                <span class="d-block h3 fw-bold mb-0 text-dark">@Model.TotalTasksToday</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="info-box-modern">
+            <div class="info-box-icon bg-gradient-info-light">
+                <i class="bi bi-bus-front-fill"></i>
+            </div>
+            <div>
+                <span class="d-block text-muted small text-uppercase fw-bold ls-1">Yoldaki Araç</span>
+                <span class="d-block h3 fw-bold mb-0 text-dark">@Model.ActiveTrips</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="info-box-modern">
+            <div class="info-box-icon bg-gradient-success-light">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div>
+                <span class="d-block text-muted small text-uppercase fw-bold ls-1">Tamamlanan</span>
+                <span class="d-block h3 fw-bold mb-0 text-dark">@Model.CompletedToday</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="info-box-modern border-danger border-opacity-25" style="background-color: #fff5f5;">
+            <div class="info-box-icon bg-white text-danger shadow-sm">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div>
+                <span class="d-block text-danger small text-uppercase fw-bold ls-1">Kritik Olay</span>
+                <span class="d-block h3 fw-bold mb-0 text-danger">@Model.PendingIssues</span>
+            </div>
+        </div>
+    </div>
+</div>

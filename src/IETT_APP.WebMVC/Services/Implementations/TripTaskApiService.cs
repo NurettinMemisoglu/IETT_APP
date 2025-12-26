@@ -1,4 +1,5 @@
-﻿using IETT_APP.Application.Dtos.TripTask;
+﻿using IETT_APP.Application.Dtos.Chief;
+using IETT_APP.Application.Dtos.TripTask;
 using IETT_APP.Application.Wrappers;
 using IETT_APP.Domain.Enums;
 using IETT_APP.WebMVC.Services.Infrastructure;
@@ -18,8 +19,19 @@ namespace IETT_APP.WebMVC.Services.Implementations
         // ============================================================
         // 1. TEMEL CRUD (MEVCUT)
         // ============================================================
-        public async Task<IEnumerable<TripTaskDto>> GetAllAsync()
-            => await _httpClient.GetFromJsonAsync<IEnumerable<TripTaskDto>>("api/triptasks") ?? new List<TripTaskDto>();
+        // Metot imzasını güncelle (Interface'i de güncellemen gerekecek!)
+        public async Task<IEnumerable<TripTaskDto>> GetAllAsync(string? creatorName = null)
+        {
+            // Eğer creatorName varsa URL'e parametre olarak ekle
+            var url = "api/triptasks";
+            if (!string.IsNullOrEmpty(creatorName))
+            {
+                url += $"?creator={Uri.EscapeDataString(creatorName)}";
+            }
+
+            return await _httpClient.GetFromJsonAsync<IEnumerable<TripTaskDto>>(url)
+                   ?? new List<TripTaskDto>();
+        }
 
         public async Task<TripTaskDto?> GetByIdAsync(Guid id)
         {
@@ -102,6 +114,19 @@ namespace IETT_APP.WebMVC.Services.Implementations
             if (role == "Chief" || role == "Admin") return new List<TaskState> { TaskState.Pending, TaskState.Cancelled };
             if (role == "Driver") return new List<TaskState> { TaskState.Accepted, TaskState.InProgress, TaskState.Completed, TaskState.Incomplete };
             return new List<TaskState>();
+        }
+
+        public async Task<ChiefDashboardDto> GetChiefDashboardMetricsAsync(string? username)
+        {
+            var url = "api/triptasks/dashboard-metrics";
+            if (!string.IsNullOrEmpty(username))
+            {
+                url += $"?username={Uri.EscapeDataString(username)}";
+            }
+
+            // API'den hazır hesaplanmış veriyi çekiyoruz
+            return await _httpClient.GetFromJsonAsync<ChiefDashboardDto>(url)
+                   ?? new ChiefDashboardDto();
         }
     }
 }

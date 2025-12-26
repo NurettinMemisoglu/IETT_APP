@@ -27,7 +27,7 @@ namespace IETT_APP.WebMVC.Services.Implementations
                 return Enumerable.Empty<GarageViewModel>();
             }
         }
-        public async Task<GarageDto<Guid>?> GetByIdAsync(Guid id)
-            => await _httpClient.GetFromJsonAsync<GarageDto<Guid>>($"api/garages/{id}");
+        public async Task<GarageDto?> GetByIdAsync(Guid id)
+            => await _httpClient.GetFromJsonAsync<GarageDto>($"api/garages/{id}");
     }
 }

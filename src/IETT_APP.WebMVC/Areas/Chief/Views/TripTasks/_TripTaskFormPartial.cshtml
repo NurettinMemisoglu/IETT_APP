@@ -6,11 +6,16 @@
 @{
     bool isEditMode = Model.Id != Guid.Empty;
 
-    // Stil mantığı
-    string inputStyle = isEditMode ? "background-color: #f8f9fa;" : "background-color: #fff;";
-    string readonlyAttr = isEditMode ? "readonly" : null;
+    // Stil mantığı: Edit modunda gri ve tıklanamaz, normalde beyaz.
+    // "pointer-events: none;" tıklamayı tamamen engeller.
+    string dateInputStyle = isEditMode
+        ? "background-color: #e9ecef; cursor: not-allowed; pointer-events: none;"
+        : "background-color: #fff;";
 
-    // Tarih formatlama mantığını buraya taşıdık (Hatayı çözen kısım)
+    // HTML attribute olarak "disabled" eklemek en güvenli yoldur.
+    string disabledAttr = isEditMode ? "disabled" : null;
+
+    // Tarih formatlama
     string scheduledArrivalVal = Model.ScheduledArrival.HasValue ? Model.ScheduledArrival.Value.ToString("dd.MM.yyyy HH:mm") : "";
     string scheduledDepartureVal = Model.ScheduledDeparture.HasValue ? Model.ScheduledDeparture.Value.ToString("dd.MM.yyyy HH:mm") : "";
     string adjustedDepartureVal = Model.AdjustedDeparture.HasValue ? Model.AdjustedDeparture.Value.ToString("dd.MM.yyyy HH:mm") : "";
@@ -54,14 +59,20 @@
         <div class="col-md-6">
             <div class="form-floating mb-3">
                 <input asp-for="ScheduledDeparture" type="text"
+                       id="ScheduledDeparture"
                        class="form-control date-input-with-icon"
                        value="@scheduledDepartureVal"
-                       readonly="@readonlyAttr"
-                       style="@inputStyle"
+                       disabled="@disabledAttr"
+                       style="@dateInputStyle"
                        placeholder="dd.MM.yyyy HH:mm"
                        maxlength="16" />
                 <label asp-for="ScheduledDeparture">Planlanan Kalkış</label>
                 <span asp-validation-for="ScheduledDeparture" class="text-danger"></span>
+
+                @if (isEditMode)
+                {
+                    <input type="hidden" name="ScheduledDeparture" value="@scheduledDepartureVal" />
+                }
             </div>
         </div>
 
@@ -69,14 +80,20 @@
             <div class="col-md-6">
                 <div class="form-floating mb-3">
                     <input asp-for="ScheduledArrival" type="text"
+                           id="ScheduledArrival"
                            class="form-control date-input-with-icon"
                            value="@scheduledArrivalVal"
-                           readonly="@readonlyAttr"
-                           style="@inputStyle"
+                           disabled="@disabledAttr"
+                           style="@dateInputStyle"
                            placeholder="dd.MM.yyyy HH:mm"
                            maxlength="16" />
                     <label asp-for="ScheduledArrival">Planlanan Varış</label>
                     <span asp-validation-for="ScheduledArrival" class="text-danger"></span>
+
+                    @if (isEditMode)
+                    {
+                        <input type="hidden" name="ScheduledArrival" value="@scheduledArrivalVal" />
+                    }
                 </div>
             </div>
         </div>
@@ -121,12 +138,13 @@
                         <div class="col-md-6">
                             <div class="form-floating">
                                 <input asp-for="AdjustedDeparture" type="text"
+                                       id="AdjustedDeparture"
                                        class="form-control date-input-with-icon"
                                        value="@adjustedDepartureVal"
                                        style="background-color: #fff;"
                                        placeholder="dd.MM.yyyy HH:mm"
                                        maxlength="16" />
-                                <label asp-for="AdjustedDeparture" class="text-warning fw-bold">Revize Kalkış (Yeni)</label>
+                                <label asp-for="AdjustedDeparture" class="text-warning fw-bold" style="opacity: 1 !important;">Revize Kalkış (Yeni)</label>
                                 <span asp-validation-for="AdjustedDeparture" class="text-danger"></span>
                             </div>
                         </div>
@@ -134,46 +152,26 @@
                         <div class="col-md-6">
                             <div class="form-floating">
                                 <input asp-for="AdjustedArrival" type="text"
+                                       id="AdjustedArrival"
                                        class="form-control date-input-with-icon"
                                        value="@adjustedArrivalVal"
                                        style="background-color: #fff;"
                                        placeholder="dd.MM.yyyy HH:mm"
                                        maxlength="16" />
-                                <label asp-for="AdjustedArrival" class="text-warning fw-bold">Revize Varış (Yeni)</label>
+                                <label asp-for="AdjustedArrival" class="text-warning fw-bold" style="opacity: 1 !important;">Revize Varış (Yeni)</label>
                                 <span asp-validation-for="AdjustedArrival" class="text-danger"></span>
                             </div>
                         </div>
                     </div>
 
                     <div class="form-floating mb-3">
-                        <select asp-for="Status" class="form-select" asp-items="ViewBag.TaskStateList"></select>
+                        <select asp-for="Status" id="Status" class="form-select" asp-items="ViewBag.TaskStateList"></select>
                         <label asp-for="Status">Görev Durumu</label>
                     </div>
 
                     <div class="form-floating mb-3">
-                        <input asp-for="StatusReason" class="form-control" placeholder="İptal Nedeni" />
+                        <input asp-for="StatusReason" id="StatusReason" class="form-control" placeholder="İptal Nedeni" />
                         <label asp-for="StatusReason">Durum Açıklaması</label>
-                    </div>
-
-                    <div class="row g-2">
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <input asp-for="PassengerCount" type="number" class="form-control" />
-                                <label asp-for="PassengerCount">Yolcu</label>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <input asp-for="DelayInMinutes" type="number" class="form-control" />
-                                <label asp-for="DelayInMinutes">Gecikme (G)</label>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-floating">
-                                <input asp-for="DelayOutMinutes" type="number" class="form-control" />
-                                <label asp-for="DelayOutMinutes">Gecikme (Ç)</label>
-                            </div>
-                        </div>
                     </div>
 
                 </div>

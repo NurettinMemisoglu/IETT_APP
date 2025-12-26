@@ -21,11 +21,18 @@ namespace IETT_APP.WebAPI.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Register(RegisterUserDto dto)
         {
-            var authResult = await _authService.RegisterAsync(dto);
-            if (authResult == null)
-                return BadRequest(new { message = "Kayıt sırasında hata oluştu." });
-
-            return Ok(authResult);
+            try
+            {
+                // Artık Service hata fırlattığı için burası başarılıysa kesin veri vardır.
+                var authResult = await _authService.RegisterAsync(dto);
+                return Ok(authResult); // 200 OK
+            }
+            catch (Exception ex)
+            {
+                // Service'ten gelen "Şifreler uyuşmuyor" veya "Email zaten var"
+                // hatası burada yakalanır ve 400 olarak döner.
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("login")]

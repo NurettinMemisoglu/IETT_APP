@@ -2,15 +2,118 @@
     console.log("🚀 Site.js Başlatıldı.");
 
     // ==========================================
-    // 📅 GELİŞMİŞ FLATPICKR + INPUT MASK
+    // 🍬 1. SWEETALERT2 AYARLARI & TOASTR KÖPRÜSÜ
+    // ==========================================
+
+    // Standart Toast Ayarı
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+
+    // Toastr Adaptörü (Eski kodların bozulmaması için)
+    window.toastr = {
+        options: {}, // Eski ayarlara hata vermemesi için boş obje
+        success: function (message, title) {
+            Toast.fire({ icon: 'success', title: title || 'Başarılı', text: message });
+        },
+        error: function (message, title) {
+            Toast.fire({ icon: 'error', title: title || 'Hata', text: message });
+        },
+        warning: function (message, title) {
+            Toast.fire({ icon: 'warning', title: title || 'Dikkat', text: message });
+        },
+        info: function (message, title) {
+            Toast.fire({ icon: 'info', title: title || 'Bilgi', text: message });
+        },
+        // clear ve remove fonksiyonlarını boş geçiyoruz ki hata vermesin
+        clear: function () { },
+        remove: function () { }
+    };
+
+    // ==========================================
+    // 📨 2. SUNUCU MESAJLARINI KONTROL ET (TempData)
+    // ==========================================
+    // Layout'a eklediğimiz hidden inputlardan değerleri oku
+    var serverSuccess = $('#server-success-msg').val();
+    var serverError = $('#server-error-msg').val();
+
+    if (serverSuccess) {
+        window.toastr.success(serverSuccess);
+    }
+
+    if (serverError) {
+        window.toastr.error(serverError);
+    }
+
+    // ==========================================
+    // 📅 3. GELİŞMİŞ FLATPICKR + INPUT MASK
     // ==========================================
     window.initDatePickers = function () {
         const selector = ".datetime-picker, .date-input-with-icon";
+
         if (typeof flatpickr !== 'undefined') {
             flatpickr(selector, {
-                enableTime: true, dateFormat: "d.m.Y H:i", time_24hr: true, locale: "tr", allowInput: true, disableMobile: "true", minuteIncrement: 1
+                enableTime: true,
+                dateFormat: "d.m.Y H:i",
+                time_24hr: true,
+                locale: "tr",
+                allowInput: true,
+                disableMobile: "true",
+                minuteIncrement: 1,
+                // 👇 BURASI GÜNCELLENDİ 👇
+                onReady: function (selectedDates, dateStr, instance) {
+                    // Elementler oluşmamışsa dur
+                    if (!instance.hourElement || !instance.minuteElement) return;
+
+                    const $hour = $(instance.hourElement);
+                    const $minute = $(instance.minuteElement);
+
+                    // SAAT INPUT KONTROLÜ
+                    $hour.on('input keyup', function (e) {
+                        let val = $(this).val();
+
+                        // 1. Sadece rakam olmasına izin ver (Opsiyonel güvenlik)
+                        val = val.replace(/\D/g, '');
+
+                        // 2. Eğer 2 karakterden fazlaysa, anında kırp
+                        if (val.length > 2) {
+                            val = val.substring(0, 2);
+                            $(this).val(val); // Inputu güncelle
+                        }
+
+                        // 3. Eğer tam 2 karakter olduysa dakikaya atla
+                        if (val.length === 2) {
+                            $minute.focus();
+                            // Dakikadaki mevcut "00" veya sayıyı seç (üzerine yazmak için)
+                            $minute.select();
+                        }
+                    });
+
+                    // DAKİKA INPUT KONTROLÜ (Sadece sınırlandırma)
+                    $minute.on('input keyup', function () {
+                        let val = $(this).val().replace(/\D/g, '');
+                        if (val.length > 2) {
+                            $(this).val(val.substring(0, 2));
+                        }
+                    });
+
+                    // Kullanıcı tıkladığında içindekini seç (Kolay düzeltme için)
+                    $hour.on('focus click', function () { $(this).select(); });
+                    $minute.on('focus click', function () { $(this).select(); });
+                }
+                // 👆 BURASI GÜNCELLENDİ 👆
             });
         }
+
+        // ... (Alttaki manuel maskeleme kodları aynen kalabilir) ...
         $(document).on('input', selector, function (e) {
             if (e.originalEvent.inputType === 'deleteContentBackward') return;
             var input = $(this);
@@ -27,15 +130,14 @@
             if (cleanVal.length > 10) formattedVal += cleanVal.substring(10, 12);
             input.val(formattedVal);
         });
+
         $(document).on('keypress', selector, function (e) {
             if ($(this).val().length >= 16) e.preventDefault();
         });
     };
-    initDatePickers();
-    $(document).on('shown.bs.modal', function () { initDatePickers(); });
 
     // ==========================================
-    // 🔑 GLOBAL ŞİFRE DEĞİŞTİRME (AJAX)
+    // 🔑 4. GLOBAL ŞİFRE DEĞİŞTİRME (AJAX)
     // ==========================================
     $(document).on('click', '#btnChangePassword', function () {
         const $btn = $(this);
@@ -46,28 +148,31 @@
             ConfirmPassword: $form.find('input[name="ConfirmPassword"]').val()
         };
 
-        if (!formData.CurrentPassword || !formData.NewPassword) { alert("Lütfen tüm alanları doldurunuz."); return; }
-        if (formData.NewPassword !== formData.ConfirmPassword) { alert("Yeni şifreler uyuşmuyor."); return; }
+        if (!formData.CurrentPassword || !formData.NewPassword) { window.toastr.warning("Lütfen tüm alanları doldurunuz."); return; }
+        if (formData.NewPassword !== formData.ConfirmPassword) { window.toastr.warning("Yeni şifreler uyuşmuyor."); return; }
 
         $btn.prop('disabled', true).html('<i class="spinner-border spinner-border-sm"></i> Güncelleniyor...');
 
         $.ajax({
             url: '/Auth/ChangePassword', type: 'POST', contentType: 'application/json', data: JSON.stringify(formData),
-            success: function (res) { alert(res.message || "Şifre başarıyla değiştirildi."); $form[0].reset(); },
+            success: function (res) {
+                window.toastr.success(res.message || "Şifre başarıyla değiştirildi.");
+                $form[0].reset();
+            },
             error: function (xhr) {
                 let errorMsg = "İşlem başarısız.";
                 if (xhr.responseJSON) {
                     if (xhr.responseJSON.errors && Array.isArray(xhr.responseJSON.errors)) errorMsg = xhr.responseJSON.errors.join("\n");
                     else if (xhr.responseJSON.message) errorMsg = xhr.responseJSON.message;
                 }
-                alert(errorMsg);
+                window.toastr.error(errorMsg);
             },
             complete: function () { $btn.prop('disabled', false).html('<i class="bi bi-save"></i> Şifreyi Güncelle'); }
         });
     });
 
     // ==========================================
-    // 🔔 BİLDİRİM UI YÖNETİMİ
+    // 🔔 5. BİLDİRİM UI YÖNETİMİ
     // ==========================================
     function decreaseNotificationCount() {
         let $badge = $('#notificationCount');
@@ -116,12 +221,12 @@
     });
 
     // ==========================================
-    // 🔔 SIGNALR SİSTEMİ (ARTIK HER ŞEY İÇERİDE)
+    // 📡 6. SIGNALR SİSTEMİ
     // ==========================================
     (async function startSignalR() {
         console.log("🚀 SignalR Script Başlatılıyor...");
 
-        const token = window.currentUserToken;
+        const token = window.currentUserToken; // Token Layout'ta window objesine atanmış olmalı
         if (!token) return;
 
         const hubUrl = "https://localhost:7254/hubs/notification?access_token=" + encodeURIComponent(token);
@@ -136,14 +241,15 @@
         connection.on("ReceiveNotification", function (title, message, importance, linkUrl, notificationId) {
             var type = importance ? importance.toLowerCase() : "info";
 
-            if (typeof toastr !== 'undefined') {
-                toastr.options = { "closeButton": true, "progressBar": true, "positionClass": "toast-top-right", "timeOut": "5000" };
-                if (linkUrl) toastr.options.onclick = function () { window.location.href = linkUrl; };
-                if (type === "error") toastr.error(message, title);
-                else if (type === "warning") toastr.warning(message, title);
-                else if (type === "success") toastr.success(message, title);
-                else toastr.info(message, title);
-            }
+            // Not: Köprü sayesinde toastr artık SweetAlert2 kullanıyor.
+            // Ancak click eventi SweetAlert'te farklı handle edilir.
+            // Basitlik için sadece mesajı gösteriyoruz, linke gitme manuel yapılır
+            // veya Swal config ile güncellenebilir.
+
+            if (type === "error") window.toastr.error(message, title);
+            else if (type === "warning") window.toastr.warning(message, title);
+            else if (type === "success") window.toastr.success(message, title);
+            else window.toastr.info(message, title);
 
             let $badge = $('#notificationCount');
             let $header = $('#notificationHeader');
@@ -173,30 +279,18 @@
             }
         });
 
-        // ==========================================
-        // 🖼️ 3. PROFİL RESMİ GÜNCELLEME (İÇERİ ALINDI)
-        // ==========================================
+        // 3. Profil Resmi Güncelleme
         connection.on("ProfileImageUpdated", function (newImageUrl) {
             console.log("📸 Profil resmi güncellendi:", newImageUrl);
-
-            // API Adresini Al
             let finalUrl = newImageUrl;
             if (finalUrl && !finalUrl.startsWith('http')) {
-                // 🔴 PORT NUMARASINI KONTROL ET
                 finalUrl = "https://localhost:7254" + (finalUrl.startsWith('/') ? finalUrl : '/' + finalUrl);
             }
-
-            // Cache kırmak için timestamp
             finalUrl += "?t=" + new Date().getTime();
-
-            // Sayfadaki tüm profil resimlerini bul ve güncelle
             const $images = $('.user-image, .img-circle, #profileImagePreview, #navbarThumbnail, #navbarHeaderImage, .user-image-live');
-
             $images.attr('src', finalUrl);
 
-            if (typeof toastr !== 'undefined') {
-                toastr.info("Profil fotoğrafınız diğer cihazlarda da güncellendi.");
-            }
+            window.toastr.info("Profil fotoğrafınız diğer cihazlarda da güncellendi.");
         });
 
         try {
@@ -207,7 +301,7 @@
     })();
 
     // ==========================================
-    // 🔗 HASH SCROLL
+    // 🔗 7. HASH SCROLL
     // ==========================================
     if (window.location.hash) {
         var targetId = window.location.hash;
@@ -222,20 +316,16 @@
     }
 
     // ==========================================
-    // 🚪 KESİN ÇALIŞAN SIDEBAR KAYDEDİCİ
+    // 🚪 8. SIDEBAR KAYDEDİCİ
     // ==========================================
     $('[data-lte-toggle="sidebar"]').on('click', function () {
-        // AdminLTE sınıfı değiştirene kadar 300ms bekle
         setTimeout(function () {
-            // Şu an kapalı mı?
             var isClosed = $('body').hasClass('sidebar-collapse');
             var state = isClosed ? 'closed' : 'open';
-
-            // 🔥 EN ÖNEMLİ KISIM: path=/
-            // Bu olmazsa sayfa değişimlerinde unutur!
             document.cookie = "SidebarStatus=" + state + "; path=/; max-age=31536000";
-
             console.log("Sidebar Durumu Kaydedildi: " + state);
         }, 300);
     });
+
+
 });

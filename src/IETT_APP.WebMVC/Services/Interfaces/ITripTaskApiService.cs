@@ -1,4 +1,5 @@
-﻿using IETT_APP.Application.Dtos.TripTask;
+﻿using IETT_APP.Application.Dtos.Chief;
+using IETT_APP.Application.Dtos.TripTask;
 using IETT_APP.Application.Wrappers;
 using IETT_APP.Domain.Enums;
 
@@ -7,7 +8,7 @@ namespace IETT_APP.WebMVC.Services.Interfaces
     public interface ITripTaskApiService
     {
         // --- TEMEL CRUD ---
-        Task<IEnumerable<TripTaskDto>> GetAllAsync();
+        Task<IEnumerable<TripTaskDto>> GetAllAsync(string? creatorName = null);
         Task<TripTaskDto?> GetByIdAsync(Guid id);
         Task<IEnumerable<TripTaskDto>> SearchAsync(string query);
         Task<ServiceResult<TripTaskDto>> CreateAsync(TripTaskCreateDto dto);
@@ -25,6 +26,8 @@ namespace IETT_APP.WebMVC.Services.Interfaces
         Task<ServiceResult> StartTripAsync(Guid id);
         Task<ServiceResult> CompleteTripAsync(Guid id, CompleteTripRequestDto dto);
         Task<ServiceResult> FailTripAsync(Guid id, FailTripRequestDto dto);
+
+        Task<ChiefDashboardDto> GetChiefDashboardMetricsAsync(string? username);
 
     }
 }

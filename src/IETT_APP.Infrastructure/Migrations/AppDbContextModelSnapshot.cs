@@ -135,7 +135,7 @@ namespace IETT_APP.Infrastructure.Migrations
                         .IsUnique()
                         .HasFilter("[UserId] IS NOT NULL");
 
-                    b.ToTable("Drivers");
+                    b.ToTable("Drivers", (string)null);
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.FileRecorder", b =>
@@ -199,7 +199,7 @@ namespace IETT_APP.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FileRecorders");
+                    b.ToTable("FileRecorders", (string)null);
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.Garage<System.Guid>", b =>
@@ -247,7 +247,7 @@ namespace IETT_APP.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Garages");
+                    b.ToTable("Garages", (string)null);
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.Line<System.Guid>", b =>
@@ -299,7 +299,7 @@ namespace IETT_APP.Infrastructure.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("Lines");
+                    b.ToTable("Lines", (string)null);
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.Notification", b =>
@@ -357,7 +357,7 @@ namespace IETT_APP.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.Route<System.Guid>", b =>
@@ -417,7 +417,7 @@ namespace IETT_APP.Infrastructure.Migrations
 
                     b.HasIndex("LineId");
 
-                    b.ToTable("Routes");
+                    b.ToTable("Routes", (string)null);
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.RouteStop<System.Guid>", b =>
@@ -435,7 +435,7 @@ namespace IETT_APP.Infrastructure.Migrations
 
                     b.HasIndex("StopId");
 
-                    b.ToTable("RouteStops");
+                    b.ToTable("RouteStops", (string)null);
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.Stop<System.Guid>", b =>
@@ -467,7 +467,7 @@ namespace IETT_APP.Infrastructure.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("Stops");
+                    b.ToTable("Stops", (string)null);
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.TripTask", b =>
@@ -586,7 +586,7 @@ namespace IETT_APP.Infrastructure.Migrations
 
                     b.HasIndex("VehicleId");
 
-                    b.ToTable("TripTasks");
+                    b.ToTable("TripTasks", (string)null);
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.TripTaskHistory", b =>
@@ -617,7 +617,7 @@ namespace IETT_APP.Infrastructure.Migrations
 
                     b.HasIndex("TripTaskId");
 
-                    b.ToTable("TripTaskHistories");
+                    b.ToTable("TripTaskHistories", (string)null);
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.User", b =>
@@ -742,7 +742,7 @@ namespace IETT_APP.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserRefreshTokens");
+                    b.ToTable("UserRefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("IETT_APP.Domain.Entities.Vehicle<System.Guid>", b =>
@@ -841,7 +841,7 @@ namespace IETT_APP.Infrastructure.Migrations
 
                     b.HasIndex("GarageId");
 
-                    b.ToTable("Vehicles");
+                    b.ToTable("Vehicles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -1011,7 +1011,7 @@ namespace IETT_APP.Infrastructure.Migrations
 
                             b1.HasKey("GarageId");
 
-                            b1.ToTable("Garages");
+                            b1.ToTable("Garages", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("GarageId");
@@ -1077,7 +1077,7 @@ namespace IETT_APP.Infrastructure.Migrations
 
                             b1.HasKey("StopId");
 
-                            b1.ToTable("Stops");
+                            b1.ToTable("Stops", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("StopId");

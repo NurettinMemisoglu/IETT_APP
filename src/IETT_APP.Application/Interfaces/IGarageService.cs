@@ -4,7 +4,7 @@ namespace IETT_APP.Application.Interfaces.Garages
 {
     public interface IGarageService
     {
-        Task<IEnumerable<GarageDto<Guid>>> GetAllAsync();
-        Task<GarageDto<Guid>?> GetByIdAsync(Guid id);
+        Task<IEnumerable<GarageDto>> GetAllAsync();
+        Task<GarageDto?> GetByIdAsync(Guid id);
     }
 }

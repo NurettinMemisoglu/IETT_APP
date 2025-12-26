@@ -13,12 +13,14 @@ namespace IETT_APP.Application.Dtos.Vehicle
         public T GarageId { get; set; } = default!;
 
         public ServiceStatus ServiceStatus { get; set; }
+        public string? StatusReason { get; set; }
         public VehicleType Driver { get; set; }
 
         public VehicleModel Model { get; set; }
 
         public int Year { get; set; }
         public int TotalKm { get; set; }
+        public int FuelLevel { get; set; }
 
         public bool HasDisabilityAccess { get; set; } = true;
         public bool HasWiFi { get; set; } = true;

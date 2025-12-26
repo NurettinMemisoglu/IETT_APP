@@ -331,17 +331,7 @@ namespace IETT_APP.Infrastructure.Services
                 FullName = $"{driver.User?.Name} {driver.User?.Surname}",
                 ProfileImageUrl = driver.ProfileImagePath ?? string.Empty,
                 WorkStatus = driver.WorkStatus,
-                CompletedTasksCount = relevantTasks.Count(t => t.Status == TaskState.Completed),
-
-                // Mesai Metni (Switch Expression)
-                ShiftStatusText = driver.WorkStatus switch
-                {
-                    WorkStatus.Working => "Direksiyon Başında",
-                    WorkStatus.Resting => "Mola",
-                    WorkStatus.Available => "Görev Bekleniyor",
-                    WorkStatus.OffDuty => "Mesai Dışı",
-                    _ => "Durum Bilinmiyor"
-                }
+                CompletedTasksCount = relevantTasks.Count(t => t.Status == TaskState.Completed)
             };
 
             // =========================================================================

@@ -1,0 +1,52 @@
+﻿@using IETT_APP.Application.Dtos.Driver
+@model IEnumerable<DriverDto>
+
+@{
+    ViewData["Title"] = "Sürücü Yönetimi";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/planner-drivers.css" asp-append-version="true" />
+}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="m-0 fw-bold text-dark">
+            <i class="bi bi-person-badge text-primary me-2"></i> Sürücü Listesi
+        </h3>
+    </div>
+
+    <div class="search-bar-container">
+        <div class="p-2 bg-white rounded shadow-sm border" style="display:inline-block;">
+            <div class="input-group input-group-sm" style="width: 300px;">
+                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Sürücü ara..." />
+            </div>
+        </div>
+    </div>
+
+    <div class="table-card mt-3">
+        <div id="driversTableContainer">
+            <partial name="_DriversTablePartial" model="Model" />
+        </div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="generalModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg modal-content-blue-top" id="generalModalContent">
+            <div class="p-5 text-center">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Yükleniyor...</p>
+            </div>
+        </div>  
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script src="~/js/planner-drivers.js" asp-append-version="true"></script>
+}

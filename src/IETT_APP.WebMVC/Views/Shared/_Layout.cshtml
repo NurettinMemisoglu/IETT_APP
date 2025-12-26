@@ -4,8 +4,26 @@
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var apiBaseUrl = "https://localhost:7254"; // API Portun
 
-    // --- PROFİL RESMİ MANTIĞI (MERKEZİ) ---
-    string finalUserImage = "/assets/img/user2-160x160.jpg"; // Varsayılan
+    // --- KULLANICI ADI VE BAŞ HARFLERİ ---
+    var currentUserFullName = User.FindFirst("FullName")?.Value ?? User.Identity?.Name ?? "Kullanıcı";
+
+    // Baş harfleri hesapla (Örn: Ahmet Yılmaz -> AY)
+    string userInitials = "";
+    if (!string.IsNullOrEmpty(currentUserFullName))
+    {
+        var parts = currentUserFullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length > 0) userInitials += parts[0][0];
+        if (parts.Length > 1) userInitials += parts[parts.Length - 1][0];
+        userInitials = userInitials.ToUpper();
+    }
+    else
+    {
+        userInitials = "U";
+    }
+
+    // --- PROFİL RESMİ MANTIĞI ---
+    // Varsayılan resmi NULL yapıyoruz ki aşağıda kontrol edebilelim
+    string? finalUserImage = null;
 
     if (User.Identity != null && User.Identity.IsAuthenticated)
     {
@@ -14,6 +32,7 @@
         {
             if (profilePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
             {
+                // Port düzeltmesi (varsa)
                 if (profilePath.Contains(":7060"))
                 {
                     finalUserImage = profilePath.Replace(":7060", ":7254");
@@ -32,14 +51,13 @@
     }
 
     ViewData["FinalUserImage"] = finalUserImage;
-    var currentUserFullName = User.FindFirst("FullName")?.Value ?? User.Identity?.Name ?? "Kullanıcı";
-
     var sidebarCookie = Context.Request.Cookies["IETT_SidebarState"];
     var sidebarClass = (sidebarCookie == "closed") ? "sidebar-collapse" : "";
 }
 <!doctype html>
 <html lang="tr">
 <head>
+
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>IETT Operasyon</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
@@ -53,7 +71,6 @@
     <link rel="stylesheet" href="~/css/adminlte.css" />
 
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/css/jsvectormap.min.css" />
@@ -112,12 +129,46 @@
 
                         <li class="nav-item dropdown user-menu">
                             <a href="#" class="nav-link dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown">
-                                <img src="@finalUserImage" class="user-image rounded-circle shadow-sm border" alt="User" style="width:35px; height:35px; object-fit: cover;">
+
+                                @if (!string.IsNullOrEmpty(finalUserImage))
+                                {
+                                    <img src="@finalUserImage" class="user-image rounded-circle shadow-sm border" alt="User"
+                                         style="width:35px; height:35px; object-fit: cover;"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+
+                                    <div class="user-avatar-placeholder nav-avatar-sm shadow-sm" style="display:none;">
+                                        @userInitials
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="user-avatar-placeholder nav-avatar-sm shadow-sm">
+                                        @userInitials
+                                    </div>
+                                }
+
                                 <span class="d-none d-md-inline fw-semibold text-dark">@currentUserFullName</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2" style="border-radius:12px; overflow:hidden;">
                                 <li class="user-header bg-primary text-white text-center py-4">
-                                    <img src="@finalUserImage" class="rounded-circle shadow border border-2 border-white mb-2" style="width:70px;height:70px; object-fit:cover;" alt="User">
+
+                                    @if (!string.IsNullOrEmpty(finalUserImage))
+                                    {
+                                        <img src="@finalUserImage" class="rounded-circle shadow border border-2 border-white mb-2"
+                                             style="width:70px;height:70px; object-fit:cover;" alt="User"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+
+                                        <div class="user-avatar-placeholder nav-avatar-lg shadow border border-2 border-white mb-2" style="display:none;">
+                                            @userInitials
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="user-avatar-placeholder nav-avatar-lg shadow border border-2 border-white mb-2">
+                                            @userInitials
+                                        </div>
+                                    }
+
                                     <p class="mb-0 fw-bold">@currentUserFullName</p>
                                     <small class="opacity-75">@userRolesDisplay</small>
                                 </li>
@@ -162,37 +213,9 @@
             </div>
 
             <div class="sidebar-wrapper">
-                @if (IsSectionDefined("Sidebar"))
-                {
-                    @RenderSection("Sidebar")
-                }
-                else
-                {
-                    @if (User.IsInRole("Admin"))
-                    {
-                        @await Html.PartialAsync("~/Areas/Admin/Views/_Sidebar_Admin.cshtml")
-                    }
-                    @if (User.IsInRole("Planner"))
-                    {
-
-                        @await Html.PartialAsync("~/Areas/Planner/Views/_Sidebar_Planner.cshtml")
-                    }
-                    @if (User.IsInRole("Chief"))
-                    {
-
-                        @await Html.PartialAsync("~/Areas/Chief/Views/_Sidebar_Chief.cshtml")
-                    }
-                    @if (User.IsInRole("Driver"))
-                    {
-
-                        @await Html.PartialAsync("~/Areas/Driver/Views/_Sidebar_Driver.cshtml")
-                    }
-                    @if (!User.IsInRole("User"))
-                    {
-
-                        @await Html.PartialAsync("_Sidebar_User")
-                    }
-                }
+                <div class="sidebar flex-grow-1 p-0 m-0" style="overflow: hidden;">
+                    <partial name="_MainSidebar" />
+                </div>
             </div>
         </aside>
 
@@ -221,7 +244,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/tr.js"></script>
 
@@ -284,6 +306,9 @@
     }
 
     <partial name="_NotificationPartial" />
+
+    <input type="hidden" id="server-success-msg" value="@TempData["SuccessMessage"]" />
+    <input type="hidden" id="server-error-msg" value="@TempData["ErrorMessage"]" />
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

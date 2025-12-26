@@ -1,0 +1,162 @@
+﻿/* ===============================================
+   PLANNER DRIVERS - STRICT ADMIN STYLE
+   =============================================== */
+
+body {
+    background-color: #f4f6f9;
+}
+
+/* --- ARAMA ALANI --- */
+.search-bar-container {
+    background-color: transparent;
+    margin-bottom: 1rem;
+}
+
+/* --- TABLO KARTI --- */
+.table-card {
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    border: 1px solid #dee2e6;
+    overflow: hidden;
+}
+
+/* HEADER (SİYAH) */
+.custom-table thead,
+.custom-table thead tr,
+.custom-table thead th {
+    background-color: #212529 !important;
+    color: #ffffff !important;
+    border-bottom: none;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    padding: 12px 15px;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* SATIRLAR */
+.custom-table tbody td {
+    vertical-align: middle;
+    padding: 12px 15px;
+    font-size: 0.9rem;
+    color: #333;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.custom-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* --- BADGE STİLLERİ --- */
+.custom-badge {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+    min-width: 70px;
+    text-align: center;
+}
+
+.badge-info-soft {
+    background-color: rgba(13, 202, 240, 0.10);
+    color: #0c9ebc;
+    border: 1px solid rgba(13, 202, 240, 0.15);
+}
+
+/* --- STATUS PILL --- */
+.status-pill {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #fff !important;
+    text-align: center;
+    min-width: 70px;
+}
+
+.status-active {
+    background-color: #198754 !important;
+}
+
+.status-passive {
+    background-color: #6c757d !important;
+}
+
+/* --- BUTTON GROUP --- */
+.btn-group .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 4px;
+    margin: 0 2px;
+}
+
+/* --- DRIVER AVATAR --- */
+.driver-avatar-placeholder {
+    width: 38px;
+    height: 38px;
+    background-color: #e9ecef;
+    color: #495057;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* ===============================================
+   MODAL STYLES (AdminLTE / Bootstrap Extended)
+   =============================================== */
+
+.modal-content {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Modal Header - Mavi Üst Çizgi */
+.modal-content-blue-top {
+    border-top: 4px solid #0d6efd !important;
+}
+
+.modal-header {
+    background-color: #fff;
+    border-bottom: 1px solid #dee2e6;
+    padding: 1rem 1.5rem;
+}
+
+.modal-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #343a40;
+}
+
+.modal-body {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    background-color: #fff;
+    border-top: 1px solid #dee2e6;
+    padding: 1rem 1.5rem;
+}
+
+/* Form Kartı (Modal İçi) */
+.form-card-simple {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}

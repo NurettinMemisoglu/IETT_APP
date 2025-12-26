@@ -10,10 +10,18 @@ namespace IETT_APP.WebMVC.Areas.Driver.Controllers
     public class HomeController : Controller
     {
         private readonly IDriverApiService _driverService;
+        private readonly ITripTaskApiService _tripTaskService;
+        private readonly IVehicleApiService _vehicleService;
 
-        public HomeController(IDriverApiService driverService)
+        // Constructor (Tek ve Temiz)
+        public HomeController(
+            IDriverApiService driverService,
+            ITripTaskApiService tripTaskService,
+            IVehicleApiService vehicleService)
         {
             _driverService = driverService;
+            _tripTaskService = tripTaskService;
+            _vehicleService = vehicleService;
         }
 
         [HttpGet]
@@ -21,15 +29,12 @@ namespace IETT_APP.WebMVC.Areas.Driver.Controllers
         {
             try
             {
-                // 1. API'den Dashboard Verisini Çekmeye Çalış
+                // 1. Dashboard Verisini Çek
                 var dashboardDto = await _driverService.GetDashboardAsync();
 
-                // 2. Eğer dashboardDto NULL geliyorsa, API'den veri alamadık demektir.
-                // Bu genellikle yeni kullanıcının profili olmadığı anlamına gelir.
+                // 2. Profil yoksa oluşturmaya gönder
                 if (dashboardDto == null)
                 {
-                    // HATAYI ÇÖZEN SATIR BURASI:
-                    // Login'e atmak yerine, Profil Oluşturma sayfasına yönlendiriyoruz.
                     return RedirectToAction("Create", "Profile");
                 }
 
@@ -44,14 +49,38 @@ namespace IETT_APP.WebMVC.Areas.Driver.Controllers
             }
             catch (Exception)
             {
-                // API 400 veya 404 hatası fırlattıysa (Profil yoksa API hata fırlatıyor olabilir)
-                // Bu durumda da Create sayfasına yönlendirmeliyiz.
-
-                // NOT: Eğer API gerçekten çöktüyse kullanıcı Create sayfasına gider, 
-                // orası da hata verirse ExceptionMiddleware yakalar.
-                // Ancak "Döngüye girmemesi" için en güvenli yol budur.
+                // API hatasında Create sayfasına yönlendir
                 return RedirectToAction("Create", "Profile");
             }
+        }
+
+        // ===================================================================
+        // Modal İçin Araç Bilgilerini Getirir (JS buradan veri çeker)
+        // ===================================================================
+        [HttpGet]
+        public async Task<IActionResult> GetVehicleInfoForTask(Guid taskId)
+        {
+            // 1. Task'ı bul
+            var task = await _tripTaskService.GetByIdAsync(taskId);
+
+            if (task == null || task.VehicleId == null)
+            {
+                return Ok(new { LastFuel = (int?)null, LastKm = (int?)null });
+            }
+
+            // 2. Aracı bul
+            var vehicle = await _vehicleService.GetByIdAsync(task.VehicleId.Value);
+
+            if (vehicle == null)
+                return Ok(new { LastFuel = (int?)null, LastKm = (int?)null });
+
+            // 3. JSON dön
+            // DİKKAT: VehicleDto içindeki property isimlerinizin FuelLevel ve TotalKm olduğundan emin olun.
+            return Ok(new
+            {
+                LastFuel = vehicle.FuelLevel,
+                LastKm = vehicle.TotalKm
+            });
         }
     }
 }

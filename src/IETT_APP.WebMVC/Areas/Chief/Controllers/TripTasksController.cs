@@ -41,8 +41,14 @@ namespace IETT_APP.WebMVC.Areas.Chief.Controllers
         {
             try
             {
-                var tasks = await _tripTaskApiService.GetAllAsync();
+                // Admin ise null (hepsi), değilse isim (filtreli)
+                var username = User.IsInRole("Admin") ? null : User.Identity?.Name;
+
+                var tasks = await _tripTaskApiService.GetAllAsync(username);
+
+                // Client tarafı "IsDeleted" kontrolü (Extra güvenlik)
                 var activeTasks = tasks.Where(x => !x.IsDeleted).Select(x => x.ToViewModel()).ToList();
+
                 return View(activeTasks);
             }
             catch

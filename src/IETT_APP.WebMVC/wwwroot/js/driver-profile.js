@@ -1,15 +1,42 @@
 ﻿$(document).ready(function () {
 
     // ============================================================
-    // 1. ORTAK AYARLAR (DATEPICKER)
+    // 1. ORTAK AYARLAR VE GÖRÜNÜRLÜK FONKSİYONLARI
     // ============================================================
-    // Flatpickr varsa ve sayfada .datepicker class'lı eleman varsa çalıştır
+
+    // --- KRONİK RAHATSIZLIK GÖSTER/GİZLE MANTIĞI ---
+    function toggleChronicDetails() {
+        // ID yerine Name grubu üzerinden kontrol ediyoruz (En güvenli yöntem)
+        // Değeri "true" olan radio seçili mi?
+        const isYesSelected = $('input[name="HasChronicDisease"][value="true"]').is(':checked');
+
+        const $container = $('#chronicDetailsContainer');
+        const $noteInput = $('textarea[name="HealthNotes"]');
+
+        if (isYesSelected) {
+            $container.slideDown();
+        } else {
+            $container.slideUp();
+            // "YOK" seçilirse görünürdeki inputu temizle
+            $noteInput.val('');
+        }
+    }
+
+    // Sayfa yüklendiğinde çalıştır
+    toggleChronicDetails();
+
+    // Radio butonlar değiştiğinde çalıştır
+    $('input[name="HasChronicDisease"]').on('change', function () {
+        toggleChronicDetails();
+    });
+
+    // --- DATEPICKER AYARLARI ---
     if (typeof flatpickr !== 'undefined' && $(".datepicker").length > 0) {
         flatpickr(".datepicker", {
             locale: "tr",
-            dateFormat: "Y-m-d", // Sunucu formatı
+            dateFormat: "Y-m-d",
             altInput: true,
-            altFormat: "d F Y",  // Görünen format
+            altFormat: "d F Y",
             allowInput: false,
             disableMobile: true
         });
@@ -18,34 +45,10 @@
     // ============================================================
     // 2. CREATE SAYFASI (PROFİL OLUŞTURMA - AJAX)
     // ============================================================
-    // Not: Create.cshtml dosyasındaki buton ID'si "btnInlineSave" veya "btnCreateSave" olabilir.
-    // İkisini de kapsayacak şekilde seçim yapalım.
     const $btnCreate = $('#btnCreateSave, #btnInlineSave');
 
     if ($btnCreate.length > 0) {
-
-        // A. KRONİK RAHATSIZLIK GÖSTER/GİZLE
-        function toggleChronicDetails() {
-            if ($('#chronicCheck').is(':checked')) {
-                $('#chronicDetails').slideDown();
-            } else {
-                $('#chronicDetails').slideUp();
-                // Kapandığında içini temizlemek istersen:
-                // $('#chronicDetails input').val(''); 
-            }
-        }
-
-        // Sayfa yüklendiğinde çalıştır (Hata sonrası dönüşlerde açık kalsın diye)
-        toggleChronicDetails();
-
-        // Değişiklik olduğunda çalıştır
-        $('#chronicCheck').on('change', function () {
-            toggleChronicDetails();
-        });
-
-        // B. KAYDETME BUTONU (AJAX)
         $btnCreate.off('click').on('click', function (e) {
-            // 1. Tarayıcı varsayılan işlemini durdur
             e.preventDefault();
             e.stopPropagation();
 
@@ -53,37 +56,46 @@
             const originalText = $btn.html();
             const $form = $('#createProfileForm');
 
-            // 2. jQuery Validation Kontrolü
+            // Validasyon
             if ($form.valid && !$form.valid()) {
                 if (typeof toastr !== 'undefined') toastr.warning("Lütfen zorunlu alanları doldurunuz.");
-                // İlk hatalı alana odaklan
-                $form.find('.input-validation-error').first().focus();
                 return;
             }
 
-            console.log("Validasyon geçti, AJAX isteği hazırlanıyor...");
-
-            // 3. Butonu Kilitle
             $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>İşleniyor...');
 
-            // 4. Form Verisini Hazırla
             const formData = new FormData($form[0]);
 
-            formData.delete('HasChronicDisease');
+            // --- CREATE MANTIĞI ---
 
-            // Sonra sadece doğru olan değeri (True/False) ekliyoruz
-            const isChecked = $('#chronicCheck').is(':checked');
-            formData.append('HasChronicDisease', isChecked);
+            // 1. Radio grubundan seçili olan değeri al (String gelir: "true" veya "false")
+            let selectedVal = $('input[name="HasChronicDisease"]:checked').val();
+            let isChronic = (selectedVal === "true"); // Boolean'a çevir
+
+            // 2. Not alanını kontrol et
+            const healthNotes = $form.find('textarea[name="HealthNotes"]').val().trim();
+
+            // 3. KURAL: Eğer "VAR" seçili ama not BOŞ ise -> "YOK" (false) yap.
+            if (isChronic && healthNotes === "") {
+                isChronic = false;
+            }
+
+            // 4. Form verisini güncelle
+            formData.delete('HasChronicDisease');
+            formData.append('HasChronicDisease', isChronic);
+
+            // Eğer false ise notu da temizle
+            if (!isChronic) {
+                formData.set('HealthNotes', '');
+            }
 
             $.ajax({
                 url: '/Driver/Profile/Create',
                 type: 'POST',
                 data: formData,
-                contentType: false, // Multipart için false olmalı
-                processData: false, // Dosya gönderimi için false olmalı
+                contentType: false,
+                processData: false,
                 success: function (data) {
-                    console.log("İşlem Başarılı:", data);
-
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             icon: 'success',
@@ -95,41 +107,24 @@
                             window.location.href = data.redirectUrl ? data.redirectUrl : '/Driver/Profile/Index';
                         });
                     } else {
-                        alert("Başarılı: " + (data.message || "İşlem tamamlandı."));
                         window.location.href = data.redirectUrl || '/Driver/Profile/Index';
                     }
                 },
                 error: function (xhr) {
-                    console.error("Hata:", xhr);
-
-                    // Butonu eski haline getir
                     $btn.prop('disabled', false).html(originalText);
-
-                    // Hata Mesajını Ayıkla
                     let userMessage = "Bir hata oluştu.";
-
+                    // Hata mesajı ayrıştırma...
                     try {
                         if (xhr.responseJSON) {
-                            if (xhr.responseJSON.message) {
-                                userMessage = xhr.responseJSON.message;
-                            }
+                            if (xhr.responseJSON.message) userMessage = xhr.responseJSON.message;
                             if (xhr.responseJSON.errors && Array.isArray(xhr.responseJSON.errors)) {
                                 userMessage += "\n" + xhr.responseJSON.errors.join("\n");
                             }
-                        } else if (xhr.responseText) {
-                            if (xhr.responseText.length < 500) userMessage = xhr.responseText;
                         }
-                    } catch (err) {
-                        console.error("Hata parse edilemedi", err);
-                    }
+                    } catch (err) { console.error(err); }
 
-                    // Hatalı (Kırmızı) SweetAlert
                     if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Hata!',
-                            html: userMessage.replace(/\n/g, '<br>')
-                        });
+                        Swal.fire({ icon: 'error', title: 'Hata!', html: userMessage.replace(/\n/g, '<br>') });
                     } else {
                         alert("HATA:\n" + userMessage);
                     }
@@ -154,15 +149,32 @@
 
             $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Kaydediliyor...');
 
+            // --- UPDATE MANTIĞI ---
+
+            // 1. Radio grubundan seçili değeri al (String -> Boolean)
+            let selectedVal = $('input[name="HasChronicDisease"]:checked').val();
+            let isChronic = (selectedVal === "true");
+
+            // 2. Not alanını al
+            let healthNotes = $('textarea[name="HealthNotes"]').val();
+
+            // 3. Mantık Kontrolü: Not boşsa False yap
+            if (isChronic && (!healthNotes || healthNotes.trim() === "")) {
+                isChronic = false;
+                healthNotes = ""; // DB temizliği için boş string gönder
+            }
+
             const jsonData = {
                 Id: operatorId,
                 PhoneNumber: $('input[name="PhoneNumber"]').val(),
+                Email: $('input[name="Email"]').val(),
                 Address: $('textarea[name="Address"]').val(),
                 EmergencyContactName: $('input[name="EmergencyContactName"]').val(),
                 EmergencyContactPhone: $('input[name="EmergencyContactPhone"]').val(),
                 BloodType: $('select[name="BloodType"]').val(),
-                HasChronicDisease: $('input[name="HasChronicDisease"]').is(':checked'),
-                HealthNotes: $('textarea[name="HealthNotes"]').val()
+                // Hesaplanmış değerleri gönderiyoruz
+                HasChronicDisease: isChronic,
+                HealthNotes: healthNotes
             };
 
             $.ajax({

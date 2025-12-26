@@ -127,7 +127,8 @@ namespace IETT_APP.Infrastructure.Services
             if (user.Email != userDto.Email)
             {
                 user.Email = userDto.Email;
-                user.UserName = userDto.Email; // Email ile Username aynı ise
+                user.UserName = userDto.Email;
+                user.PhoneNumber = userDto.PhoneNumber;
             }
 
             // 3. Güncelleyen kişiyi al ve Update işlemini yap

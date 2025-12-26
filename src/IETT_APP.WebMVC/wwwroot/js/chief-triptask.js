@@ -9,11 +9,47 @@
         allowClear: true
     });
 
-    // === 2. DROPDOWNLARI DOLDUR ===
+    // === 2. TARİH SEÇİCİ (FLATPICKR) BAŞLATMA ===
+    initDatePickers();
+
+    function initDatePickers() {
+        const dateInputs = document.querySelectorAll(".date-input-with-icon");
+
+        if (dateInputs.length > 0 && typeof flatpickr !== 'undefined') {
+            dateInputs.forEach(input => {
+
+                // 🔥 KİLİT NOKTA: Disabled/Readonly ise takvimi bağlama! 🔥
+                // Bu sayede Edit modunda takvim açılmaz.
+                if (input.hasAttribute('disabled') || input.hasAttribute('readonly')) {
+                    return;
+                }
+
+                // Mevcut değeri al (Düzenleme modu için)
+                const existingValue = input.value;
+
+                flatpickr(input, {
+                    enableTime: true,             // Saat seçimi aktif
+                    dateFormat: "d.m.Y H:i",      // Format: 25.12.2025 14:30
+                    time_24hr: true,              // 24 saat formatı
+                    locale: "tr",                 // Türkçe dil desteği
+
+                    // "today" -> Bugünden önceki günleri (dün vb.) seçtirmesin.
+                    minDate: "today",
+
+                    // Input'ta zaten bir tarih varsa onu varsayılan olarak seçili getir
+                    defaultDate: existingValue ? existingValue : null,
+
+                    disableMobile: "true",        // Mobil klavye açılmasın
+                    allowInput: false             // Elle yazmayı engelle (sadece seçim)
+                });
+            });
+        }
+    }
+
+    // === 3. DROPDOWNLARI DOLDUR ===
     initDropdowns();
 
     function initDropdowns() {
-
         if (typeof allLines === 'undefined') {
             console.warn("allLines bulunamadı!");
             return;
@@ -43,7 +79,6 @@
         setInitialValue('#Status');
     }
 
-  
     // --- YARDIMCI FONKSİYONLAR ---
     function populateDropdown(selector, data, valueProp, textProp1, textProp2 = null) {
         const $select = $(selector);
@@ -73,7 +108,7 @@
         if (val) $(selector).val(val).trigger('change');
     }
 
-    // === 3. CASCADING: HAT -> GÜZERGAH ===
+    // === 4. CASCADING: HAT -> GÜZERGAH ===
     $('#LineId').on('change', function () {
         const selectedLineId = $(this).val();
         const $routeSelect = $('#RouteId');
@@ -99,7 +134,7 @@
         }
     });
 
-    // === 4. CASCADING: GARAJ -> ARAÇ ===
+    // === 5. CASCADING: GARAJ -> ARAÇ ===
     $('#GarageId').on('change', function () {
         const selectedGarageId = $(this).val();
         const $vehicleSelect = $('#VehicleId');
@@ -125,28 +160,18 @@
         }
     });
 
-    // === UX: İPTAL SEÇİLİRSE AÇIKLAMA İSTE ===
+    // === 6. UX: İPTAL SEÇİLİRSE AÇIKLAMA İSTE ===
     $('#Status').on('change', function () {
         const statusVal = parseInt($(this).val());
         const $reasonInput = $('#StatusReason');
 
         // Enum: Cancelled(4) veya Incomplete(5)
         if (statusVal === 4 || statusVal === 5) {
-            // Görsel uyarı ver
             $reasonInput.addClass('is-invalid border-danger');
             $reasonInput.prop('required', true);
-
-            // Kullanıcıya ipucu ver
             $reasonInput.attr('placeholder', 'Lütfen iptal/yarım kalma nedenini giriniz...');
-
-            // Oraya odaklan
             $reasonInput.focus();
-
-            // İstersen Toastr ile de uyarabilirsin (Opsiyonel)
-            // if (typeof toastr !== 'undefined') toastr.warning("Lütfen durum açıklamasını giriniz.");
-        }
-        else {
-            // Normale döndür
+        } else {
             $reasonInput.removeClass('is-invalid border-danger');
             $reasonInput.prop('required', false);
             $reasonInput.attr('placeholder', 'Durum Açıklaması');
@@ -163,7 +188,6 @@
         const $form = $('#tripTaskForm');
 
         if ($form.valid && !$form.valid()) {
-            // Validasyon hatası varsa ilk hataya odaklan
             $('.input-validation-error').first().focus();
             return;
         }
@@ -195,16 +219,14 @@
             delayInMinutes: parseInt($('#DelayInMinutes').val()) || 0,
             delayOutMinutes: parseInt($('#DelayOutMinutes').val()) || 0,
 
-            // PLANLANAN SAATLER
+            // DİKKAT: Disabled inputlar .val() ile alınamazsa diye hidden inputlar HTML'de var.
+            // Ama JS .val() disabled olsa bile değeri okur. Yine de null kontrolü ekledik.
             scheduledDeparture: $('#ScheduledDeparture').val() || null,
             scheduledArrival: $('#ScheduledArrival').val() || null,
 
-            // 🔥 HATAYI ÇÖZEN KISIM: REVİZE SAATLER EKLENDİ 🔥
-            // Input ID'lerinden değerleri okuyup DTO'ya ekliyoruz
             adjustedDeparture: $('#AdjustedDeparture').val() || null,
             adjustedArrival: $('#AdjustedArrival').val() || null,
 
-            // GERÇEKLEŞEN SAATLER
             actualDeparture: $('#ActualDeparture').val() || null,
             actualArrival: $('#ActualArrival').val() || null
         };
@@ -228,43 +250,32 @@
                 }, 1000);
             },
             error: function (xhr) {
-                console.error("AJAX Hatası:", xhr); // Teknik detayı sadece konsola bas (Yazılımcı görsün)
-
+                console.error("AJAX Hatası:", xhr);
                 let errorMsg = "Bir hata oluştu.";
 
-                // 1. JSON Cevabını Analiz Et
                 if (xhr.responseJSON) {
-                    // Sadece 'message' alanını al. 'detail' veya 'stackTrace' alanlarını alma.
                     if (xhr.responseJSON.message) {
                         errorMsg = xhr.responseJSON.message;
-                    }
-                    else if (xhr.responseJSON.title) {
+                    } else if (xhr.responseJSON.title) {
                         errorMsg = xhr.responseJSON.title;
                     }
-
-                    // Validasyon Hataları
                     if (xhr.responseJSON.errors) {
                         if (Array.isArray(xhr.responseJSON.errors)) {
                             errorMsg += "\n" + xhr.responseJSON.errors.join("\n");
-                        }
-                        else if (typeof xhr.responseJSON.errors === 'object') {
+                        } else if (typeof xhr.responseJSON.errors === 'object') {
                             for (let key in xhr.responseJSON.errors) {
                                 errorMsg += "\n- " + xhr.responseJSON.errors[key];
                             }
                         }
                     }
-                }
-                // 2. Eğer JSON yoksa ve Raw Text geldiyse
-                else if (xhr.responseText) {
-                    // Eğer mesaj çok uzunsa (Stack Trace ise) kullanıcıya gösterme
+                } else if (xhr.responseText) {
                     if (xhr.responseText.length > 200) {
-                        errorMsg = "Sunucu tarafında teknik bir hata oluştu. Lütfen konsolu kontrol ediniz.";
+                        errorMsg = "Sunucu tarafında teknik bir hata oluştu.";
                     } else {
                         errorMsg = xhr.responseText;
                     }
                 }
 
-                // 3. Temiz Mesajı Göster
                 if (typeof toastr !== 'undefined') {
                     toastr.error(errorMsg, "Hata", { timeOut: 7000 });
                 } else {
@@ -422,7 +433,4 @@
 
     // Sayfa Yüklendiğinde
     initPagination();
-
-    // Arama Yapıldığında (Tablo içeriği değişince tekrar çalıştır)
-    // refreshTripTasksTable fonksiyonunun success bloğuna 'initPagination()' eklemeyi unutma.
 });

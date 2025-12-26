@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using IETT_APP.Application.Dtos.Chief;
 using IETT_APP.Application.Dtos.TripTask;
 using IETT_APP.Application.Interfaces;
 using IETT_APP.Domain.Entities;
@@ -263,6 +264,123 @@ namespace IETT_APP.Infrastructure.Services
 
             await _repository.SoftDeleteAsync(entity, reason);
             await NotifyStateChange(id);
+        }
+
+        public async Task<ChiefDashboardDto> GetDashboardMetricsAsync(string? username)
+        {
+            var response = new ChiefDashboardDto();
+
+            // 1. Tüm Görevleri Çek (Repository'deki mevcut GetAllAsync'i kullanıyoruz)
+            //    Eğer username doluysa (Chief), sadece kendi görevlerini getirir.
+            var allTasks = await _repository.GetAllAsync(username);
+
+            // 2. Sadece BUGÜNÜN görevlerini filtrele
+            var today = DateTime.Today;
+            var todaysTasks = allTasks.Where(x => x.ScheduledDeparture.HasValue &&
+                                                  x.ScheduledDeparture.Value.Date == today).ToList();
+
+            // 3. KPI Hesapla
+            response.TotalTasksToday = todaysTasks.Count;
+            response.ActiveTrips = todaysTasks.Count(x => x.Status == TaskState.InProgress);
+            response.CompletedToday = todaysTasks.Count(x => x.Status == TaskState.Completed);
+            response.PendingIssues = todaysTasks.Count(x => x.Status == TaskState.Cancelled ||
+                                                      x.Status == TaskState.Incomplete);
+
+            // 4. Timeline Oluştur
+            response.DailyTimeline = todaysTasks.OrderBy(x => x.ScheduledDeparture).Select(t =>
+            {
+                bool isDelayed = false;
+                int delayMin = 0;
+
+                if ((t.Status == TaskState.Pending || t.Status == TaskState.Accepted) &&
+                    t.ScheduledDeparture < DateTime.Now)
+                {
+                    isDelayed = true;
+                    delayMin = (int)(DateTime.Now - t.ScheduledDeparture.Value).TotalMinutes;
+                }
+
+                // Entity'den DTO'ya Map (Manuel Mapping)
+                return new DashboardTimelineItemDto
+                {
+                    Id = t.Id,
+                    LineCode = t.Line?.Code ?? "-",       // Entity Navigasyonu
+                    RouteName = t.Route?.Name ?? "Belirsiz",
+                    DriverName = t.Driver?.User != null ? $"{t.Driver.User.Name} {t.Driver.User.Surname}" : "Atanmadı",
+                    PlateNumber = t.Vehicle?.PlateNumber ?? "-",
+                    ScheduledTime = t.ScheduledDeparture ?? DateTime.Now,
+                    ActualTime = t.ActualDeparture,
+                    Status = t.Status,
+                    IsDelayed = isDelayed,
+                    DelayMinutes = delayMin
+                };
+            }).ToList();
+
+            // ============================================================
+            // 5. GENİŞLETİLMİŞ KRİTİK UYARILAR (İptaller + Gecikmeler)
+            // ============================================================
+
+            var allAlerts = new List<DashboardAlertDto>();
+
+            // ------------------------------------------------------------
+            // A) İPTAL VE YARIM KALANLAR (Yüksek Öncelik - Kırmızı/Danger)
+            // ------------------------------------------------------------
+            var criticalErrors = todaysTasks
+                .Where(x => x.Status == TaskState.Cancelled || x.Status == TaskState.Incomplete)
+                .Select(x => new DashboardAlertDto
+                {
+                    Id = x.Id,
+                    Title = $"{x.Line?.Code ?? "-"} - İPTAL/ARIZA",
+                    Reason = x.StatusReason ?? "Neden belirtilmedi",
+                    Time = x.UpdatedAt ?? DateTime.Now,
+                    AlertType = AlertType.Danger // View tarafında Kırmızı çerçeve için
+                });
+
+            allAlerts.AddRange(criticalErrors);
+
+            // ------------------------------------------------------------
+            // B) GECİKEN SEFERLER (Orta Öncelik - Turuncu/Warning)
+            // Mantık: Statüsü hala 'Pending' veya 'Accepted' ise VE saati geçtiyse
+            // ------------------------------------------------------------
+            var delayedWarnings = todaysTasks
+                .Where(x => (x.Status == TaskState.Pending || x.Status == TaskState.Accepted)
+                            && x.ScheduledDeparture.HasValue
+                            && x.ScheduledDeparture.Value < DateTime.Now) // Şimdiki zamanı geçmiş
+                .Select(x => new DashboardAlertDto
+                {
+                    Id = x.Id,
+                    Title = $"{x.Line?.Code ?? "-"} - GECİKME",
+                    // Gecikme süresini hesaplayıp mesaj olarak yazıyoruz
+                    Reason = $"Planlanan kalkış saati {(int)(DateTime.Now - x.ScheduledDeparture.Value).TotalMinutes} dakika geçti. Henüz çıkış yapılmadı.",
+                    Time = DateTime.Now, // Olayın zamanı şu an
+                    AlertType = AlertType.Warning // View tarafında Turuncu çerçeve için
+                });
+
+            allAlerts.AddRange(delayedWarnings);
+
+            // ------------------------------------------------------------
+            // C) LİSTEYİ BİRLEŞTİR, SIRALA VE DTO'YA EKLE
+            // ------------------------------------------------------------
+            response.CriticalAlerts = allAlerts
+                .OrderByDescending(x => x.Time) // En son olan olay en üstte
+                .Take(10) // Sayıyı biraz artırdık (Hem iptal hem gecikme sığsın)
+                .ToList();
+
+            // 6. Şoför İstatistikleri (IDriverRepository kullanıyoruz)
+            var allDrivers = await _driverRepository.GetAllWithDetailsAsync(); // Tüm şoförleri çek
+            if (allDrivers != null)
+            {
+                response.DriverStats = new DashboardDriverStatsDto
+                {
+                    TotalDrivers = allDrivers.Count(),
+                    Active = allDrivers.Count(d => d.WorkStatus == WorkStatus.Working),
+                    Available = allDrivers.Count(d => d.WorkStatus == WorkStatus.Available),
+                    OnLeave = allDrivers.Count(d => d.WorkStatus == WorkStatus.OnVacation ||
+                                                    d.WorkStatus == WorkStatus.MedicalLeave ||
+                                                    d.WorkStatus == WorkStatus.AdministrativeLeave)
+                };
+            }
+
+            return response;
         }
 
         // ============================================================
@@ -596,7 +714,13 @@ namespace IETT_APP.Infrastructure.Services
         // OKUMA & YARDIMCI METOTLAR
         // ============================================================
 
-        public async Task<IEnumerable<TripTaskDto>> GetAllAsync() => _mapper.Map<IEnumerable<TripTaskDto>>(await _repository.GetAllAsync());
+        public async Task<IEnumerable<TripTaskDto>> GetAllAsync(string? creatorName = null)
+        {
+            var allTasks = await _repository.GetAllAsync(creatorName);
+
+            return _mapper.Map<IEnumerable<TripTaskDto>>(allTasks);
+        }
+
         public async Task<TripTaskDto?> GetByIdAsync(Guid id) => _mapper.Map<TripTaskDto>(await _repository.GetByIdAsync(id));
         public async Task<IEnumerable<TripTaskDto>> GetByDriverIdAsync(Guid driverId) => _mapper.Map<IEnumerable<TripTaskDto>>(await _repository.GetByDriverIdAsync(driverId));
         public async Task<List<TripTaskDto>> SearchAsync(string query) => _mapper.Map<List<TripTaskDto>>(await _repository.SearchByTermAsync(query));
