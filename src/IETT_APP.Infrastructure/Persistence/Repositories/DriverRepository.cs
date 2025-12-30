@@ -1,6 +1,7 @@
 ﻿using IETT_APP.Domain.Entities;
 using IETT_APP.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage; // Transaction için gerekli
 
 namespace IETT_APP.Infrastructure.Persistence.Repositories
 {
@@ -13,8 +14,7 @@ namespace IETT_APP.Infrastructure.Persistence.Repositories
             _context = context;
         }
 
-        // --- OKUMA İŞLEMLERİ (AsNoTracking opsiyonel performans için eklenebilir) ---
-
+        // --- OKUMA İŞLEMLERİ ---
         public async Task<IEnumerable<Driver>> GetAllWithDetailsAsync()
         {
             return await _context.Drivers
@@ -34,7 +34,7 @@ namespace IETT_APP.Infrastructure.Persistence.Repositories
         public async Task<Driver?> GetByUserIdAsync(string userId)
         {
             return await _context.Drivers
-                .Include(d => d.User)
+                .Include(d => d.User) // User tablosunu dahil et
                 .Include(d => d.Garage)
                 .FirstOrDefaultAsync(d => d.UserId == userId);
         }
@@ -48,39 +48,37 @@ namespace IETT_APP.Infrastructure.Persistence.Repositories
         }
 
         // --- YAZMA İŞLEMLERİ ---
-
         public async Task AddAsync(Driver entity)
         {
             await _context.Drivers.AddAsync(entity);
-
-            // EntityState.Added olduğundan emin olmak için (Interceptor için)
             _context.Entry(entity).State = EntityState.Added;
 
+            // Not: Bu SaveChanges, Transaction commit edilene kadar
+            // veritabanında kalıcı olmaz. Güvenlidir.
             await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Driver entity)
         {
-            // Eğer entity zaten context tarafından takip ediliyorsa (Tracked), direkt state değiştir.
-            // Değilse Attach et.
             if (_context.Entry(entity).State == EntityState.Detached)
             {
                 _context.Drivers.Attach(entity);
             }
-
             _context.Entry(entity).State = EntityState.Modified;
-
             await _context.SaveChangesAsync();
         }
 
         public async Task SoftDeleteAsync(Driver entity)
         {
-            // Interceptor'ın "Deleted" state'ini yakalayıp "Modified" (IsDeleted=true) yapması için
-            // Remove metodunu çağırıyoruz.
             _context.Drivers.Remove(entity);
             await _context.SaveChangesAsync();
         }
 
-
+        // ✅ YENİ EKLENEN: Transaction Yönetimi
+        // Service katmanı artık _context çağırmadan buradan transaction başlatabilir.
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        {
+            return await _context.Database.BeginTransactionAsync();
+        }
     }
 }

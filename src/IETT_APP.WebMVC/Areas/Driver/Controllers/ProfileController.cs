@@ -1,5 +1,5 @@
 ﻿using IETT_APP.Application.Dtos.Driver;
-using IETT_APP.WebMVC.Areas.Driver.Extensions;
+using IETT_APP.WebMVC.Areas.Driver.Extensions; // ViewModel çeviricilerin olduğu yer
 using IETT_APP.WebMVC.Areas.Driver.Models;
 using IETT_APP.WebMVC.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -40,12 +40,12 @@ namespace IETT_APP.WebMVC.Areas.Driver.Controllers
                     return RedirectToAction("Create");
                 }
 
+                // Extension metodu kullanarak ViewModel'e çeviriyoruz
                 var model = driver.ToViewModel();
                 return View(model);
             }
             catch (Exception ex)
             {
-                // Index'te hata olursa bembeyaz sayfa yerine Error sayfasına veya güvenli bir yere atabiliriz
                 TempData["ErrorMessage"] = "Profil yüklenirken bir sorun oluştu: " + ex.Message;
                 return RedirectToAction("Index", "Home", new { area = "" });
             }
@@ -72,12 +72,12 @@ namespace IETT_APP.WebMVC.Areas.Driver.Controllers
         }
 
         // ============================================================
-        // CREATE POST: (DÜZELTİLDİ - ARTIK SAYFAYI PATLATMIYOR)
+        // CREATE POST: (Profil Kaydetme)
         // ============================================================
         [HttpPost]
         public async Task<IActionResult> Create(CompleteProfileDto model)
         {
-            // 1. Model Validasyon
+            // 1. Model Validasyon (Sunucu tarafı kontrolü)
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
@@ -89,26 +89,25 @@ namespace IETT_APP.WebMVC.Areas.Driver.Controllers
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-                // 2. Servis Çağrısı
+                // 2. Servis Çağrısı (API'ye git)
                 var result = await _driverService.CompleteProfileAsync(userId, model);
 
                 // 3. SONUÇ KONTROLÜ
                 if (result.Succeeded)
                 {
+                    // Frontend 'redirectUrl' bekliyor.
                     return Ok(new
                     {
                         message = "Profiliniz başarıyla oluşturuldu. Yönlendiriliyorsunuz...",
-                        redirectUrl = Url.Action("Index", "Profile")
+                        redirectUrl = Url.Action("Index", "Profile") // /Driver/Profile/Index
                     });
                 }
 
-                // --- TEMİZ KOD ---
-                // Artık hata analiz etmiyoruz, servisin hazırladığı temiz mesajı basıyoruz.
+                // HATA DURUMU: ApiService'de temizlenen mesajı gösteriyoruz.
                 return BadRequest(new { message = result.Message });
             }
             catch (Exception ex)
             {
-                // Sadece bağlantı kopması vb. beklenmedik durumlarda burası çalışır
                 return BadRequest(new { message = "Beklenmedik bir hata oluştu: " + ex.Message });
             }
         }
@@ -124,13 +123,20 @@ namespace IETT_APP.WebMVC.Areas.Driver.Controllers
 
             try
             {
+                // ViewModel'i DTO'ya çevir (Extension metodu)
                 var updateDto = model.ToUpdateProfileDto();
+
                 var result = await _driverService.UpdateProfileAsync(updateDto);
 
                 if (result.Succeeded)
+                {
                     return Ok(new { message = "Profil bilgileri güncellendi." });
+                }
                 else
-                    return BadRequest(new { message = "Hata: " + string.Join(", ", result.Errors) });
+                {
+                    // Düzeltme: result.Errors yerine result.Message kullanıyoruz (Daha temiz)
+                    return BadRequest(new { message = result.Message });
+                }
             }
             catch (Exception ex)
             {
@@ -150,11 +156,14 @@ namespace IETT_APP.WebMVC.Areas.Driver.Controllers
 
                 if (result.Succeeded)
                 {
+                    // Oturumdaki resim bilgisini güncelle (Cookie/Session)
                     await _sessionService.UpdateProfileImageClaimAsync(result.Data);
+
                     return Ok(new { message = "Fotoğraf güncellendi.", newUrl = result.Data });
                 }
 
-                return BadRequest(new { message = "Hata: " + string.Join(", ", result.Errors) });
+                // Düzeltme: result.Errors yerine result.Message kullanıyoruz
+                return BadRequest(new { message = result.Message });
             }
             catch (Exception ex)
             {

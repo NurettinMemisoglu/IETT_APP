@@ -6,18 +6,14 @@
 
     // --- KRONİK RAHATSIZLIK GÖSTER/GİZLE MANTIĞI ---
     function toggleChronicDetails() {
-        // ID yerine Name grubu üzerinden kontrol ediyoruz (En güvenli yöntem)
-        // Değeri "true" olan radio seçili mi?
-        const isYesSelected = $('input[name="HasChronicDisease"][value="true"]').is(':checked');
-
-        const $container = $('#chronicDetailsContainer');
+        const isChecked = $('#chronicCheck').is(':checked');
+        const $container = $('#chronicDetails');
         const $noteInput = $('textarea[name="HealthNotes"]');
 
-        if (isYesSelected) {
+        if (isChecked) {
             $container.slideDown();
         } else {
             $container.slideUp();
-            // "YOK" seçilirse görünürdeki inputu temizle
             $noteInput.val('');
         }
     }
@@ -25,8 +21,8 @@
     // Sayfa yüklendiğinde çalıştır
     toggleChronicDetails();
 
-    // Radio butonlar değiştiğinde çalıştır
-    $('input[name="HasChronicDisease"]').on('change', function () {
+    // Checkbox değiştiğinde çalıştır
+    $('#chronicCheck').on('change', function () {
         toggleChronicDetails();
     });
 
@@ -68,14 +64,14 @@
 
             // --- CREATE MANTIĞI ---
 
-            // 1. Radio grubundan seçili olan değeri al (String gelir: "true" veya "false")
-            let selectedVal = $('input[name="HasChronicDisease"]:checked').val();
-            let isChronic = (selectedVal === "true"); // Boolean'a çevir
+            // 1. Checkbox seçili mi?
+            let isChronic = $('#chronicCheck').is(':checked');
 
-            // 2. Not alanını kontrol et
-            const healthNotes = $form.find('textarea[name="HealthNotes"]').val().trim();
+            // 2. Not alanını al
+            let rawNotes = $form.find('textarea[name="HealthNotes"]').val();
+            const healthNotes = (rawNotes || "").trim();
 
-            // 3. KURAL: Eğer "VAR" seçili ama not BOŞ ise -> "YOK" (false) yap.
+            // 3. KURAL: Eğer seçili ama not boşsa -> Hastalık yok say.
             if (isChronic && healthNotes === "") {
                 isChronic = false;
             }
@@ -84,7 +80,6 @@
             formData.delete('HasChronicDisease');
             formData.append('HasChronicDisease', isChronic);
 
-            // Eğer false ise notu da temizle
             if (!isChronic) {
                 formData.set('HealthNotes', '');
             }
@@ -95,15 +90,18 @@
                 data: formData,
                 contentType: false,
                 processData: false,
+                timeout: 600000, // 🔥 EKLENEN KISIM: 10 Dakika bekleme süresi (Büyük dosyalar için şart)
                 success: function (data) {
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             icon: 'success',
                             title: 'Başarılı!',
+                            // Controller'dan gelen "message" alanını kullanıyoruz
                             text: data.message || "Profil oluşturuldu.",
                             timer: 2000,
                             showConfirmButton: false
                         }).then(() => {
+                            // Controller'dan gelen "redirectUrl" alanını kullanıyoruz
                             window.location.href = data.redirectUrl ? data.redirectUrl : '/Driver/Profile/Index';
                         });
                     } else {
@@ -113,7 +111,6 @@
                 error: function (xhr) {
                     $btn.prop('disabled', false).html(originalText);
                     let userMessage = "Bir hata oluştu.";
-                    // Hata mesajı ayrıştırma...
                     try {
                         if (xhr.responseJSON) {
                             if (xhr.responseJSON.message) userMessage = xhr.responseJSON.message;
@@ -149,19 +146,12 @@
 
             $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Kaydediliyor...');
 
-            // --- UPDATE MANTIĞI ---
+            let isChronic = $('#chronicCheck').is(':checked');
+            let healthNotes = $('textarea[name="HealthNotes"]').val() || "";
 
-            // 1. Radio grubundan seçili değeri al (String -> Boolean)
-            let selectedVal = $('input[name="HasChronicDisease"]:checked').val();
-            let isChronic = (selectedVal === "true");
-
-            // 2. Not alanını al
-            let healthNotes = $('textarea[name="HealthNotes"]').val();
-
-            // 3. Mantık Kontrolü: Not boşsa False yap
-            if (isChronic && (!healthNotes || healthNotes.trim() === "")) {
+            if (isChronic && healthNotes.trim() === "") {
                 isChronic = false;
-                healthNotes = ""; // DB temizliği için boş string gönder
+                healthNotes = "";
             }
 
             const jsonData = {
@@ -172,7 +162,6 @@
                 EmergencyContactName: $('input[name="EmergencyContactName"]').val(),
                 EmergencyContactPhone: $('input[name="EmergencyContactPhone"]').val(),
                 BloodType: $('select[name="BloodType"]').val(),
-                // Hesaplanmış değerleri gönderiyoruz
                 HasChronicDisease: isChronic,
                 HealthNotes: healthNotes
             };
@@ -184,7 +173,7 @@
                 data: JSON.stringify(jsonData),
                 success: function (res) {
                     $('#updateProfileModal').modal('hide');
-                    if (typeof toastr !== 'undefined') toastr.success("Bilgileriniz başarıyla güncellendi.");
+                    if (typeof toastr !== 'undefined') toastr.success(res.message || "Bilgileriniz başarıyla güncellendi.");
                     else alert("Bilgileriniz güncellendi.");
                     setTimeout(() => window.location.reload(), 1500);
                 },
@@ -222,6 +211,7 @@
                 processData: false,
                 success: function (res) {
                     const timestamp = new Date().getTime();
+                    // Controller "newUrl" dönüyor
                     let rawPath = res.newUrl || res.path || res.Path;
 
                     if (!rawPath) {
@@ -240,7 +230,7 @@
                     $imagesToUpdate.attr('src', finalSrc);
                     $imagesToUpdate.css('opacity', '1');
 
-                    if (typeof toastr !== 'undefined') toastr.success("Profil fotoğrafı güncellendi.");
+                    if (typeof toastr !== 'undefined') toastr.success(res.message || "Profil fotoğrafı güncellendi.");
                 },
                 error: function (xhr) {
                     $imagesToUpdate.css('opacity', '1');

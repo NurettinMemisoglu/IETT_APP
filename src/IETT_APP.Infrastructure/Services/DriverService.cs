@@ -132,68 +132,83 @@ namespace IETT_APP.Infrastructure.Services
             return isComplete;
         }
 
-        // 2. Şoför Kendi Profilini Tamamlarsa (ONBOARDING)
         public async Task<DriverDto> CompleteProfileAsync(
-            string userId,
-            CompleteProfileDto dto,
-            IFormFile? licenseDoc,
-            IFormFile? psychoDoc)
+    string userId,
+    CompleteProfileDto dto,
+    IFormFile? licenseDoc,
+    IFormFile? psychoDoc)
         {
-            // 1. Validasyonlar (Kullanıcı, Rol, Mevcut Profil vb.)
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null) throw new Exception("Kullanıcı bulunamadı.");
-
-            if (await _userManager.IsInRoleAsync(user, "Admin"))
-                throw new Exception("Admin hesabı ile şoför profili oluşturulamaz.");
-
-            var existingDriver = await _repository.GetByUserIdAsync(userId);
-            if (existingDriver != null) throw new Exception("Profiliniz zaten oluşturulmuş.");
-
-            if (!await _userManager.IsInRoleAsync(user, "Driver"))
-                await _userManager.AddToRoleAsync(user, "Driver");
-
-            // 2. Entity Oluşturma (DTO'dan gelen metin verileri)
-            var entity = _mapper.Map<Driver>(dto);
-            entity.Id = Guid.NewGuid();
-            entity.UserId = userId;
-            entity.WorkStatus = WorkStatus.OffDuty;
-            entity.IsActive = true;
-            entity.DriverType = DriverType.IETT_Staff;
-            if (entity.EmploymentDate == default) entity.EmploymentDate = DateTime.Today;
-
-            // 3. DOSYA KAYDETME VE YOL ATAMA
-            // DTO yerine parametreden gelen dosyaları kullanıyoruz.
-
-            // A) Ehliyet Belgesi
-            if (licenseDoc != null && licenseDoc.Length > 0)
-            {
-                var savedFile = await _fileService.SaveFileAsync(licenseDoc, FileCategory.Document, userId);
-                entity.LicenseDocumentPath = savedFile.FilePath;
-            }
-
-            // B) Psikoteknik Belgesi
-            if (psychoDoc != null && psychoDoc.Length > 0)
-            {
-                var savedFile = await _fileService.SaveFileAsync(psychoDoc, FileCategory.Document, userId);
-                entity.PsychotechnicDocumentPath = savedFile.FilePath;
-            }
+            // 1. Transaction'ı Repository üzerinden başlatıyoruz
+            using var transaction = await _repository.BeginTransactionAsync();
 
             try
             {
-                // Kayıt işlemi
+                // --- Validasyonlar ---
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) throw new Exception("Kullanıcı bulunamadı.");
+
+                if (await _userManager.IsInRoleAsync(user, "Admin"))
+                    throw new Exception("Admin hesabı ile şoför profili oluşturulamaz.");
+
+                var existingDriver = await _repository.GetByUserIdAsync(userId);
+                if (existingDriver != null) throw new Exception("Profiliniz zaten oluşturulmuş.");
+
+                // Rol Atama
+                if (!await _userManager.IsInRoleAsync(user, "Driver"))
+                {
+                    var roleResult = await _userManager.AddToRoleAsync(user, "Driver");
+                    if (!roleResult.Succeeded) throw new Exception("Rol atama hatası.");
+                }
+
+                // --- Entity Hazırlama ---
+                var entity = _mapper.Map<Driver>(dto);
+                entity.Id = Guid.NewGuid();
+                entity.UserId = userId;
+                entity.WorkStatus = WorkStatus.OffDuty;
+                entity.IsActive = true;
+                entity.DriverType = DriverType.IETT_Staff;
+                if (entity.EmploymentDate == default) entity.EmploymentDate = DateTime.Today;
+
+                // --- Dosya Yükleme ---
+                if (licenseDoc != null && licenseDoc.Length > 0)
+                {
+                    var savedFile = await _fileService.SaveFileAsync(licenseDoc, FileCategory.Document, userId);
+                    entity.LicenseDocumentPath = savedFile.FilePath;
+                }
+
+                if (psychoDoc != null && psychoDoc.Length > 0)
+                {
+                    var savedFile = await _fileService.SaveFileAsync(psychoDoc, FileCategory.Document, userId);
+                    entity.PsychotechnicDocumentPath = savedFile.FilePath;
+                }
+
+                // --- Kayıt ---
+                // Repository içindeki AddAsync, SaveChanges yapar ama Transaction Commit olmadığı için DB'ye işlemez.
                 await _repository.AddAsync(entity);
+
+                // Cache Temizliği
                 _cache.Remove($"profile_complete_{userId}");
-                return _mapper.Map<DriverDto>(entity);
+
+                // --- İŞLEMİ ONAYLA (COMMIT) ---
+                await transaction.CommitAsync();
+
+                // 🔥 KRİTİK DÜZELTME:
+                // Mapper kullanıp tüm entity'yi döndürmek yerine basit bir DTO dönüyoruz.
+                // Bu sayede "Serialization Error" (Boş hata mesajı) oluşmaz.
+                return new DriverDto
+                {
+                    Id = entity.Id,
+                    UserId = userId,
+                    Email = user.Email // Gerekirse
+                };
             }
             catch (Exception ex)
             {
-                // 🔥 SİHİRLİ DOKUNUŞ: Inner Exception'ı yakala
-                // Hata mesajının en derinindeki sebebi buluyoruz
-                var errorMessage = ex.InnerException != null
-                    ? ex.InnerException.Message
-                    : ex.Message;
+                // Hata durumunda yapılanları geri al
+                await transaction.RollbackAsync();
 
-                throw new Exception($"Veritabanı Kayıt Hatası: {errorMessage}");
+                var errorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                throw new Exception($"Kayıt Başarısız: {errorMessage}");
             }
         }
 

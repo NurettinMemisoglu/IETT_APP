@@ -120,26 +120,28 @@
             <span asp-validation-for="BloodType" class="text-danger small"></span>
         </div>
 
-        <div class="col-md-6">
-            <label class="form-label small fw-bold text-muted d-block">Kronik Rahatsızlık</label>
-            <div class="btn-group w-100" role="group">
-                <input type="radio" class="btn-check" name="HasChronicDisease" id="chronicNo" value="false"
-                       autocomplete="off" @(!Model.HasChronicDisease ? "checked" : "")>
-                <label class="btn btn-outline-secondary" for="chronicNo">YOK</label>
+        <div class="col-12 mt-4">
+            <div class="p-3 rounded-3 border bg-light" style="border-style: dashed !important;">
 
-                <input type="radio" class="btn-check" name="HasChronicDisease" id="chronicYes" value="true"
-                       autocomplete="off" @(Model.HasChronicDisease ? "checked" : "")>
-                <label class="btn btn-outline-danger" for="chronicYes">VAR</label>
-            </div>
-        </div>
+                <div class="form-check form-switch d-flex align-items-center">
+                    <input asp-for="HasChronicDisease" class="form-check-input fs-5 me-3" type="checkbox" id="chronicCheck" style="cursor: pointer;">
 
-        <div class="col-12" id="chronicDetailsContainer" style="display:none;">
-            <label asp-for="HealthNotes" class="form-label small fw-bold text-muted">Sağlık Notları</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-clipboard2-pulse text-success"></i></span>
-                <textarea asp-for="HealthNotes" class="form-control" rows="2" placeholder="Varsa belirtiniz..."></textarea>
+                    <label class="form-check-label fw-bold text-danger mb-0" for="chronicCheck" style="cursor: pointer;">
+                        Kronik bir rahatsızlığınız var mı?
+                    </label>
+                </div>
+
+                <div id="chronicDetails" class="mt-3" style="display:none;">
+                    <label asp-for="HealthNotes" class="form-label small fw-bold text-secondary">RAHATSIZLIK DETAYI</label>
+
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-clipboard2-pulse text-danger"></i></span>
+                        <textarea asp-for="HealthNotes" name="HealthNotes" class="form-control" rows="3" placeholder="Lütfen rahatsızlığınızı kısaca açıklayınız..."></textarea>
+                    </div>
+                    <span asp-validation-for="HealthNotes" class="text-danger small"></span>
+                </div>
+
             </div>
-            <span asp-validation-for="HealthNotes" class="text-danger small"></span>
         </div>
     </div>
 </div>

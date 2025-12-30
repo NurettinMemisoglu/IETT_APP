@@ -11,7 +11,6 @@ using IETT_APP.Infrastructure.Persistence.Interceptors;
 using IETT_APP.Infrastructure.Persistence.Repositories;
 using IETT_APP.Infrastructure.Persistence.Seed;
 using IETT_APP.Infrastructure.Services;
-using IETT_APP.WebAPI.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
@@ -326,7 +325,6 @@ if (app.Environment.IsDevelopment())
 app.UseHangfireDashboard("/hangfire", new DashboardOptions
 {
     DashboardTitle = "İETT Operasyon Paneli", // Tarayıcı sekmesinde görünen isim
-    Authorization = new[] { new HangfireAuthorizationFilter() }, // <-- FİLTREYİ BURAYA EKLİYORUZ
 
     // (Opsiyonel) ReadOnly modu: True yaparsan panelden iş tetiklenemez, sadece izlenir.
     // Şimdilik False (kapalı) bırakıyorum ki işleri yönetebilesin.

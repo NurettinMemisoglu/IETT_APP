@@ -156,16 +156,17 @@ namespace IETT_APP.WebAPI.Controllers
 
         // Şoförün Profilini İlk Kez Oluşturması (Onboarding)
         // POST: api/drivers/complete-profile
+        // Profil Oluşturma (Onboarding)
         [HttpPost("complete-profile")]
         [Authorize(Roles = "Driver")]
-        [Consumes("multipart/form-data")] // Dosya yükleme olduğu için şart
-        public async Task<ActionResult<DriverDto>> CompleteProfile([FromForm] CompleteProfileRequest request)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CompleteProfile([FromForm] CompleteProfileRequest request)
         {
-            // 1. Kullanıcı Kimliği Kontrolü
+            // 1. Kullanıcı ID Kontrolü
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-            // 2. JSON String'i DTO'ya Çevirme (Deserialization)
+            // 2. JSON Deserialization (request.Data string'ini DTO'ya çevir)
             CompleteProfileDto? dto;
             try
             {
@@ -179,12 +180,11 @@ namespace IETT_APP.WebAPI.Controllers
 
             if (dto == null) return BadRequest(new { Message = "Veri boş olamaz." });
 
-            //DOSYALARI DTO'YA ATAMA
-            // Bunu yapmazsan TryValidateModel hep hata verir çünkü dosyalar [Required].
+            // 3. Dosyaları DTO'ya manuel ata (Validasyon için)
             dto.LicenseDocument = request.LicenseDocument;
             dto.PsychotechnicDocument = request.PsychotechnicDocument;
 
-            // 3. Manuel Validasyon (Çünkü DTO otomatik bind edilmedi)
+            // 4. Manuel Validasyon
             if (!TryValidateModel(dto))
             {
                 var errors = ModelState
@@ -192,13 +192,12 @@ namespace IETT_APP.WebAPI.Controllers
                     .Select(x => new { Field = x.Key, Error = x.Value.Errors.First().ErrorMessage })
                     .ToList();
 
-                // Hatanın ne olduğunu JSON olarak dönüyoruz
-                return BadRequest(new { Message = "Validasyon Hatası", Errors = errors });
+                return BadRequest(new { Message = "Lütfen bilgileri kontrol ediniz.", Errors = errors });
             }
 
             try
             {
-                // 4. Servise Gönderim (Veri + Dosyalar Ayrı Ayrı)
+                // 5. Servise Gönder
                 var result = await _driverService.CompleteProfileAsync(
                     userId,
                     dto,
@@ -206,10 +205,20 @@ namespace IETT_APP.WebAPI.Controllers
                     request.PsychotechnicDocument
                 );
 
-                return Ok(result);
+                // 🔥 DEĞİŞEN KISIM BURASI 🔥
+                // Frontend (JS) 'message' ve 'redirectUrl' bekliyor.
+                // Sadece 'result' (DTO) dönersek JS tarafında mesaj görünmez.
+                return Ok(new
+                {
+                    Success = true,
+                    Message = "Profiliniz başarıyla oluşturuldu.",
+                    RedirectUrl = "/Driver/Profile/Index",
+                    Data = result
+                });
             }
             catch (Exception ex)
             {
+                // Hata mesajını düzgün formatta dön
                 return BadRequest(new { Message = ex.Message });
             }
         }

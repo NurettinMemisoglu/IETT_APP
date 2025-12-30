@@ -78,14 +78,16 @@ namespace IETT_APP.WebMVC.Services.Implementations
         }
 
         // --- DÜZENLEME YAPILAN METOT ---
+        // --- DÜZENLENMİŞ COMPLETE PROFILE METODU ---
         public async Task<ServiceResult<DriverDto>> CompleteProfileAsync(string userId, CompleteProfileDto dto)
         {
             using var content = new MultipartFormDataContent();
 
-            // 1. Veri Hazırlama (JSON + Dosyalar)
+            // 1. JSON Verisi
             var jsonString = JsonSerializer.Serialize(dto);
             content.Add(new StringContent(jsonString), "data");
 
+            // 2. Dosyalar
             if (dto.LicenseDocument != null)
             {
                 var fileContent = new StreamContent(dto.LicenseDocument.OpenReadStream());
@@ -100,23 +102,45 @@ namespace IETT_APP.WebMVC.Services.Implementations
                 content.Add(fileContent, "psychotechnicDocument", dto.PsychotechnicDocument.FileName);
             }
 
-            // 2. API İsteği
+            // 3. API İsteği
             var response = await _httpClient.PostAsync("api/drivers/complete-profile", content);
 
-            // 3. BAŞARILI DURUM
+            // 4. BAŞARILI DURUM (GÜNCELLENDİ)
             if (response.IsSuccessStatusCode)
             {
-                return await response.Content.ReadFromJsonAsync<ServiceResult<DriverDto>>();
+                // Backend artık { Success, Message, RedirectUrl, Data } dönüyor.
+                // Bunu doğrudan ServiceResult<DriverDto> olarak okumak yerine manuel mapliyoruz.
+                var jsonResponse = await response.Content.ReadFromJsonAsync<JsonElement>();
+
+                bool isSuccess = false;
+                // Backend "Success" gönderiyor, bunu yakala:
+                if (jsonResponse.TryGetProperty("Success", out var successProp)) isSuccess = successProp.GetBoolean();
+                else if (jsonResponse.TryGetProperty("success", out var successPropLower)) isSuccess = successPropLower.GetBoolean();
+
+                string message = "";
+                if (jsonResponse.TryGetProperty("Message", out var msgProp)) message = msgProp.GetString() ?? "";
+
+                DriverDto? data = null;
+                if (jsonResponse.TryGetProperty("Data", out var dataProp))
+                {
+                    // Data içerisindeki DriverDto'yu deserialize et
+                    data = JsonSerializer.Deserialize<DriverDto>(dataProp.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                }
+
+                // MVC Controller'a dönecek standart ServiceResult oluştur
+                return new ServiceResult<DriverDto>
+                {
+                    Succeeded = isSuccess, // Backend'deki "Success" buraya
+                    Message = message,     // Backend'deki "Message" buraya
+                    Data = data
+                };
             }
 
-            // 4. HATALI DURUM (Mesajı Burada Güzelleştiriyoruz)
+            // 5. HATALI DURUM (AYNEN KORUNDU)
             var errorDetails = await ExtractErrorDetails(response);
-
-            // API'den gelen ham hata mesajlarını birleştir
             string rawError = (errorDetails.Message ?? "") + " " + (errorDetails.Errors != null ? string.Join(" ", errorDetails.Errors) : "");
             string userFriendlyMessage = "İşlem gerçekleştirilemedi.";
 
-            // --- KİRLİ İŞİ BURADA YAPIYORUZ (Controller Temiz Kalsın) ---
             if (rawError.Contains("IX_Drivers_EmployeeNumber") || rawError.Contains("EmployeeNumber"))
             {
                 userFriendlyMessage = $"Girdiğiniz Sicil Numarası ({dto.EmployeeNumber}) sistemde zaten kayıtlı.";
@@ -131,15 +155,13 @@ namespace IETT_APP.WebMVC.Services.Implementations
             }
             else
             {
-                // Eğer özel bir SQL hatası değilse, API'nin kendi mesajını kullan
                 userFriendlyMessage = !string.IsNullOrEmpty(errorDetails.Message) ? errorDetails.Message : "Sunucu tarafında bir hata oluştu.";
             }
 
-            // Controller'a tertemiz bir hata mesajı dönüyoruz
             return new ServiceResult<DriverDto>
             {
                 Succeeded = false,
-                Message = userFriendlyMessage // <-- ARTIK BU MESAJ TEMİZ
+                Message = userFriendlyMessage
             };
         }
 

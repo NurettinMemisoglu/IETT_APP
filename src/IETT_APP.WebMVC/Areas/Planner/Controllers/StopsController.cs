@@ -76,11 +76,14 @@ namespace IETT_APP.WebMVC.Areas.Planner.Controllers
                     .Select(w => char.ToUpper(w[0]) + w.Substring(1).ToLower()));
             }
 
+
+
             // Kod alanını sadece sayı olarak temizle
             if (!string.IsNullOrWhiteSpace(model.Code))
             {
                 model.Code = new string(model.Code.Where(char.IsDigit).ToArray());
             }
+            ModelState.Remove("Id");
             if (!ModelState.IsValid)
             {
                 PopulateDropdowns();
