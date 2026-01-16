@@ -89,7 +89,7 @@ Follow these instructions to get a local copy of the project up and running.
 1.  **Clone the repository**
     ```bash
     git clone [https://github.com/NurettinMemisoglu/IETT_APP.git](https://github.com/NurettinMemisoglu/IETT_APP.git)
-    cd IETT-Operation
+    cd IETT_APP
     ```
 
 2.  **Database Configuration**
